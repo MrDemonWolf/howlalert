@@ -26,6 +26,31 @@ export interface UsageEventPayload {
 	costUSD: number;
 }
 
+export interface HookEventPayload {
+	session_id?: string;
+	tool_name?: string;
+	tool_use_id?: string;
+	model?: string;
+	input_tokens?: number;
+	output_tokens?: number;
+	cache_read_tokens?: number;
+	cache_write_tokens?: number;
+	cost_usd?: number;
+}
+
+export interface UserPreferences {
+	userId: string;
+	thresholds: ThresholdConfig[];
+	updatedAt: string;
+}
+
+export interface ThresholdConfig {
+	id: string;
+	type: "daily_cost" | "token_count" | "session_count";
+	value: number;
+	isEnabled: boolean;
+}
+
 export interface NotificationPayload {
 	aps: {
 		alert: {

@@ -17,3 +17,18 @@ ENVIRONMENT = "development"
 
 [observability]
 enabled = true
+
+[env.production]
+name = "howlalert-worker"
+
+[[env.production.kv_namespaces]]
+binding = "HOWLALERT_DEVICES"
+id = "placeholder_kv_id_prod"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "howlalert-db"
+database_id = "placeholder_d1_id_prod"
+
+[env.production.vars]
+ENVIRONMENT = "production"

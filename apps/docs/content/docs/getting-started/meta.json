@@ -1,4 +1,4 @@
 {
   "title": "Getting Started",
-  "pages": ["index", "installation", "configuration"]
+  "pages": ["index", "installation", "configuration", "cloudflare-setup", "github-setup", "app-store-setup"]
 }
