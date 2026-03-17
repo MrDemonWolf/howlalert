@@ -61,6 +61,8 @@ node_modules/
 .wrangler/
 dist/
 .next/
+.source/
+next-env.d.ts
 out/
 
 ############################################################
