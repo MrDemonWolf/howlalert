@@ -1,4 +1,4 @@
 {
   "title": "Architecture",
-  "pages": ["index", "cloud-worker", "push-notifications"]
+  "pages": ["index", "cloud-worker", "push-notifications", "api-reference"]
 }

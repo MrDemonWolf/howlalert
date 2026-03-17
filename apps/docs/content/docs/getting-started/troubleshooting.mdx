@@ -1,0 +1,58 @@
+---
+title: Troubleshooting
+description: Solutions for common HowlAlert issues.
+---
+
+## Push notifications not arriving
+
+If you're not receiving alerts when thresholds are exceeded, work through these checks:
+
+- Verify the Cloudflare Worker is deployed and healthy by hitting `GET /status` — it should return a success response.
+- Check that all APNs secrets are configured in the Worker environment: `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`, and `APNS_BUNDLE_ID`.
+- Ensure you're using the correct APNs environment — **sandbox** for development builds and **production** for TestFlight and App Store releases.
+- Confirm that notifications are enabled on your device in **System Settings → Notifications → HowlAlert** (macOS) or **Settings → Notifications → HowlAlert** (iOS).
+- Re-register the device by signing out of HowlAlert and signing back in. This generates a fresh device token and re-registers it with the API.
+
+## Menu bar icon not appearing (macOS)
+
+If the HowlAlert icon doesn't show up in the macOS menu bar:
+
+- HowlAlert requires **macOS 15 (Sequoia)** or later. Check your macOS version in **Apple Menu → About This Mac**.
+- Verify that HowlAlert has permission to appear in the menu bar under **System Settings → Control Center → Menu Bar Only**.
+- Try quitting the app completely and relaunching it.
+- If running from Xcode, ensure the **macOS target** is selected in the scheme picker rather than an iOS or watchOS simulator.
+
+## Stats not updating
+
+If your usage statistics appear stale or aren't changing:
+
+- The **macOS app must be running** to collect usage data. HowlAlert cannot track sessions if the app is quit.
+- Verify that HowlAlert has access to `~/.claude/` under **System Settings → Privacy & Security → Files and Folders**.
+- Check that FSEvents monitoring is working — usage data should appear within seconds of a Claude Code session writing to disk.
+- Try restarting the app to re-initialize the file watcher.
+
+## "No data" showing on iOS
+
+The iOS app displays data collected by the macOS app and relayed through the API:
+
+- The **macOS app must be running** on your Mac to collect and relay usage data to the API.
+- Ensure the Cloudflare Worker is deployed and accessible from your network.
+- Check that both your Mac and iPhone are signed in with the **same Apple ID** in HowlAlert.
+- Pull to refresh on the iOS dashboard to fetch the latest data.
+
+## Expired Apple identity token
+
+Apple identity tokens have a limited lifespan and will expire:
+
+- **Sign out** of HowlAlert and **sign back in** to obtain a fresh identity token.
+- If the issue persists, verify your Apple ID is working correctly in **System Settings → Apple ID**.
+- Ensure your device has an active internet connection so the token can be refreshed with Apple's servers.
+
+## D1 migration errors
+
+If the API worker fails with database-related errors:
+
+- Verify the database ID in `wrangler.toml` matches your actual D1 database in the Cloudflare dashboard.
+- Run `make apply-migrations-prod` to apply any pending migrations to the production database.
+- Check the **Cloudflare dashboard → D1** for the database status and any error logs.
+- If the database is corrupted, you may need to recreate it and re-apply all migrations from scratch. Back up any important data first.
