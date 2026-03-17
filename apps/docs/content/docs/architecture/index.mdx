@@ -1,0 +1,28 @@
+---
+title: Architecture
+description: How HowlAlert works under the hood.
+---
+
+> **TL;DR** — Local-first: Mac reads journals, aggregates locally, sends events to a Cloudflare Worker, which delivers APNs pushes.
+
+## System diagram
+
+```
+Claude Code
+    ↓ writes JSONL
+~/.claude/projects/
+    ↓ FSEvents
+HowlAlert (macOS)
+    ↓ HTTP POST /event
+Cloudflare Worker (D1 + KV)
+    ↓ APNs HTTP/2
+iPhone + Apple Watch
+```
+
+## Components
+
+- **HowlAlertKit** — Shared Swift package: models, journal parser, cloud client
+- **Mac app** — FSEvents watcher, menu bar UI, sandbox bookmarks
+- **iOS app** — Push registration, usage dashboard
+- **watchOS app** — Complications, notification views
+- **Cloudflare Worker** — REST API, D1 history, APNs delivery

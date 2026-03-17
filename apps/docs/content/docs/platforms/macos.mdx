@@ -1,0 +1,18 @@
+---
+title: macOS
+description: The HowlAlert macOS menu bar app monitors Claude Code's journal files.
+---
+
+> **TL;DR** — Lives in your menu bar. Watches Claude Code's JSONL journal via FSEvents. Requires sandbox-scoped access to `~/.claude/`.
+
+## Menu bar app
+
+HowlAlert runs as a menu bar app (`LSUIElement = YES`) with no Dock icon. Click the bell icon to see your current usage summary.
+
+## FSEvents monitoring
+
+HowlAlert uses FSEvents to watch Claude Code's journal directory for new JSONL entries. When a file changes, the app parses the new lines and updates usage state in real time.
+
+## Sandbox & permissions
+
+The app uses a security-scoped bookmark to maintain persistent access to `~/.claude/` across launches. You'll be prompted once on first run.

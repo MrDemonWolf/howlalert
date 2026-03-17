@@ -1,0 +1,25 @@
+---
+title: Developer Guide
+description: Build and contribute to HowlAlert.
+---
+
+> **TL;DR** — Clone, run `make build-all` for Swift targets, `make worker-dev` for the Worker, `make docs-dev` for docs.
+
+## Prerequisites
+
+- Xcode 16+
+- XcodeGen (`brew install xcodegen`)
+- Bun (`brew install bun`)
+- Wrangler (installed via `bun install` in `src/howlalert-worker`)
+
+## Build commands
+
+```bash
+make build-mac       # Build macOS app
+make build-ios       # Build iOS app
+make build-watch     # Build watchOS app
+make worker-dev      # Run Worker locally
+make docs-dev        # Start docs dev server
+make test            # Run Swift package tests
+make help            # Show all commands
+```
