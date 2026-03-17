@@ -25,7 +25,7 @@ app.post("/register", async (c) => {
 		return unauthorizedResponse("Invalid authorization token");
 	}
 
-	const body = await c.req.json<{ device_token: string; platform: string }>();
+	const body = await c.req.json<{ device_token: string; platform: string; sandbox?: boolean }>();
 	if (!body.device_token || !body.platform) {
 		return c.json({ error: "Missing device_token or platform" }, 400);
 	}
@@ -35,11 +35,31 @@ app.post("/register", async (c) => {
 		platform: body.platform as "ios" | "watchos",
 		userId,
 		registeredAt: new Date().toISOString(),
+		sandbox: body.sandbox ?? false,
 	};
 
 	await c.env.HOWLALERT_DEVICES.put(`device:${userId}:${body.device_token}`, JSON.stringify(registration));
 
 	return c.json({ success: true, message: "Device registered" });
+});
+
+// Deregister a device for push notifications
+app.delete("/register", async (c) => {
+	let userId: string;
+	try {
+		userId = await verifyAppleToken(c);
+	} catch {
+		return unauthorizedResponse("Invalid authorization token");
+	}
+
+	const body = await c.req.json<{ deviceToken?: string }>();
+	if (!body.deviceToken) {
+		return c.json({ error: "Missing deviceToken" }, 400);
+	}
+
+	await c.env.HOWLALERT_DEVICES.delete(`device:${userId}:${body.deviceToken}`);
+
+	return c.json({ message: "Device deregistered" });
 });
 
 // Receive a usage event and optionally trigger push
@@ -72,16 +92,29 @@ app.post("/event", async (c) => {
 			if (!deviceData) continue;
 			const device = JSON.parse(deviceData) as DeviceRegistration;
 
-			await sendAPNsNotification(c.env, device.deviceToken, {
-				aps: {
-					alert: {
-						title: "HowlAlert",
-						body: `Daily cost reached $${summary.totalCost.toFixed(2)}`,
+			try {
+				await sendAPNsNotification(c.env, device.deviceToken, {
+					aps: {
+						alert: {
+							title: "HowlAlert",
+							body: `Daily cost reached $${summary.totalCost.toFixed(2)}`,
+						},
+						sound: "default",
 					},
-					sound: "default",
-				},
-				costUSD: summary.totalCost,
-			});
+					costUSD: summary.totalCost,
+				}, device.sandbox);
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err);
+				const isStale =
+					msg.includes("410") ||
+					msg.toLowerCase().includes("baddevicetoken") ||
+					msg.toLowerCase().includes("unregistered");
+				if (isStale) {
+					await c.env.HOWLALERT_DEVICES.delete(`device:${userId}:${device.deviceToken}`);
+				} else {
+					console.error(`APNs error for device ${device.deviceToken}:`, msg);
+				}
+			}
 		}
 	}
 

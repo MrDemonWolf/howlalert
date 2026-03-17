@@ -13,6 +13,7 @@ export interface DeviceRegistration {
 	platform: "ios" | "watchos";
 	userId: string;
 	registeredAt: string;
+	sandbox: boolean;
 }
 
 export interface UsageEventPayload {
