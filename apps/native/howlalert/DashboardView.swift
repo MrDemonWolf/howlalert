@@ -20,6 +20,7 @@ struct DashboardView: View {
 	@State private var showPreferences: Bool = false
 
 	#if os(macOS)
+	@State private var activeSession: ActiveClaudeSession?
 	private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 	#endif
 
@@ -28,9 +29,11 @@ struct DashboardView: View {
 		macDashboard
 			.onReceive(timer) { _ in
 				Task { await loadData() }
+				activeSession = ClaudeSessionReader.readActiveSession()
 			}
 			.onAppear {
 				Task { await loadData() }
+				activeSession = ClaudeSessionReader.readActiveSession()
 			}
 		#elseif os(iOS)
 		iOSDashboard
@@ -55,6 +58,20 @@ struct DashboardView: View {
 			Divider()
 
 			VStack(spacing: 12) {
+				if let session = activeSession {
+					HStack(spacing: 4) {
+						Image(systemName: "folder.fill")
+							.font(.caption2)
+							.foregroundStyle(.secondary)
+						Text(session.projectName)
+							.font(.caption)
+							.foregroundStyle(.secondary)
+							.lineLimit(1)
+							.truncationMode(.middle)
+						Spacer()
+					}
+				}
+
 				if isLoading && usageState == .empty {
 					ProgressView("Loading…")
 						.padding()
