@@ -1,0 +1,33 @@
+---
+title: Contributing
+description: How to contribute to HowlAlert.
+---
+
+> **TL;DR** — Fork, branch, PR. Follow Swift 6 strict concurrency. TypeScript strict mode for the Worker.
+
+## Development workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes
+4. Run `make ci` to verify everything passes
+5. Open a pull request
+
+## Code conventions
+
+### Swift
+- Swift 6 strict concurrency (`Sendable`, `@MainActor`, `actor`)
+- SwiftUI for all UI
+- No third-party Swift dependencies (only Apple frameworks + HowlAlertKit)
+
+### TypeScript (Worker)
+- `strict: true` — no `any` types
+- Hono for routing — no raw `Request`/`Response` handling
+- All D1 queries use prepared statements
+
+## Running tests
+
+```bash
+make test            # HowlAlertKit unit tests
+cd src/howlalert-worker && bun run typecheck
+```

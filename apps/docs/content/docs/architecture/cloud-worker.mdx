@@ -1,0 +1,26 @@
+---
+title: Cloudflare Worker
+description: The HowlAlert Cloudflare Worker handles device registration and push delivery.
+---
+
+> **TL;DR** — Hono-based Worker with D1 for event history and KV for device tokens. Deployed to Cloudflare's edge.
+
+## API routes
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /status | Health check |
+| POST | /register | Register device token |
+| POST | /event | Submit usage event |
+| GET | /history | Get event history |
+| GET | /device | List registered devices |
+| DELETE | /device/:token | Unregister device |
+
+## Storage
+
+- **KV (`HOWLALERT_DEVICES`)** — Device token registry, keyed by `device:{userId}:{token}`
+- **D1 (`howlalert-db`)** — Event history with daily aggregation queries
+
+## Authentication
+
+All endpoints (except `/status`) require an `Authorization: Bearer {token}` header. In production this is an Apple identity token; in development any string is accepted.

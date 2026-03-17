@@ -1,0 +1,97 @@
+############################################################
+# macOS
+############################################################
+.DS_Store
+Icon\r
+
+############################################################
+# Xcode
+############################################################
+DerivedData/
+build/
+.build/
+
+# User-specific data
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
+
+# Project files that should not be committed
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Build artifacts
+*.o
+*.linkfilelist
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.xcresult
+*.xcarchive
+
+# Xcode debugger data
+xcdebugger/
+
+# Shared schemes — keep checked-in schemes, ignore user-specific ones
+xcshareddata/xcschemes
+
+# XcodeGen — generated project (regenerate with: make generate-project)
+# project.yml is NOT ignored (it is the source of truth)
+src/HowlAlert.xcodeproj
+
+############################################################
+# Swift Package Manager
+############################################################
+/.build/
+/.swiftpm/
+Package.pins
+
+############################################################
+# Node.js / Cloudflare Worker / Docs
+############################################################
+node_modules/
+.env
+.env.local
+.env.*
+.wrangler/
+dist/
+.next/
+out/
+
+############################################################
+# IDEs
+############################################################
+.vscode/
+.idea/
+
+############################################################
+# Temporary files
+############################################################
+*~
+*.swp
+*.swo
+
+############################################################
+# Archives
+############################################################
+*.zip
+*.tar.gz
+
+############################################################
+# Build output
+############################################################
+builds/
+
+############################################################
+# Claude Code
+############################################################
+.claude

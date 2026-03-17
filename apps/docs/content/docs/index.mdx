@@ -1,0 +1,26 @@
+---
+title: Overview
+description: HowlAlert monitors your Claude Code usage and sends push notifications when you approach limits.
+---
+
+> **TL;DR** — HowlAlert is a native Apple app suite (macOS menu bar + iOS + watchOS) that reads Claude Code's local journal files and fires push notifications before you hit usage limits.
+
+## What is HowlAlert?
+
+HowlAlert bridges Claude Code's local usage data with your Apple devices. It watches the JSONL journal files that Claude Code writes, aggregates token and cost metrics, and delivers real-time push notifications to your iPhone and Apple Watch.
+
+## How it works
+
+1. The **macOS menu bar app** monitors Claude Code's journal directory via FSEvents
+2. Usage events are parsed and aggregated locally in real time
+3. When thresholds are approached, the Mac app sends events to the **Cloudflare Worker**
+4. The Worker persists history in D1 and delivers **APNs push notifications** to registered devices
+5. Your **iPhone and Apple Watch** receive instant alerts
+
+## Key features
+
+- **Real-time monitoring** — FSEvents-based file watching with sub-second latency
+- **Cross-device alerts** — Native push to iOS and watchOS via APNs
+- **Privacy-first** — Usage data is processed locally; only aggregated events leave your Mac
+- **Complication support** — Current daily cost on your Apple Watch face
+- **Demo mode** — Try the UI without a Claude Code installation

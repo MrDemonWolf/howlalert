@@ -1,0 +1,14 @@
+---
+title: iOS
+description: The HowlAlert iOS app displays your usage dashboard and handles push notifications.
+---
+
+> **TL;DR** — Dashboard for usage history + notification delivery. Registers your device token with the Cloudflare Worker.
+
+## Dashboard
+
+The main view shows today's cost, token counts, and a scrollable list of recent usage events from all sessions.
+
+## Push notifications
+
+On first launch, HowlAlert requests notification permission. Your device token is sent to the Cloudflare Worker and stored in KV for future alerts.
