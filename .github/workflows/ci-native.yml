@@ -1,0 +1,25 @@
+name: CI — Native
+
+on:
+  push:
+    paths:
+      - "apps/native/**"
+      - ".github/workflows/ci-native.yml"
+  pull_request:
+    paths:
+      - "apps/native/**"
+      - ".github/workflows/ci-native.yml"
+
+concurrency:
+  group: ci-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift-test:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Swift tests
+        run: make test
