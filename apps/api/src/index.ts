@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { Env, DeviceRegistration } from "./types";
+import type { Env, DeviceRegistration, UserPreferences, ThresholdConfig } from "./types";
 import { verifyAppleToken, unauthorizedResponse } from "./auth";
 import { sendAPNsNotification } from "./apns";
 import { insertEvent, getHistory, getDailySummary, deleteAllUserEvents } from "./history";
@@ -55,12 +55,17 @@ app.post("/event", async (c) => {
 
 	await insertEvent(c.env.DB, userId, event);
 
-	// Check if any threshold alerts should fire (placeholder logic)
 	const today = new Date().toISOString().split("T")[0] ?? new Date().toISOString();
 	const summary = await getDailySummary(c.env.DB, userId, today);
 
-	if (summary.totalCost >= 5.0) {
-		// Get all registered devices for this user
+	// Load user preferences for configurable thresholds
+	const prefsData = await c.env.HOWLALERT_DEVICES.get(`prefs:${userId}`);
+	const prefs = prefsData ? (JSON.parse(prefsData) as UserPreferences) : null;
+	const costThreshold = prefs?.thresholds.find(
+		(t) => t.type === "daily_cost" && t.isEnabled,
+	)?.value ?? 5.0;
+
+	if (summary.totalCost >= costThreshold) {
 		const keys = await c.env.HOWLALERT_DEVICES.list({ prefix: `device:${userId}:` });
 		for (const key of keys.keys) {
 			const deviceData = await c.env.HOWLALERT_DEVICES.get(key.name);
@@ -81,6 +86,48 @@ app.post("/event", async (c) => {
 	}
 
 	return c.json({ success: true, summary });
+});
+
+// Get or update user preferences (thresholds)
+app.post("/preferences", async (c) => {
+	let userId: string;
+	try {
+		userId = await verifyAppleToken(c);
+	} catch {
+		return unauthorizedResponse("Invalid authorization token");
+	}
+
+	const body = await c.req.json<{ thresholds: ThresholdConfig[] }>();
+	if (!Array.isArray(body.thresholds)) {
+		return c.json({ error: "Missing or invalid thresholds array" }, 400);
+	}
+
+	const prefs: UserPreferences = {
+		userId,
+		thresholds: body.thresholds,
+		updatedAt: new Date().toISOString(),
+	};
+
+	await c.env.HOWLALERT_DEVICES.put(`prefs:${userId}`, JSON.stringify(prefs));
+
+	return c.json({ success: true, preferences: prefs });
+});
+
+// Get user preferences
+app.get("/preferences", async (c) => {
+	let userId: string;
+	try {
+		userId = await verifyAppleToken(c);
+	} catch {
+		return unauthorizedResponse("Invalid authorization token");
+	}
+
+	const prefsData = await c.env.HOWLALERT_DEVICES.get(`prefs:${userId}`);
+	if (!prefsData) {
+		return c.json({ preferences: null });
+	}
+
+	return c.json({ preferences: JSON.parse(prefsData) as UserPreferences });
 });
 
 // Get usage history
@@ -119,7 +166,7 @@ app.get("/device", async (c) => {
 	return c.json({ devices });
 });
 
-// Delete account — removes all devices and usage history
+// Delete account — removes all devices, preferences, and usage history
 app.delete("/account", async (c) => {
 	let userId: string;
 	try {
@@ -132,6 +179,8 @@ app.delete("/account", async (c) => {
 	for (const key of keys.keys) {
 		await c.env.HOWLALERT_DEVICES.delete(key.name);
 	}
+
+	await c.env.HOWLALERT_DEVICES.delete(`prefs:${userId}`);
 
 	const eventsRemoved = await deleteAllUserEvents(c.env.DB, userId);
 

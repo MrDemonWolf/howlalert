@@ -1,0 +1,130 @@
+---
+title: Cloudflare Setup
+description: Deploy the HowlAlert Cloudflare Worker with KV, D1, and APNs secrets.
+---
+
+This guide walks you through deploying the HowlAlert backend — a Cloudflare Worker that relays push notifications when usage thresholds are exceeded.
+
+## Prerequisites
+
+- A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free tier is sufficient)
+- [Bun](https://bun.sh) installed (`curl -fsSL https://bun.sh/install | bash`)
+- Wrangler CLI: `bun add -g wrangler`
+- An APNs key (`.p8` file) from your Apple Developer account — see [Push Notifications](/docs/architecture/push-notifications)
+
+## 1. Clone and install
+
+```bash
+git clone https://github.com/mrdemonwolf/howlalert.git
+cd howlalert/apps/api
+bun install
+```
+
+## 2. Authenticate Wrangler
+
+```bash
+wrangler login
+```
+
+This opens a browser window to authorise Wrangler against your Cloudflare account.
+
+## 3. Create the KV namespace
+
+The Worker uses KV to store device registrations and user preferences.
+
+```bash
+wrangler kv namespace create HOWLALERT_DEVICES
+```
+
+Wrangler prints something like:
+
+```
+Add the following to your wrangler.toml:
+kv_namespaces = [
+  { binding = "HOWLALERT_DEVICES", id = "abc123..." }
+]
+```
+
+Open `apps/api/wrangler.toml` and update the `id` field under `kv_namespaces` with the returned value.
+
+### Preview namespace (optional, for local dev)
+
+```bash
+wrangler kv namespace create HOWLALERT_DEVICES --preview
+```
+
+Update the `preview_id` field in `wrangler.toml` with this ID.
+
+## 4. Create the D1 database
+
+D1 stores usage event history.
+
+```bash
+wrangler d1 create howlalert-db
+```
+
+Update `wrangler.toml` with the returned `database_id`:
+
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "howlalert-db"
+database_id = "<returned-id>"
+```
+
+## 5. Run migrations
+
+Apply the schema locally first, then to production:
+
+```bash
+# Local
+make apply-migrations
+
+# Production
+make apply-migrations-prod
+```
+
+## 6. Configure APNs secrets
+
+The Worker needs four secrets to send push notifications via APNs:
+
+```bash
+wrangler secret put APNS_KEY_ID        # 10-char key ID from Apple Developer
+wrangler secret put APNS_TEAM_ID       # 10-char Team ID from Apple Developer
+wrangler secret put APNS_BUNDLE_ID     # com.mrdemonwolf.howlalert
+wrangler secret put APNS_PRIVATE_KEY   # Contents of the .p8 file (paste the full PEM block)
+```
+
+See [Push Notifications](/docs/architecture/push-notifications) for instructions on generating the `.p8` key in Apple Developer.
+
+## 7. Deploy
+
+```bash
+make worker-deploy
+```
+
+Wrangler compiles and uploads the Worker. On success it prints the Worker URL, e.g.:
+`https://howlalert.<your-subdomain>.workers.dev`
+
+## 8. Verify
+
+```bash
+curl https://howlalert.<your-subdomain>.workers.dev/status
+```
+
+Expected response:
+
+```json
+{ "status": "ok" }
+```
+
+## Environment reference
+
+| Variable | Description |
+|----------|-------------|
+| `APNS_KEY_ID` | 10-char APNs key ID |
+| `APNS_TEAM_ID` | 10-char Apple Team ID |
+| `APNS_BUNDLE_ID` | `com.mrdemonwolf.howlalert` |
+| `APNS_PRIVATE_KEY` | Full contents of `.p8` file |
+
+KV and D1 bindings are configured in `wrangler.toml`, not as secrets.

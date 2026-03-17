@@ -41,12 +41,8 @@ xcuserdata/
 # Xcode debugger data
 xcdebugger/
 
-# Shared schemes — keep checked-in schemes, ignore user-specific ones
-xcshareddata/xcschemes
-
-# XcodeGen — generated project (regenerate with: make generate-project)
-# project.yml is NOT ignored (it is the source of truth)
-src/HowlAlert.xcodeproj
+# User-specific Xcode data only — shared schemes are committed
+xcshareddata/UserData/
 
 ############################################################
 # Swift Package Manager
