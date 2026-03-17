@@ -11,7 +11,8 @@ import HowlAlertKit
 // MARK: - Dashboard View
 
 struct DashboardView: View {
-	let apiClient: APIClient
+	var apiClient: APIClient = APIClient()
+	var isDemo: Bool = false
 
 	@StateObject private var prefs = UserPreferences.shared
 	@State private var usageState: UsageState = .empty
@@ -28,21 +29,28 @@ struct DashboardView: View {
 		#if os(macOS)
 		macDashboard
 			.onReceive(timer) { _ in
+				guard !isDemo else { return }
 				Task { await loadData() }
 				activeSession = ClaudeSessionReader.readActiveSession()
 			}
 			.onAppear {
-				Task { await loadData() }
-				activeSession = ClaudeSessionReader.readActiveSession()
+				if isDemo {
+					loadDemoData()
+				} else {
+					Task { await loadData() }
+					activeSession = ClaudeSessionReader.readActiveSession()
+				}
 			}
 		#elseif os(iOS)
 		iOSDashboard
 			.onAppear {
+				guard !isDemo else { loadDemoData(); return }
 				Task { await loadData() }
 			}
 		#elseif os(watchOS)
 		watchDashboard
 			.onAppear {
+				guard !isDemo else { loadDemoData(); return }
 				Task { await loadData() }
 			}
 		#endif
@@ -58,6 +66,10 @@ struct DashboardView: View {
 			Divider()
 
 			VStack(spacing: 12) {
+				if isDemo {
+					demoBanner
+				}
+
 				if let session = activeSession {
 					HStack(spacing: 4) {
 						Image(systemName: "folder.fill")
@@ -103,6 +115,12 @@ struct DashboardView: View {
 	private var iOSDashboard: some View {
 		NavigationStack {
 			List {
+				if isDemo {
+					Section {
+						demoBanner
+							.listRowBackground(Color.orange.opacity(0.05))
+					}
+				}
 				Section("Today's Usage") {
 					statsSection
 				}
@@ -129,7 +147,7 @@ struct DashboardView: View {
 				ToolbarItem(placement: .topBarLeading) {
 					if isLoading {
 						ProgressView()
-					} else {
+					} else if !isDemo {
 						Button {
 							Task { await loadData() }
 						} label: {
@@ -142,6 +160,7 @@ struct DashboardView: View {
 				PreferencesView(apiClient: apiClient)
 			}
 			.refreshable {
+				guard !isDemo else { return }
 				await loadData()
 			}
 		}
@@ -154,6 +173,11 @@ struct DashboardView: View {
 	private var watchDashboard: some View {
 		ScrollView {
 			VStack(spacing: 8) {
+				if isDemo {
+					Text("Demo")
+						.font(.caption2)
+						.foregroundStyle(.orange)
+				}
 				statRow(label: "Tokens", value: formatTokens(usageState.totalTokens))
 				statRow(label: "Sessions", value: "\(usageState.activeSessions)")
 				thresholdIndicator
@@ -166,17 +190,30 @@ struct DashboardView: View {
 
 	// MARK: - Shared Sub-Views
 
+	private var demoBanner: some View {
+		HStack {
+			Image(systemName: "exclamationmark.circle.fill")
+				.foregroundStyle(.orange)
+			Text("Demo — connect your Mac to see live data")
+				.font(.caption)
+				.foregroundStyle(.orange)
+		}
+		.padding(.horizontal, 12)
+		.padding(.vertical, 6)
+		.background(.orange.opacity(0.1), in: Capsule())
+	}
+
 	private var headerBar: some View {
 		HStack {
 			Image(systemName: "bell.badge.fill")
-				.foregroundStyle(.tint)
+				.foregroundStyle(.accent)
 			Text("HowlAlert")
 				.font(.headline)
 			Spacer()
 			if isLoading {
 				ProgressView()
 					.controlSize(.small)
-			} else {
+			} else if !isDemo {
 				Button {
 					Task { await loadData() }
 				} label: {
@@ -201,7 +238,7 @@ struct DashboardView: View {
 			}
 			.font(.caption)
 			.buttonStyle(.plain)
-			.foregroundStyle(.tint)
+			.foregroundStyle(.accent)
 		}
 		.padding(.horizontal, 12)
 		.padding(.vertical, 6)
@@ -318,6 +355,24 @@ struct DashboardView: View {
 
 	// MARK: - Data Loading
 
+	private func loadDemoData() {
+		usageState = UsageState(
+			dailyCost: 0,
+			totalInputTokens: DemoData.tokensUsed,
+			totalOutputTokens: 0,
+			activeSessions: DemoData.sessionCount,
+			lastUpdated: Date(),
+			recentEvents: []
+		)
+		#if os(macOS)
+		activeSession = ActiveClaudeSession(
+			projectPath: "/Users/demo/\(DemoData.projectName)",
+			projectName: DemoData.projectName,
+			lastActiveDate: Date()
+		)
+		#endif
+	}
+
 	private func loadData() async {
 		isLoading = true
 		errorMessage = nil
@@ -386,6 +441,10 @@ private extension ThresholdType {
 	}
 }
 
-#Preview {
+#Preview("Live") {
 	DashboardView(apiClient: APIClient())
+}
+
+#Preview("Demo") {
+	DashboardView(isDemo: true)
 }

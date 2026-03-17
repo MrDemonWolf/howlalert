@@ -13,6 +13,8 @@ import HowlAlertKit
 
 struct ContentView: View {
 	@State private var isAuthenticated: Bool = false
+	@State private var isDemoMode: Bool = false
+	@State private var isMacConfigured: Bool = false
 	@State private var showError: Bool = false
 	@State private var errorMessage: String = ""
 
@@ -21,7 +23,7 @@ struct ContentView: View {
 	var body: some View {
 		Group {
 			if isAuthenticated {
-				DashboardView(apiClient: apiClient)
+				authenticatedView
 			} else {
 				signInView
 			}
@@ -34,6 +36,38 @@ struct ContentView: View {
 		} message: {
 			Text(errorMessage)
 		}
+	}
+
+	// MARK: - Authenticated View
+
+	@ViewBuilder
+	private var authenticatedView: some View {
+		#if os(macOS)
+		DashboardView(apiClient: apiClient)
+		#elseif os(iOS)
+		NavigationStack {
+			Group {
+				if isMacConfigured || isDemoMode {
+					DashboardView(apiClient: apiClient, isDemo: isDemoMode)
+				} else {
+					SetupPromptView(showDemo: $isDemoMode)
+						.navigationTitle("HowlAlert")
+				}
+			}
+		}
+		.task { await checkMacConfigured() }
+		#elseif os(watchOS)
+		NavigationStack {
+			Group {
+				if isMacConfigured || isDemoMode {
+					DashboardView(apiClient: apiClient, isDemo: isDemoMode)
+				} else {
+					SetupPromptView(showDemo: $isDemoMode)
+				}
+			}
+		}
+		.task { await checkMacConfigured() }
+		#endif
 	}
 
 	// MARK: - Sign In View
@@ -55,7 +89,7 @@ struct ContentView: View {
 
 			Image(systemName: "bell.badge.fill")
 				.font(.system(size: 48))
-				.foregroundStyle(.tint)
+				.foregroundStyle(.accent)
 
 			Text("HowlAlert")
 				.font(.title)
@@ -92,7 +126,7 @@ struct ContentView: View {
 
 				Image(systemName: "bell.badge.fill")
 					.font(.system(size: 64))
-					.foregroundStyle(.tint)
+					.foregroundStyle(.accent)
 
 				VStack(spacing: 8) {
 					Text("HowlAlert")
@@ -130,7 +164,7 @@ struct ContentView: View {
 	private var watchSignInView: some View {
 		VStack(spacing: 8) {
 			Image(systemName: "bell.badge.fill")
-				.foregroundStyle(.tint)
+				.foregroundStyle(.accent)
 			Text("HowlAlert")
 				.font(.headline)
 			Text("Open on iPhone to sign in")
@@ -174,6 +208,13 @@ struct ContentView: View {
 			errorMessage = error.localizedDescription
 			showError = true
 		}
+	}
+
+	private func checkMacConfigured() async {
+		// Attempt to fetch history — if we get any events back, the macOS app
+		// has been set up and is sending data. Stub until the history endpoint
+		// is confirmed reachable from iOS.
+		isMacConfigured = false
 	}
 }
 
