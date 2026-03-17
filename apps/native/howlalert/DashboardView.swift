@@ -7,6 +7,9 @@
 
 import SwiftUI
 import HowlAlertKit
+#if canImport(WatchConnectivity)
+import WatchConnectivity
+#endif
 
 // MARK: - Dashboard View
 
@@ -34,6 +37,7 @@ struct DashboardView: View {
 				activeSession = ClaudeSessionReader.readActiveSession()
 			}
 			.onAppear {
+				WatchConnectivityManager.shared.activate()
 				if isDemo {
 					loadDemoData()
 				} else {
@@ -44,6 +48,7 @@ struct DashboardView: View {
 		#elseif os(iOS)
 		iOSDashboard
 			.onAppear {
+				WatchConnectivityManager.shared.activate()
 				guard !isDemo else { loadDemoData(); return }
 				Task { await loadData() }
 			}
@@ -403,6 +408,22 @@ struct DashboardView: View {
 				activeSessions: Set(todayEvents.compactMap { $0.sessionId }).count,
 				lastUpdated: Date(),
 				recentEvents: todayEvents
+			)
+			#endif
+
+			// Relay updated stats to Apple Watch
+			#if os(macOS) || os(iOS)
+			let tokenLimit = prefs.thresholds
+				.first(where: { $0.type == .tokenCount && $0.isEnabled })
+				.map { Int($0.value) } ?? 200_000
+			let sessionLimit = prefs.thresholds
+				.first(where: { $0.type == .sessionCount && $0.isEnabled })
+				.map { Int($0.value) } ?? 10
+			WatchConnectivityManager.shared.sendStats(
+				tokensUsed: usageState.totalTokens,
+				tokenLimit: tokenLimit,
+				sessionCount: usageState.activeSessions,
+				sessionLimit: sessionLimit
 			)
 			#endif
 		} catch {
