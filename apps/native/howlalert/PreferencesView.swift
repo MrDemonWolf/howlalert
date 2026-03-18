@@ -6,7 +6,11 @@
 //
 
 import SwiftUI
+import UserNotifications
 import HowlAlertKit
+#if os(iOS)
+import UIKit
+#endif
 
 // MARK: - Preferences View
 
@@ -14,6 +18,7 @@ struct PreferencesView: View {
 	let apiClient: APIClient
 
 	@StateObject private var prefs = UserPreferences.shared
+	@StateObject private var notificationManager = NotificationManager.shared
 	@Environment(\.dismiss) private var dismiss
 
 	// MARK: Local editing state
@@ -63,7 +68,9 @@ struct PreferencesView: View {
 			Divider()
 
 			VStack(alignment: .leading, spacing: 16) {
+				notificationSection
 				thresholdSection
+				demoModeSection
 				feedbackSection
 			}
 			.padding(12)
@@ -93,7 +100,9 @@ struct PreferencesView: View {
 	private var iOSLayout: some View {
 		NavigationStack {
 			Form {
+				notificationSection
 				thresholdSection
+				demoModeSection
 				feedbackSection
 			}
 			.navigationTitle("Preferences")
@@ -118,6 +127,99 @@ struct PreferencesView: View {
 	#endif
 
 	// MARK: - Shared Sub-Views
+
+	private var notificationSection: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("Notifications")
+				.font(.subheadline)
+				.fontWeight(.semibold)
+				.foregroundStyle(.secondary)
+
+			Group {
+				switch notificationManager.authorizationStatus {
+				case .authorized:
+					HStack(spacing: 6) {
+						Image(systemName: "checkmark.circle.fill")
+							.foregroundStyle(.green)
+						Text("Notifications enabled")
+							.font(.caption)
+							.foregroundStyle(.green)
+					}
+				case .denied:
+					VStack(alignment: .leading, spacing: 6) {
+						HStack(spacing: 6) {
+							Image(systemName: "xmark.circle.fill")
+								.foregroundStyle(.red)
+							Text("Notifications are disabled")
+								.font(.caption)
+								.foregroundStyle(.red)
+						}
+						#if os(iOS)
+						Button("Open Settings") {
+							if let url = URL(string: UIApplication.openSettingsURLString) {
+								UIApplication.shared.open(url)
+							}
+						}
+						.font(.caption)
+						#else
+						Text("Enable in System Settings > Notifications")
+							.font(.caption2)
+							.foregroundStyle(.secondary)
+						#endif
+					}
+				case .notDetermined:
+					Button {
+						Task {
+							let granted = await notificationManager.requestPermission()
+							if granted {
+								#if os(iOS)
+								await UIApplication.shared.registerForRemoteNotifications()
+								#elseif os(macOS)
+								NSApplication.shared.registerForRemoteNotifications()
+								#endif
+							}
+						}
+					} label: {
+						Label("Enable Notifications", systemImage: "bell.badge")
+					}
+					.font(.caption)
+				default:
+					HStack(spacing: 6) {
+						Image(systemName: "questionmark.circle")
+							.foregroundStyle(.secondary)
+						Text("Notification status unavailable")
+							.font(.caption)
+							.foregroundStyle(.secondary)
+					}
+				}
+			}
+			.padding(10)
+			.frame(maxWidth: .infinity, alignment: .leading)
+			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+		}
+		.task {
+			await notificationManager.checkStatus()
+		}
+	}
+
+	private var demoModeSection: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("Demo Mode")
+				.font(.subheadline)
+				.fontWeight(.semibold)
+				.foregroundStyle(.secondary)
+
+			VStack(alignment: .leading, spacing: 6) {
+				Toggle("Demo Mode", isOn: $prefs.isDemoMode)
+					.toggleStyle(.switch)
+				Text("Show sample data for demonstration purposes")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
+			.padding(10)
+			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+		}
+	}
 
 	private var thresholdSection: some View {
 		VStack(alignment: .leading, spacing: 12) {

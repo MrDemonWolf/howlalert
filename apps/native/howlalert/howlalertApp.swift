@@ -20,8 +20,11 @@ struct howlalertApp: App {
 		#if os(macOS)
 		MenuBarExtra("HowlAlert", systemImage: "bell.badge") {
 			ContentView()
-				.onAppear {
-					NSApplication.shared.registerForRemoteNotifications()
+				.task {
+					let granted = await NotificationManager.shared.requestPermission()
+					if granted {
+						NSApplication.shared.registerForRemoteNotifications()
+					}
 				}
 		}
 		.menuBarExtraStyle(.window)
@@ -44,7 +47,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 		didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
 	) -> Bool {
 		if KeychainHelper.shared.load(key: "apple_identity_token") != nil {
-			application.registerForRemoteNotifications()
+			Task {
+				let granted = await NotificationManager.shared.requestPermission()
+				if granted {
+					await application.registerForRemoteNotifications()
+				}
+			}
 		}
 		return true
 	}
@@ -98,7 +106,12 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		if KeychainHelper.shared.load(key: "apple_identity_token") != nil {
-			NSApplication.shared.registerForRemoteNotifications()
+			Task {
+				let granted = await NotificationManager.shared.requestPermission()
+				if granted {
+					NSApplication.shared.registerForRemoteNotifications()
+				}
+			}
 		}
 	}
 

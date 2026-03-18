@@ -12,6 +12,7 @@ This is a monorepo with three independent applications. No workspace tooling (np
 │   ├── api/       Cloudflare Worker (Hono + D1 + KV)
 │   ├── docs/      Next.js 15 documentation site (Fumadocs)
 │   └── native/    SwiftUI multiplatform app (iOS, macOS, watchOS)
+├── .github/       CI/CD workflows for each app
 └── Makefile       Root orchestration for all components
 ```
 
@@ -19,10 +20,14 @@ This is a monorepo with three independent applications. No workspace tooling (np
 
 1.  **API (`apps/api`)**:
     *   **Runtime**: Cloudflare Workers (using `bun`).
-    *   **Framework**: Hono 4.x.
-    *   **Storage**: D1 (Relational history) and KV (Device registrations & preferences).
-    *   **Notifications**: Direct integration with Apple Push Notification service (APNs) using JWT authentication.
-    *   **Auth**: Apple Identity Token verification (RS256).
+    *   **Framework**: Hono 4.x with `{ Bindings: Env }` pattern.
+    *   **Storage**:
+        *   **D1 (`DB`)**: Relational event history (`usage_events` table).
+        *   **KV (`HOWLALERT_DEVICES`)**: Device registrations (`device:{userId}:{token}`) and User Preferences (`prefs:{userId}`).
+    *   **Notifications**: Direct integration with Apple Push Notification service (APNs) using HTTP/2 and JWT authentication.
+    *   **Auth**: Apple Identity Token verification.
+        *   **Production**: Full RS256 JWT validation against Apple's JWKS (cached in KV for 24h).
+        *   **Development**: Simple `dev_user_{token_prefix}` logic for easier testing.
 
 2.  **Native (`apps/native`)**:
     *   **Language**: Swift 6.0+, SwiftUI.
@@ -36,6 +41,27 @@ This is a monorepo with three independent applications. No workspace tooling (np
 
 ---
 
+## Data Models (API)
+
+### Usage Event (`usage_events` table)
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | TEXT | Primary Key (UUID) |
+| `user_id` | TEXT | Apple `sub` claim |
+| `session_id` | TEXT | Unique session identifier from Claude |
+| `timestamp` | TEXT | ISO8601 event time |
+| `model` | TEXT | Claude model name |
+| `cost_usd` | REAL | Total cost for this event |
+| `input_tokens` | INTEGER | Prompt tokens |
+| `output_tokens` | INTEGER | Completion tokens |
+
+### Threshold Config (KV `prefs:{userId}`)
+*   **Daily Cost**: Trigger when `SUM(cost_usd)` for the current date exceeds the value.
+*   **Token Count**: (Planned) Trigger on cumulative daily tokens.
+*   **Session Count**: (Planned) Trigger on number of active sessions.
+
+---
+
 ## Building and Running
 
 The root `Makefile` is the primary entry point for development commands.
@@ -44,6 +70,7 @@ The root `Makefile` is the primary entry point for development commands.
 *   `make worker-dev`: Start local Wrangler development server (Hono + D1 local).
 *   `make worker-deploy`: Deploy to Cloudflare production.
 *   `make apply-migrations`: Apply D1 database migrations locally.
+*   `make apply-migrations-prod`: Apply D1 database migrations to production.
 *   `cd apps/api && bun run typecheck`: Run TypeScript compiler check.
 
 ### Native (Apple Platforms)
@@ -59,6 +86,19 @@ The root `Makefile` is the primary entry point for development commands.
 
 ---
 
+## CI/CD Processes
+
+*   **API**:
+    *   `ci-api.yml`: Runs on PRs to `main`. Performs `bun install`, `bun run lint`, and `bun run typecheck`.
+    *   `deploy-api.yml`: Triggers on push to `main`. Deploys to Cloudflare Workers using Wrangler.
+*   **Native**:
+    *   `ci-native.yml`: Runs `swift test` for the `HowlAlertKit` package.
+*   **Docs**:
+    *   `ci-docs.yml`: Validates the build.
+    *   `deploy-docs.yml`: Deploys to GitHub Pages or designated hosting.
+
+---
+
 ## Development Conventions
 
 ### Code Style
@@ -67,12 +107,9 @@ The root `Makefile` is the primary entry point for development commands.
 *   **TypeScript**: Strict mode enabled. Avoid `any` types; prefer strong typing for API responses and environment bindings.
 *   **Swift**: Follow modern Swift concurrency patterns (`async/await`). Maintain clear separation between `HowlAlertKit` (logic) and SwiftUI Views.
 
-### Testing
-*   **Logic**: All core parsing and networking logic must reside in `HowlAlertKit` and be covered by Swift tests (`make test`).
-*   **API**: Test endpoints locally using `wrangler dev` before deploying.
-
 ### Infrastructure
 *   **Migrations**: Always create a new `.sql` file in `apps/api/migrations/` for schema changes.
 *   **KV Naming**:
     *   `device:{userId}:{token}`: Device registration metadata.
     *   `prefs:{userId}`: User-specific alert thresholds.
+    *   `apple_public_keys`: Cached JWKS from Apple (TTL 24h).

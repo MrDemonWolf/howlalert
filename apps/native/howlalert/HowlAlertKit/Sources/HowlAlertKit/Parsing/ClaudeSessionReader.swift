@@ -6,11 +6,18 @@ public struct ActiveClaudeSession {
 	public let projectPath: String
 	public let projectName: String
 	public let lastActiveDate: Date
+
+	public init(projectPath: String, projectName: String, lastActiveDate: Date) {
+		self.projectPath = projectPath
+		self.projectName = projectName
+		self.lastActiveDate = lastActiveDate
+	}
 }
 
 public struct ClaudeSessionReader {
 
 	public static func readActiveSession() -> ActiveClaudeSession? {
+		#if os(macOS)
 		let fm = FileManager.default
 		let home = fm.homeDirectoryForCurrentUser
 		let projectsURL = home.appendingPathComponent(".claude/projects", isDirectory: true)
@@ -51,6 +58,9 @@ public struct ClaudeSessionReader {
 			projectName: projectName,
 			lastActiveDate: modDate
 		)
+		#else
+		return nil
+		#endif
 	}
 
 	// Decodes a Claude project directory name back to an absolute path.
