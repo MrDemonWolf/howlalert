@@ -97,6 +97,27 @@ type: "daily_cost" | "token_count" | "session_count"
 - **SPM package**: `apps/native/howlalert/HowlAlertKit/` — testable library code, tested independently with `swift test`
 - **Bundle ID**: `com.mrdemonwolf.howlalert`
 
+### Key components
+| File | Role |
+|------|------|
+| `ContentView.swift` | Root view — auth gate, routes to `DashboardView` or `SetupPromptView` |
+| `DashboardView.swift` | Main dashboard — macOS tray, iOS list, watchOS scroll; shows usage stats and threshold status |
+| `PreferencesView.swift` | Settings sheet — notification status, alert thresholds, demo mode toggle |
+| `NotificationManager.swift` | Singleton `ObservableObject` wrapping `UNUserNotificationCenter` — permission request and status tracking |
+| `DemoData.swift` | Static demo data for Apple review (project name, tokens, sessions, cost, recent events) |
+| `SetupPromptView.swift` | Onboarding prompt shown on iOS/watchOS when macOS companion isn't configured |
+
+### Notification flow
+1. `NotificationManager.shared.requestPermission()` is called after Sign in with Apple and on app launch (both iOS AppDelegate and macOS MenuBarExtra)
+2. If granted, `registerForRemoteNotifications()` is called on the platform's shared application
+3. `PreferencesView` shows live notification status (authorized / denied / not determined) with platform-appropriate actions
+
+### Demo mode
+- Persisted via `UserPreferences.shared.isDemoMode` (stored in App Group UserDefaults)
+- Toggleable from `PreferencesView` → "Demo Mode" section
+- When active, `DashboardView` loads `DemoData` instead of live API/cache data
+- macOS tray shows a synthetic `ActiveClaudeSession` with the demo project name
+
 ## Code style
 
 Enforced by `.editorconfig`:

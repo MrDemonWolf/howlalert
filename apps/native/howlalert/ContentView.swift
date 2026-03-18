@@ -13,7 +13,7 @@ import HowlAlertKit
 
 struct ContentView: View {
 	@State private var isAuthenticated: Bool = false
-	@State private var isDemoMode: Bool = false
+	@StateObject private var prefs = UserPreferences.shared
 	@State private var isMacConfigured: Bool = false
 	@State private var showError: Bool = false
 	@State private var errorMessage: String = ""
@@ -43,14 +43,14 @@ struct ContentView: View {
 	@ViewBuilder
 	private var authenticatedView: some View {
 		#if os(macOS)
-		DashboardView(apiClient: apiClient)
+		DashboardView(apiClient: apiClient, isDemo: prefs.isDemoMode)
 		#elseif os(iOS)
 		NavigationStack {
 			Group {
-				if isMacConfigured || isDemoMode {
-					DashboardView(apiClient: apiClient, isDemo: isDemoMode)
+				if isMacConfigured || prefs.isDemoMode {
+					DashboardView(apiClient: apiClient, isDemo: prefs.isDemoMode)
 				} else {
-					SetupPromptView(showDemo: $isDemoMode)
+					SetupPromptView(showDemo: $prefs.isDemoMode)
 						.navigationTitle("HowlAlert")
 				}
 			}
@@ -59,10 +59,10 @@ struct ContentView: View {
 		#elseif os(watchOS)
 		NavigationStack {
 			Group {
-				if isMacConfigured || isDemoMode {
-					DashboardView(apiClient: apiClient, isDemo: isDemoMode)
+				if isMacConfigured || prefs.isDemoMode {
+					DashboardView(apiClient: apiClient, isDemo: prefs.isDemoMode)
 				} else {
-					SetupPromptView(showDemo: $isDemoMode)
+					SetupPromptView(showDemo: $prefs.isDemoMode)
 				}
 			}
 		}
@@ -89,7 +89,7 @@ struct ContentView: View {
 
 			Image(systemName: "bell.badge.fill")
 				.font(.system(size: 48))
-				.foregroundStyle(.accent)
+				.foregroundStyle(Color.accentColor)
 
 			Text("HowlAlert")
 				.font(.title)
@@ -126,7 +126,7 @@ struct ContentView: View {
 
 				Image(systemName: "bell.badge.fill")
 					.font(.system(size: 64))
-					.foregroundStyle(.accent)
+					.foregroundStyle(Color.accentColor)
 
 				VStack(spacing: 8) {
 					Text("HowlAlert")
@@ -164,7 +164,7 @@ struct ContentView: View {
 	private var watchSignInView: some View {
 		VStack(spacing: 8) {
 			Image(systemName: "bell.badge.fill")
-				.foregroundStyle(.accent)
+				.foregroundStyle(Color.accentColor)
 			Text("HowlAlert")
 				.font(.headline)
 			Text("Open on iPhone to sign in")
@@ -200,6 +200,16 @@ struct ContentView: View {
 			KeychainHelper.shared.save(key: "apple_identity_token", value: token)
 			apiClient.setAuthToken(token)
 			isAuthenticated = true
+			Task {
+				let granted = await NotificationManager.shared.requestPermission()
+				if granted {
+					#if os(iOS)
+					await UIApplication.shared.registerForRemoteNotifications()
+					#elseif os(macOS)
+					NSApplication.shared.registerForRemoteNotifications()
+					#endif
+				}
+			}
 
 		case .failure(let error):
 			let asError = error as? ASAuthorizationError
