@@ -21,7 +21,11 @@ public struct StatsCacheParser {
     }
 
     public static func defaultURL() -> URL? {
-        FileManager.default.homeDirectoryForCurrentUser
+        #if os(macOS)
+        return FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".claude/stats-cache.json")
+        #else
+        return nil
+        #endif
     }
 }

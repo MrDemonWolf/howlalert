@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import HowlAlertKit
 #if canImport(WatchConnectivity)
 import WatchConnectivity
@@ -37,7 +38,9 @@ struct DashboardView: View {
 				activeSession = ClaudeSessionReader.readActiveSession()
 			}
 			.onAppear {
+				#if canImport(WatchConnectivity)
 				WatchConnectivityManager.shared.activate()
+				#endif
 				if isDemo {
 					loadDemoData()
 				} else {
@@ -211,7 +214,7 @@ struct DashboardView: View {
 	private var headerBar: some View {
 		HStack {
 			Image(systemName: "bell.badge.fill")
-				.foregroundStyle(.accent)
+				.foregroundStyle(Color.accentColor)
 			Text("HowlAlert")
 				.font(.headline)
 			Spacer()
@@ -227,6 +230,13 @@ struct DashboardView: View {
 				}
 				.buttonStyle(.plain)
 			}
+			Button {
+				showPreferences = true
+			} label: {
+				Image(systemName: "gear")
+					.font(.caption)
+			}
+			.buttonStyle(.plain)
 		}
 		.padding(.horizontal, 12)
 		.padding(.vertical, 8)
@@ -243,7 +253,7 @@ struct DashboardView: View {
 			}
 			.font(.caption)
 			.buttonStyle(.plain)
-			.foregroundStyle(.accent)
+			.foregroundStyle(Color.accentColor)
 		}
 		.padding(.horizontal, 12)
 		.padding(.vertical, 6)
@@ -362,7 +372,7 @@ struct DashboardView: View {
 
 	private func loadDemoData() {
 		usageState = UsageState(
-			dailyCost: 0,
+			dailyCost: DemoData.dailyCost,
 			totalInputTokens: DemoData.tokensUsed,
 			totalOutputTokens: 0,
 			activeSessions: DemoData.sessionCount,
@@ -412,7 +422,7 @@ struct DashboardView: View {
 			#endif
 
 			// Relay updated stats to Apple Watch
-			#if os(macOS) || os(iOS)
+			#if canImport(WatchConnectivity) && (os(macOS) || os(iOS))
 			let tokenLimit = prefs.thresholds
 				.first(where: { $0.type == .tokenCount && $0.isEnabled })
 				.map { Int($0.value) } ?? 200_000
