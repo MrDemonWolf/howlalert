@@ -26,15 +26,6 @@ struct PreferencesView: View {
 	@State private var sessionEnabled: Bool = false
 	@State private var sessionLimit: String = ""
 
-	// MARK: Save feedback
-
-	@State private var saveResult: SaveResult? = nil
-
-	private enum SaveResult {
-		case success
-		case failure(String)
-	}
-
 	var body: some View {
 		#if os(macOS)
 		macLayout
@@ -43,247 +34,79 @@ struct PreferencesView: View {
 		#endif
 	}
 
-	// MARK: - macOS Layout
+	// MARK: - macOS Layout (TabView)
 
 	#if os(macOS)
 	private var macLayout: some View {
-		VStack(alignment: .leading, spacing: 0) {
-			HStack {
-				Text("Preferences")
-					.font(.headline)
-				Spacer()
-				Button {
-					dismiss()
-				} label: {
-					Image(systemName: "xmark.circle.fill")
-						.foregroundStyle(.secondary)
-				}
-				.buttonStyle(.plain)
-			}
-			.padding(12)
-
-			Divider()
-
-			VStack(alignment: .leading, spacing: 16) {
-				claudePlanSection
-				hookSetupSection
-				notificationSection
-				thresholdSection
-				proSection
-				generalSection
-				feedbackSection
-			}
-			.padding(12)
-
-			Divider()
-
-			HStack {
-				Spacer()
-				Button("Cancel") { dismiss() }
-					.keyboardShortcut(.cancelAction)
-				Button("Save") {
-					save()
-				}
-				.keyboardShortcut(.defaultAction)
-			}
-			.padding(12)
+		TabView {
+			generalTab
+				.tabItem { Label("General", systemImage: "gear") }
+			alertsTab
+				.tabItem { Label("Alerts", systemImage: "bell.badge") }
+			aboutTab
+				.tabItem { Label("About", systemImage: "info.circle") }
 		}
-		.frame(width: 300)
+		.frame(width: 400, height: 340)
 		.onAppear { loadFromPrefs() }
 	}
-	#endif
 
-	// MARK: - iOS Layout
-
-	#if os(iOS)
-	private var iOSLayout: some View {
-		NavigationStack {
-			Form {
-				claudePlanSection
-				notificationSection
-				thresholdSection
-				proSection
-				generalSection
-				feedbackSection
-			}
-			.navigationTitle("Preferences")
-			.navigationBarTitleDisplayMode(.inline)
-			.toolbar {
-				ToolbarItem(placement: .cancellationAction) {
-					Button("Cancel") { dismiss() }
-				}
-				ToolbarItem(placement: .confirmationAction) {
-					Button("Save") {
-						save()
-					}
-				}
-			}
-			.onAppear { loadFromPrefs() }
-		}
-	}
-	#endif
-
-	// MARK: - Claude Plan Section
-
-	private var claudePlanSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("Claude Plan")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
-
-			VStack(alignment: .leading, spacing: 8) {
+	private var generalTab: some View {
+		Form {
+			// Claude Plan
+			Section("Claude Plan") {
 				Picker("Plan", selection: $prefs.selectedPlan) {
-					ForEach(ClaudePlan.allCases, id: \.self) { plan in
+					ForEach(ClaudePlan.allCases) { plan in
 						Text(plan.displayName).tag(plan)
 					}
 				}
-				#if os(macOS)
 				.pickerStyle(.menu)
-				#endif
 
 				HStack {
 					Text("Monthly Price")
+						.foregroundStyle(.secondary)
 					Spacer()
-					Text(String(format: "$%.2f", prefs.selectedPlan.monthlyPrice))
+					Text(String(format: "$%.0f/mo", prefs.selectedPlan.monthlyPrice))
 						.foregroundStyle(.secondary)
 				}
+				.font(.caption)
 			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
-		}
-	}
 
-	// MARK: - Hook Setup Section (macOS only)
-
-	#if os(macOS)
-	private var hookSetupSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("Claude Code Hook")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
-
-			VStack(alignment: .leading, spacing: 8) {
-				Text("Add a hook to Claude Code for real-time usage tracking.")
+			// Claude Code Hook (macOS only)
+			Section("Claude Code Hook") {
+				Text("Install the hook to send usage events to HowlAlert automatically.")
 					.font(.caption)
 					.foregroundStyle(.secondary)
-
 				Button("Copy Hook Command") {
-					let hookPath = Bundle.main.path(forResource: "howlalert-hook", ofType: nil) ?? "/Applications/HowlAlert.app/Contents/Resources/howlalert-hook"
-					let hookJSON = """
-					{
-					  "hooks": {
-					    "Notification": [{
-					      "type": "command",
-					      "command": "\(hookPath)"
-					    }]
-					  }
-					}
-					"""
+					let command = "claude hook install howlalert"
 					NSPasteboard.general.clearContents()
-					NSPasteboard.general.setString(hookJSON, forType: .string)
+					NSPasteboard.general.setString(command, forType: .string)
 				}
+			}
 
-				Text("Paste into ~/.claude/settings.json")
+			// Demo Mode
+			Section("General") {
+				Toggle("Demo Mode", isOn: $prefs.isDemoMode)
+				Text("Show sample data for demonstration purposes")
 					.font(.caption)
 					.foregroundStyle(.secondary)
+
+				Toggle("Launch at Login", isOn: $prefs.launchAtLogin)
 			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
 		}
-	}
-	#endif
-
-	// MARK: - Notifications Section
-
-	private var notificationSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("Notifications")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
-
-			Group {
-				switch notificationManager.authorizationStatus {
-				case .authorized:
-					HStack(spacing: 6) {
-						Image(systemName: "checkmark.circle.fill")
-							.foregroundStyle(.green)
-						Text("Notifications enabled")
-							.font(.caption)
-							.foregroundStyle(.green)
-					}
-				case .denied:
-					VStack(alignment: .leading, spacing: 6) {
-						HStack(spacing: 6) {
-							Image(systemName: "xmark.circle.fill")
-								.foregroundStyle(.red)
-							Text("Notifications are disabled")
-								.font(.caption)
-								.foregroundStyle(.red)
-						}
-						#if os(iOS)
-						Button("Open Settings") {
-							if let url = URL(string: UIApplication.openSettingsURLString) {
-								UIApplication.shared.open(url)
-							}
-						}
-						.font(.caption)
-						#else
-						Text("Enable in System Settings > Notifications")
-							.font(.caption2)
-							.foregroundStyle(.secondary)
-						#endif
-					}
-				case .notDetermined:
-					Button {
-						Task {
-							let granted = await notificationManager.requestPermission()
-							if granted {
-								#if os(iOS)
-								await UIApplication.shared.registerForRemoteNotifications()
-								#elseif os(macOS)
-								NSApplication.shared.registerForRemoteNotifications()
-								#endif
-							}
-						}
-					} label: {
-						Label("Enable Notifications", systemImage: "bell.badge")
-					}
-					.font(.caption)
-				default:
-					HStack(spacing: 6) {
-						Image(systemName: "questionmark.circle")
-							.foregroundStyle(.secondary)
-						Text("Notification status unavailable")
-							.font(.caption)
-							.foregroundStyle(.secondary)
-					}
-				}
-			}
-			.padding(10)
-			.frame(maxWidth: .infinity, alignment: .leading)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
-		}
-		.task {
-			await notificationManager.checkStatus()
-		}
+		.formStyle(.grouped)
+		.padding()
 	}
 
-	// MARK: - Threshold Section
+	private var alertsTab: some View {
+		Form {
+			// Notifications
+			Section("Notifications") {
+				notificationStatusRow
+			}
 
-	private var thresholdSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("Alert Thresholds")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
-
-			// Token count threshold
-			VStack(alignment: .leading, spacing: 6) {
+			// Alert Thresholds
+			Section("Alert Thresholds") {
 				Toggle("Token Count Alert", isOn: $tokenEnabled)
-					.toggleStyle(.switch)
 
 				if tokenEnabled {
 					HStack {
@@ -293,21 +116,14 @@ struct PreferencesView: View {
 						Spacer()
 						TextField("e.g. 100000", text: $tokenLimit)
 							.multilineTextAlignment(.trailing)
-							#if os(iOS)
-							.keyboardType(.numberPad)
-							#endif
 							.frame(width: 120)
 					}
 					.padding(.leading, 8)
 				}
-			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
 
-			// Session count threshold
-			VStack(alignment: .leading, spacing: 6) {
+				Divider()
+
 				Toggle("Session Count Alert", isOn: $sessionEnabled)
-					.toggleStyle(.switch)
 
 				if sessionEnabled {
 					HStack {
@@ -317,87 +133,253 @@ struct PreferencesView: View {
 						Spacer()
 						TextField("e.g. 20", text: $sessionLimit)
 							.multilineTextAlignment(.trailing)
-							#if os(iOS)
-							.keyboardType(.numberPad)
-							#endif
 							.frame(width: 120)
 					}
 					.padding(.leading, 8)
 				}
+
+				Divider()
+
+				HStack {
+					Text("Daily Cost Alert")
+						.foregroundStyle(.secondary)
+					Spacer()
+					Text(String(format: "$%.2f", prefs.dailyCostThreshold))
+						.foregroundStyle(.secondary)
+				}
+				.font(.caption)
 			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+
+			HStack {
+				Spacer()
+				Button("Save Thresholds") {
+					save()
+				}
+				.keyboardShortcut(.defaultAction)
+			}
 		}
+		.formStyle(.grouped)
+		.padding()
+		.onAppear { loadFromPrefs() }
 	}
 
-	// MARK: - HowlAlert Pro Section
+	private var aboutTab: some View {
+		Form {
+			Section("HowlAlert") {
+				HStack {
+					Text("Version")
+					Spacer()
+					Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")
+						.foregroundStyle(.secondary)
+				}
 
-	private var proSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("HowlAlert Pro")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
+				if let url = URL(string: "https://howlalert.com") {
+					Link("Website", destination: url)
+				}
 
-			VStack(alignment: .leading, spacing: 8) {
-				Label("Upgrade to Pro", systemImage: "star.fill")
-					.foregroundStyle(.orange)
-				Text("Widgets, Live Activities, usage history & more")
-					.font(.caption)
-					.foregroundStyle(.secondary)
-				// RevenueCat PaywallView will go here later
-				Button("Coming Soon") {}
-					.disabled(true)
+				if let url = URL(string: "https://howlalert.com/privacy") {
+					Link("Privacy Policy", destination: url)
+				}
 			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+
+			Section("HowlAlert Pro") {
+				HStack {
+					Image(systemName: "sparkles")
+						.foregroundStyle(.secondary)
+					Text("Coming Soon")
+						.foregroundStyle(.secondary)
+				}
+			}
+		}
+		.formStyle(.grouped)
+		.padding()
+	}
+	#endif
+
+	// MARK: - iOS Layout
+
+	#if os(iOS)
+	private var iOSLayout: some View {
+		NavigationStack {
+			Form {
+				// Claude Plan
+				Section("Claude Plan") {
+					Picker("Plan", selection: $prefs.selectedPlan) {
+						ForEach(ClaudePlan.allCases) { plan in
+							Text(plan.displayName).tag(plan)
+						}
+					}
+					HStack {
+						Text("Monthly Price")
+						Spacer()
+						Text(String(format: "$%.0f/mo", prefs.selectedPlan.monthlyPrice))
+							.foregroundStyle(.secondary)
+					}
+				}
+
+				// Notifications
+				Section("Notifications") {
+					notificationStatusRow
+				}
+
+				// Alert Thresholds
+				Section("Alert Thresholds") {
+					Toggle("Token Count Alert", isOn: $tokenEnabled)
+
+					if tokenEnabled {
+						HStack {
+							Text("Limit")
+								.foregroundStyle(.secondary)
+							Spacer()
+							TextField("e.g. 100000", text: $tokenLimit)
+								.multilineTextAlignment(.trailing)
+								.keyboardType(.numberPad)
+								.frame(width: 120)
+						}
+					}
+
+					Toggle("Session Count Alert", isOn: $sessionEnabled)
+
+					if sessionEnabled {
+						HStack {
+							Text("Limit")
+								.foregroundStyle(.secondary)
+							Spacer()
+							TextField("e.g. 20", text: $sessionLimit)
+								.multilineTextAlignment(.trailing)
+								.keyboardType(.numberPad)
+								.frame(width: 120)
+						}
+					}
+
+					HStack {
+						Text("Daily Cost Alert")
+						Spacer()
+						Text(String(format: "$%.2f", prefs.dailyCostThreshold))
+							.foregroundStyle(.secondary)
+					}
+				}
+
+				// Live Activity
+				Section("Live Activity") {
+					Text("Session vs Weekly display")
+						.foregroundStyle(.secondary)
+						.font(.caption)
+				}
+
+				// HowlAlert Pro
+				Section("HowlAlert Pro") {
+					HStack {
+						Image(systemName: "sparkles")
+							.foregroundStyle(.secondary)
+						Text("Coming Soon")
+							.foregroundStyle(.secondary)
+					}
+				}
+
+				// General
+				Section("General") {
+					Toggle("Demo Mode", isOn: $prefs.isDemoMode)
+					Text("Show sample data for demonstration purposes")
+						.font(.caption)
+						.foregroundStyle(.secondary)
+				}
+
+				// About
+				Section("About") {
+					HStack {
+						Text("Version")
+						Spacer()
+						Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")
+							.foregroundStyle(.secondary)
+					}
+
+					if let url = URL(string: "https://howlalert.com") {
+						Link("Website", destination: url)
+					}
+
+					if let url = URL(string: "https://howlalert.com/privacy") {
+						Link("Privacy Policy", destination: url)
+					}
+				}
+			}
+			.navigationTitle("Settings")
+			.navigationBarTitleDisplayMode(.inline)
+			.toolbar {
+				ToolbarItem(placement: .cancellationAction) {
+					Button("Cancel") { dismiss() }
+				}
+				ToolbarItem(placement: .confirmationAction) {
+					Button("Save") {
+						save()
+						dismiss()
+					}
+				}
+			}
+			.onAppear { loadFromPrefs() }
 		}
 	}
+	#endif
 
-	// MARK: - General Section (Demo Mode + Claude Directory on macOS)
-
-	private var generalSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("General")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
-
-			VStack(alignment: .leading, spacing: 6) {
-				Toggle("Demo Mode", isOn: $prefs.isDemoMode)
-					.toggleStyle(.switch)
-				Text("Show sample data for demonstration purposes")
-					.font(.caption)
-					.foregroundStyle(.secondary)
-			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
-		}
-	}
-
-	// MARK: - Feedback Section
+	// MARK: - Shared Sub-Views
 
 	@ViewBuilder
-	private var feedbackSection: some View {
-		switch saveResult {
-		case .success:
+	private var notificationStatusRow: some View {
+		switch notificationManager.authorizationStatus {
+		case .authorized:
 			HStack(spacing: 6) {
 				Image(systemName: "checkmark.circle.fill")
 					.foregroundStyle(.green)
-				Text("Preferences saved.")
+				Text("Notifications enabled")
 					.font(.caption)
 					.foregroundStyle(.green)
 			}
-		case .failure(let message):
-			HStack(spacing: 6) {
-				Image(systemName: "xmark.circle.fill")
-					.foregroundStyle(.red)
-				Text(message)
-					.font(.caption)
-					.foregroundStyle(.red)
+		case .denied:
+			VStack(alignment: .leading, spacing: 6) {
+				HStack(spacing: 6) {
+					Image(systemName: "xmark.circle.fill")
+						.foregroundStyle(.red)
+					Text("Notifications are disabled")
+						.font(.caption)
+						.foregroundStyle(.red)
+				}
+				#if os(iOS)
+				Button("Open Settings") {
+					if let url = URL(string: UIApplication.openSettingsURLString) {
+						UIApplication.shared.open(url)
+					}
+				}
+				.font(.caption)
+				#else
+				Text("Enable in System Settings > Notifications")
+					.font(.caption2)
+					.foregroundStyle(.secondary)
+				#endif
 			}
-		case .none:
-			EmptyView()
+		case .notDetermined:
+			Button {
+				Task {
+					let granted = await notificationManager.requestPermission()
+					if granted {
+						#if os(iOS)
+						await UIApplication.shared.registerForRemoteNotifications()
+						#elseif os(macOS)
+						NSApplication.shared.registerForRemoteNotifications()
+						#endif
+					}
+				}
+			} label: {
+				Label("Enable Notifications", systemImage: "bell.badge")
+			}
+			.font(.caption)
+		default:
+			HStack(spacing: 6) {
+				Image(systemName: "questionmark.circle")
+					.foregroundStyle(.secondary)
+				Text("Notification status unavailable")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
 		}
 	}
 
@@ -450,13 +432,7 @@ struct PreferencesView: View {
 	}
 
 	private func save() {
-		saveResult = nil
-
-		let thresholds = buildThresholds()
-
-		// Persist locally
-		prefs.thresholds = thresholds
-		saveResult = .success
+		prefs.thresholds = buildThresholds()
 	}
 }
 

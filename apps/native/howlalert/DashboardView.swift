@@ -15,7 +15,6 @@ import WatchConnectivity
 // MARK: - Dashboard View
 
 struct DashboardView: View {
-	var apiClient: APIClient = APIClient()
 	var isDemo: Bool = false
 
 	@StateObject private var prefs = UserPreferences.shared
@@ -25,7 +24,6 @@ struct DashboardView: View {
 	@State private var showPreferences: Bool = false
 
 	#if os(macOS)
-	@State private var activeSession: ActiveClaudeSession?
 	@State private var snapshot: ProviderSnapshot?
 	@State private var hoveredFooterItem: String?
 	private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -36,8 +34,7 @@ struct DashboardView: View {
 		macDashboard
 			.onReceive(timer) { _ in
 				guard !isDemo else { return }
-				Task { await loadData() }
-				activeSession = ClaudeSessionReader.readActiveSession()
+				loadData()
 			}
 			.onAppear {
 				#if canImport(WatchConnectivity)
@@ -46,8 +43,7 @@ struct DashboardView: View {
 				if isDemo {
 					loadDemoData()
 				} else {
-					Task { await loadData() }
-					activeSession = ClaudeSessionReader.readActiveSession()
+					loadData()
 				}
 			}
 		#elseif os(iOS)
@@ -55,13 +51,13 @@ struct DashboardView: View {
 			.onAppear {
 				WatchConnectivityManager.shared.activate()
 				guard !isDemo else { loadDemoData(); return }
-				Task { await loadData() }
+				loadData()
 			}
 		#elseif os(watchOS)
 		watchDashboard
 			.onAppear {
 				guard !isDemo else { loadDemoData(); return }
-				Task { await loadData() }
+				loadData()
 			}
 		#endif
 	}
@@ -71,58 +67,24 @@ struct DashboardView: View {
 	#if os(macOS)
 	private var macDashboard: some View {
 		VStack(spacing: 0) {
-			macHeaderSection
-
-			Divider()
-
-			VStack(spacing: 12) {
-				if isDemo {
-					demoBanner
-				}
-
-				if isLoading && usageState == .empty && snapshot == nil {
-					ProgressView("Loading\u{2026}")
-						.padding()
-				} else {
-					macRateWindowsSection
-					Divider()
-					macCostSection
-				}
-
-				if let err = errorMessage {
-					Text(err)
-						.font(.caption)
-						.foregroundStyle(.red)
-				}
-			}
-			.padding(12)
-
-			Divider()
-
-			macFooterSection
-		}
-		.frame(width: 300)
-	}
-
-	// MARK: - macOS Header
-
-	private var macHeaderSection: some View {
-		VStack(alignment: .leading, spacing: 2) {
-			HStack(alignment: .firstTextBaseline) {
-				Text(snapshot?.providerName ?? "Claude")
+			// Header
+			HStack {
+				Text("Claude")
 					.font(.headline)
-					.fontWeight(.semibold)
 				Spacer()
-				if let plan = snapshot?.planName {
-					Text(plan)
-						.font(.subheadline)
-						.foregroundStyle(.secondary)
-				}
+				Text(prefs.selectedPlan.displayName)
+					.font(.caption)
+					.fontWeight(.medium)
+					.padding(.horizontal, 8)
+					.padding(.vertical, 2)
+					.background(.quaternary, in: Capsule())
 			}
+			.padding(.horizontal, 12)
+			.padding(.vertical, 8)
 
-			HStack(alignment: .firstTextBaseline) {
+			HStack {
 				Text(lastUpdatedText)
-					.font(.footnote)
+					.font(.caption)
 					.foregroundStyle(.secondary)
 				Spacer()
 				if isLoading {
@@ -130,129 +92,148 @@ struct DashboardView: View {
 						.controlSize(.small)
 				}
 			}
+			.padding(.horizontal, 12)
+			.padding(.bottom, 8)
+
+			Divider()
+
+			// Content
+			VStack(spacing: 12) {
+				if isDemo {
+					demoBanner
+				}
+
+				if isLoading && usageState == .empty {
+					ProgressView("Loading\u{2026}")
+						.padding()
+				} else {
+					macUsageBars
+				}
+
+				if let err = errorMessage {
+					Text(err)
+						.font(.caption)
+						.foregroundStyle(.red)
+						.padding(.horizontal)
+				}
+			}
+			.padding(12)
+
+			Divider()
+
+			// Cost section
+			CostSectionView(
+				todayCost: usageState.dailyCost,
+				todayTokens: usageState.totalTokens,
+				last30DaysCost: nil,
+				last30DaysTokens: nil
+			)
+			.padding(12)
+
+			Divider()
+
+			// Footer
+			VStack(spacing: 0) {
+				SettingsLink {
+					HStack(spacing: 6) {
+						Image(systemName: "gear").frame(width: 16).imageScale(.small)
+						Text("Settings\u{2026}")
+						Spacer()
+					}
+					.foregroundStyle(.primary)
+					.padding(.horizontal, 12)
+					.padding(.vertical, 5)
+					.contentShape(Rectangle())
+					.background(hoveredFooterItem == "settings" ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 4))
+				}
+				.buttonStyle(.plain)
+				.onHover { hovering in hoveredFooterItem = hovering ? "settings" : nil }
+
+				macFooterRow(id: "about", icon: "info.circle", label: "About HowlAlert") {
+					NSApplication.shared.orderFrontStandardAboutPanel(nil)
+				}
+
+				macFooterRow(id: "quit", icon: "xmark.circle", label: "Quit") {
+					NSApplication.shared.terminate(nil)
+				}
+			}
+			.padding(.vertical, 4)
 		}
-		.padding(.horizontal, 16)
-		.padding(.vertical, 10)
+		.frame(width: 300)
 	}
 
-	// MARK: - macOS Rate Windows
+	@ViewBuilder
+	private var macUsageBars: some View {
+		if let snap = snapshot, let session = snap.primary {
+			// Rate windows available
+			UsageProgressBar(
+				title: session.label,
+				percent: session.percentUsed,
+				percentLabel: String(format: "%.0f%% left", session.percentRemaining * 100),
+				detailText: "",
+				tint: .green,
+				resetText: session.resetText,
+				paceStage: session.pace?.stage
+			)
 
-	private var macRateWindowsSection: some View {
-		VStack(spacing: 12) {
-			if let primary = snapshot?.primary {
+			if let weekly = snap.weekly {
 				UsageProgressBar(
-					title: primary.label,
-					percent: primary.usedPercent / 100.0,
-					percentLabel: String(format: "%.0f%% left", primary.remainingPercent),
-					resetText: primary.resetText,
-					paceText: snapshot?.primaryPace?.paceText,
-					etaText: snapshot?.primaryPace?.etaText,
-					paceStage: snapshot?.primaryPace?.stage
-				)
-			} else {
-				macFallbackTokenBar
-			}
-
-			if let secondary = snapshot?.secondary {
-				UsageProgressBar(
-					title: secondary.label,
-					percent: secondary.usedPercent / 100.0,
-					percentLabel: String(format: "%.0f%% left", secondary.remainingPercent),
-					resetText: secondary.resetText,
-					paceText: snapshot?.secondaryPace?.paceText,
-					etaText: snapshot?.secondaryPace?.etaText,
-					paceStage: snapshot?.secondaryPace?.stage
+					title: weekly.label,
+					percent: weekly.percentUsed,
+					percentLabel: String(format: "%.0f%% left", weekly.percentRemaining * 100),
+					detailText: "",
+					tint: .blue,
+					resetText: weekly.resetText,
+					paceText: weekly.pace?.paceText,
+					etaText: weekly.pace?.etaDescription,
+					paceStage: weekly.pace?.stage
 				)
 			}
-		}
-	}
+		} else {
+			// Fallback: threshold-based bars
+			let tokenLimit = prefs.thresholds
+				.first(where: { $0.type == .tokenCount && $0.isEnabled })?.value ?? 100_000
+			let tokenPercent = tokenLimit > 0 ? Double(usageState.totalTokens) / tokenLimit : 0
+			let tokenRemaining = max(0, 1.0 - tokenPercent)
 
-	/// Fallback progress bar when no rate windows are available (uses token threshold)
-	private var macFallbackTokenBar: some View {
-		let tokenThreshold = prefs.thresholds
-			.first(where: { $0.type == .tokenCount && $0.isEnabled })
-		let limit = tokenThreshold?.value ?? 200_000
-		let used = Double(usageState.totalTokens)
-		let percent = limit > 0 ? used / limit : 0
-		return UsageProgressBar(
-			title: "Tokens Today",
-			percent: percent,
-			percentLabel: "\(formatTokens(usageState.totalTokens)) / \(formatTokens(Int(limit)))",
-			tint: .accentColor
-		)
-	}
+			UsageProgressBar(
+				title: "Tokens",
+				percent: tokenPercent,
+				percentLabel: String(format: "%.0f%% left", tokenRemaining * 100),
+				detailText: "\(formatTokens(usageState.totalTokens)) / \(formatTokens(Int(tokenLimit)))",
+				tint: .green
+			)
 
-	// MARK: - macOS Cost Section
+			let sessionLimit = prefs.thresholds
+				.first(where: { $0.type == .sessionCount && $0.isEnabled })?.value ?? 10
+			let sessionPercent = sessionLimit > 0 ? Double(usageState.activeSessions) / sessionLimit : 0
+			let sessionRemaining = max(0, 1.0 - sessionPercent)
 
-	private var macCostSection: some View {
-		CostSectionView(
-			todayCost: snapshot?.todayCost ?? usageState.dailyCost,
-			todayTokens: snapshot?.todayTokens ?? usageState.totalTokens,
-			last30DaysCost: snapshot?.last30DaysCost,
-			last30DaysTokens: snapshot?.last30DaysTokens
-		)
-	}
-
-	// MARK: - macOS Footer
-
-	private var macFooterSection: some View {
-		VStack(spacing: 0) {
-			macFooterButton(
-				id: "settings",
-				icon: "gear",
-				label: "Settings\u{2026}"
-			) {
-				showPreferences = true
-			}
-
-			macFooterButton(
-				id: "about",
-				icon: "info.circle",
-				label: "About HowlAlert"
-			) {
-				NSApplication.shared.orderFrontStandardAboutPanel(nil)
-			}
-
-			macFooterButton(
-				id: "quit",
-				icon: "xmark.circle",
-				label: "Quit"
-			) {
-				NSApplication.shared.terminate(nil)
-			}
-		}
-		.sheet(isPresented: $showPreferences) {
-			PreferencesView(apiClient: apiClient)
-		}
-	}
-
-	private func macFooterButton(
-		id: String,
-		icon: String,
-		label: String,
-		action: @escaping () -> Void
-	) -> some View {
-		Button(action: action) {
-			HStack(spacing: 8) {
-				Image(systemName: icon)
-					.font(.footnote)
-					.frame(width: 16, alignment: .center)
-				Text(label)
-					.font(.footnote)
-				Spacer()
-			}
-			.contentShape(Rectangle())
-			.padding(.horizontal, 16)
-			.padding(.vertical, 6)
-			.background(
-				RoundedRectangle(cornerRadius: 4, style: .continuous)
-					.fill(hoveredFooterItem == id ? Color.primary.opacity(0.08) : Color.clear)
+			UsageProgressBar(
+				title: "Sessions",
+				percent: sessionPercent,
+				percentLabel: String(format: "%.0f%% left", sessionRemaining * 100),
+				detailText: "\(usageState.activeSessions) / \(Int(sessionLimit))",
+				tint: .blue
 			)
 		}
-		.buttonStyle(.plain)
-		.onHover { isHovered in
-			hoveredFooterItem = isHovered ? id : nil
+	}
+
+	private func macFooterRow(id: String, icon: String, label: String, action: @escaping () -> Void) -> some View {
+		Button(action: action) {
+			HStack(spacing: 6) {
+				Image(systemName: icon).frame(width: 16).imageScale(.small)
+				Text(label)
+				Spacer()
+			}
+			.foregroundStyle(.primary)
+			.padding(.horizontal, 12)
+			.padding(.vertical, 5)
+			.contentShape(Rectangle())
+			.background(hoveredFooterItem == id ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 4))
 		}
+		.buttonStyle(.plain)
+		.onHover { hovering in hoveredFooterItem = hovering ? id : nil }
 	}
 	#endif
 
@@ -263,17 +244,61 @@ struct DashboardView: View {
 		NavigationStack {
 			List {
 				if isDemo {
-					Section {
-						demoBanner
-							.listRowBackground(Color.orange.opacity(0.05))
+					Section { demoBanner }
+				}
+
+				Section("Rate Limits") {
+					let tokenLimit = prefs.thresholds
+						.first(where: { $0.type == .tokenCount && $0.isEnabled })?.value ?? 100_000
+					let tokenPercent = tokenLimit > 0 ? Double(usageState.totalTokens) / tokenLimit : 0
+					let tokenRemaining = max(0, 1.0 - tokenPercent)
+
+					UsageProgressBar(
+						title: "Tokens",
+						percent: tokenPercent,
+						percentLabel: String(format: "%.0f%% left", tokenRemaining * 100),
+						detailText: "\(formatTokens(usageState.totalTokens)) / \(formatTokens(Int(tokenLimit)))",
+						tint: .green
+					)
+
+					let sessionLimit = prefs.thresholds
+						.first(where: { $0.type == .sessionCount && $0.isEnabled })?.value ?? 10
+					let sessionPercent = sessionLimit > 0 ? Double(usageState.activeSessions) / sessionLimit : 0
+					let sessionRemaining = max(0, 1.0 - sessionPercent)
+
+					UsageProgressBar(
+						title: "Sessions",
+						percent: sessionPercent,
+						percentLabel: String(format: "%.0f%% left", sessionRemaining * 100),
+						detailText: "\(usageState.activeSessions) / \(Int(sessionLimit))",
+						tint: .blue
+					)
+				}
+
+				Section("Cost") {
+					HStack {
+						Text("Today")
+						Spacer()
+						Text(String(format: "$%.2f \u{00b7} %@ tokens", usageState.dailyCost, formatTokens(usageState.totalTokens)))
+							.foregroundStyle(.secondary)
+					}
+					HStack {
+						Text("Last 30 Days")
+						Spacer()
+						Text("\u{2014}")
+							.foregroundStyle(.secondary)
 					}
 				}
-				Section("Today's Usage") {
-					statsSection
+
+				Section("Your Plan") {
+					HStack {
+						Text("Claude \(prefs.selectedPlan.displayName)")
+						Spacer()
+						Text(String(format: "$%.0f/mo", prefs.selectedPlan.monthlyPrice))
+							.foregroundStyle(.secondary)
+					}
 				}
-				Section("Threshold Status") {
-					thresholdStatusSection
-				}
+
 				if let err = errorMessage {
 					Section {
 						Text(err)
@@ -285,9 +310,7 @@ struct DashboardView: View {
 			.navigationTitle("HowlAlert")
 			.toolbar {
 				ToolbarItem(placement: .topBarTrailing) {
-					Button {
-						showPreferences = true
-					} label: {
+					Button { showPreferences = true } label: {
 						Label("Settings", systemImage: "gear")
 					}
 				}
@@ -296,7 +319,7 @@ struct DashboardView: View {
 						ProgressView()
 					} else if !isDemo {
 						Button {
-							Task { await loadData() }
+							loadData()
 						} label: {
 							Label("Refresh", systemImage: "arrow.clockwise")
 						}
@@ -304,11 +327,11 @@ struct DashboardView: View {
 				}
 			}
 			.sheet(isPresented: $showPreferences) {
-				PreferencesView(apiClient: apiClient)
+				PreferencesView()
 			}
 			.refreshable {
 				guard !isDemo else { return }
-				await loadData()
+				loadData()
 			}
 		}
 	}
@@ -319,19 +342,68 @@ struct DashboardView: View {
 	#if os(watchOS)
 	private var watchDashboard: some View {
 		ScrollView {
-			VStack(spacing: 8) {
+			VStack(spacing: 16) {
 				if isDemo {
 					Text("Demo")
 						.font(.caption2)
 						.foregroundStyle(.orange)
 				}
-				statRow(label: "Tokens", value: formatTokens(usageState.totalTokens))
-				statRow(label: "Sessions", value: "\(usageState.activeSessions)")
-				thresholdIndicator
+
+				// Concentric rings
+				ZStack {
+					// Outer ring track - Session (green)
+					Circle()
+						.stroke(.green.opacity(0.2), lineWidth: 10)
+						.frame(width: 100, height: 100)
+
+					// Outer ring - Session
+					Circle()
+						.trim(from: 0, to: sessionPercent)
+						.stroke(.green, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+						.rotationEffect(.degrees(-90))
+						.frame(width: 100, height: 100)
+
+					// Inner ring track - Weekly (blue)
+					Circle()
+						.stroke(.blue.opacity(0.2), lineWidth: 10)
+						.frame(width: 76, height: 76)
+
+					// Inner ring - Weekly
+					Circle()
+						.trim(from: 0, to: weeklyPercent)
+						.stroke(.blue, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+						.rotationEffect(.degrees(-90))
+						.frame(width: 76, height: 76)
+				}
+
+				// Labels
+				HStack(spacing: 16) {
+					Label("Session", systemImage: "circle.fill")
+						.font(.caption2)
+						.foregroundStyle(.green)
+					Label("Weekly", systemImage: "circle.fill")
+						.font(.caption2)
+						.foregroundStyle(.blue)
+				}
+
+				// Cost
+				Text(String(format: "$%.2f today", usageState.dailyCost))
+					.font(.caption)
+					.foregroundStyle(.secondary)
 			}
 			.padding()
 		}
 		.navigationTitle("HowlAlert")
+	}
+
+	private var sessionPercent: Double {
+		let limit = prefs.thresholds.first(where: { $0.type == .tokenCount && $0.isEnabled })?.value ?? 100_000
+		return min(Double(usageState.totalTokens) / max(limit, 1), 1.0)
+	}
+
+	private var weeklyPercent: Double {
+		let limit = prefs.thresholds.first(where: { $0.type == .sessionCount && $0.isEnabled })?.value ?? 10
+		return min(Double(usageState.activeSessions) / max(limit, 1), 1.0)
 	}
 	#endif
 
@@ -341,120 +413,13 @@ struct DashboardView: View {
 		HStack {
 			Image(systemName: "exclamationmark.circle.fill")
 				.foregroundStyle(.orange)
-			Text("Demo — connect your Mac to see live data")
+			Text("Demo \u{2014} connect your Mac to see live data")
 				.font(.caption)
 				.foregroundStyle(.orange)
 		}
 		.padding(.horizontal, 12)
 		.padding(.vertical, 6)
 		.background(.orange.opacity(0.1), in: Capsule())
-	}
-
-
-	private var statsSection: some View {
-		VStack(spacing: 8) {
-			statRow(
-				label: "Tokens Today",
-				value: formatTokens(usageState.totalTokens)
-			)
-			statRow(
-				label: "Sessions Today",
-				value: "\(usageState.activeSessions)"
-			)
-		}
-	}
-
-	private var thresholdStatusSection: some View {
-		VStack(spacing: 6) {
-			ForEach(prefs.thresholds.filter { $0.isEnabled && $0.type != .dailyCost }) { threshold in
-				thresholdRow(threshold)
-			}
-		}
-	}
-
-	private var thresholdIndicator: some View {
-		let status = overallThresholdStatus
-		return Circle()
-			.fill(status.color)
-			.frame(width: 16, height: 16)
-			.overlay(
-				Circle().stroke(status.color.opacity(0.3), lineWidth: 4)
-			)
-	}
-
-	private func statRow(label: String, value: String) -> some View {
-		HStack {
-			Text(label)
-				.font(.subheadline)
-				.foregroundStyle(.secondary)
-			Spacer()
-			Text(value)
-				.font(.subheadline)
-				.fontWeight(.medium)
-		}
-	}
-
-	private func thresholdRow(_ threshold: AlertThreshold) -> some View {
-		let status = thresholdStatus(for: threshold)
-		return HStack(spacing: 6) {
-			Circle()
-				.fill(status.color)
-				.frame(width: 8, height: 8)
-			Text(threshold.type.displayName)
-				.font(.caption)
-				.foregroundStyle(.secondary)
-			Spacer()
-			Text(status.label)
-				.font(.caption)
-				.foregroundStyle(status.color)
-		}
-	}
-
-	// MARK: - Threshold Logic
-
-	private enum ThresholdStatus {
-		case ok, warning, exceeded
-
-		var color: Color {
-			switch self {
-			case .ok: .green
-			case .warning: .yellow
-			case .exceeded: .red
-			}
-		}
-
-		var label: String {
-			switch self {
-			case .ok: "OK"
-			case .warning: "Near limit"
-			case .exceeded: "Exceeded"
-			}
-		}
-	}
-
-	private func thresholdStatus(for threshold: AlertThreshold) -> ThresholdStatus {
-		let current: Double
-		switch threshold.type {
-		case .tokenCount:
-			current = Double(usageState.totalTokens)
-		case .sessionCount:
-			current = Double(usageState.activeSessions)
-		case .dailyCost:
-			current = usageState.dailyCost
-		}
-		let ratio = threshold.value > 0 ? current / threshold.value : 0
-		if ratio >= 1.0 { return .exceeded }
-		if ratio >= 0.8 { return .warning }
-		return .ok
-	}
-
-	private var overallThresholdStatus: ThresholdStatus {
-		let statuses = prefs.thresholds
-			.filter { $0.isEnabled }
-			.map { thresholdStatus(for: $0) }
-		if statuses.contains(.exceeded) { return .exceeded }
-		if statuses.contains(.warning) { return .warning }
-		return .ok
 	}
 
 	// MARK: - Data Loading
@@ -469,70 +434,44 @@ struct DashboardView: View {
 			recentEvents: []
 		)
 		#if os(macOS)
-		activeSession = ActiveClaudeSession(
-			projectPath: "/Users/demo/\(DemoData.projectName)",
-			projectName: DemoData.projectName,
-			lastActiveDate: Date()
-		)
 		snapshot = ProviderSnapshot(
 			providerName: "Claude",
-			planName: "Max",
+			planName: prefs.selectedPlan.displayName,
 			updatedAt: Date(),
-			primary: nil,
-			secondary: nil,
 			todayCost: DemoData.dailyCost,
-			todayTokens: DemoData.tokensUsed,
-			last30DaysCost: 91.23,
-			last30DaysTokens: 2_100_000
+			todayTokens: DemoData.tokensUsed
 		)
 		#endif
 	}
 
-	private func loadData() async {
+	private func loadData() {
 		isLoading = true
 		errorMessage = nil
-		defer { isLoading = false }
 
 		do {
 			#if os(macOS)
-			if let url = StatsCacheParser.defaultURL() {
-				let cache = try StatsCacheParser.parse(from: url)
-				let cost = cache.totalCost ?? 0
-				let tokens = cache.totalTokens ?? 0
-				let sessions = cache.sessionCount ?? 0
-				usageState = UsageState(
-					dailyCost: cost,
-					totalInputTokens: tokens,
-					totalOutputTokens: 0,
-					activeSessions: sessions,
-					lastUpdated: Date(),
-					recentEvents: []
-				)
-				// Populate snapshot from cache — rate windows will be nil until
-				// ClaudeUsageFetcher is built; dashboard shows fallback bars.
+			try SandboxedFileAccess.shared.resolveAndAccess { claudeURL in
+				usageState = ConversationScanner.scan(from: claudeURL)
 				snapshot = ProviderSnapshot(
 					providerName: "Claude",
-					planName: nil,
+					planName: prefs.selectedPlan.displayName,
 					updatedAt: Date(),
-					primary: nil,
-					secondary: nil,
-					todayCost: cost,
-					todayTokens: tokens
+					todayCost: usageState.dailyCost,
+					todayTokens: usageState.totalTokens
 				)
+				CloudSyncManager.shared.saveUsageState(usageState, plan: prefs.selectedPlan)
 			}
 			#else
-			let events = try await apiClient.getHistory(limit: 50)
-			let todayEvents = events.filter { Calendar.current.isDateInToday($0.timestamp) }
-			let totalTokens = todayEvents.reduce(0) { $0 + $1.inputTokens + $1.outputTokens }
-			let totalCost = todayEvents.reduce(0.0) { $0 + $1.costUSD }
-			usageState = UsageState(
-				dailyCost: totalCost,
-				totalInputTokens: totalTokens,
-				totalOutputTokens: 0,
-				activeSessions: Set(todayEvents.compactMap { $0.sessionId }).count,
-				lastUpdated: Date(),
-				recentEvents: todayEvents
-			)
+			if let today = CloudSyncManager.shared.fetchTodayUsage() {
+				usageState = UsageState(
+					dailyCost: today.totalCostUSD,
+					totalInputTokens: today.totalInputTokens,
+					totalOutputTokens: today.totalOutputTokens,
+					activeSessions: today.sessionCount,
+					lastUpdated: today.updatedAt,
+					recentEvents: []
+				)
+			}
 			#endif
 
 			// Relay updated stats to Apple Watch
@@ -553,6 +492,8 @@ struct DashboardView: View {
 		} catch {
 			errorMessage = error.localizedDescription
 		}
+
+		isLoading = false
 	}
 
 	// MARK: - Helpers
@@ -587,7 +528,7 @@ private extension ThresholdType {
 }
 
 #Preview("Live") {
-	DashboardView(apiClient: APIClient())
+	DashboardView()
 }
 
 #Preview("Demo") {

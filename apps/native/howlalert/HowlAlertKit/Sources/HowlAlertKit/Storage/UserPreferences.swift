@@ -33,6 +33,7 @@ public final class UserPreferences: ObservableObject {
         self.notificationsEnabled = suite.bool(forKey: "notificationsEnabled")
         self.selectedPlan = ClaudePlan(rawValue: suite.string(forKey: "selectedPlan") ?? "") ?? .free
         self.thresholds = UserPreferences.loadThresholds(from: suite)
+        self.selectedPlan = ClaudePlan(rawValue: suite.string(forKey: "selectedPlan") ?? "") ?? .pro
     }
 
     private static func loadThresholds(from defaults: UserDefaults) -> [AlertThreshold] {

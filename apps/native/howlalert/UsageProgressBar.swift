@@ -2,167 +2,117 @@
 //  UsageProgressBar.swift
 //  howlalert
 //
-//  Created by Nathanial Henniges on 3/18/26.
+//  Created by Nathanial Henniges on 3/17/26.
 //
 
 import SwiftUI
 import HowlAlertKit
 
-/// Progress bar matching CodexBar's MetricRow pattern:
-/// Title (.body .medium) -> Capsule bar (6pt) -> HStack with percent left + detail right (.footnote)
-/// Optionally shows pace text and ETA below the bar.
 struct UsageProgressBar: View {
 	let title: String
-	let percent: Double
-	let percentLabel: String
-	let detailText: String?
-	let tint: Color
-	let resetText: String?
-	let paceText: String?
-	let etaText: String?
-	let paceStage: UsagePace.Stage?
-
-	init(
-		title: String,
-		percent: Double,
-		percentLabel: String,
-		detailText: String? = nil,
-		tint: Color = .accentColor,
-		resetText: String? = nil,
-		paceText: String? = nil,
-		etaText: String? = nil,
-		paceStage: UsagePace.Stage? = nil
-	) {
-		self.title = title
-		self.percent = percent
-		self.percentLabel = percentLabel
-		self.detailText = detailText
-		self.tint = tint
-		self.resetText = resetText
-		self.paceText = paceText
-		self.etaText = etaText
-		self.paceStage = paceStage
-	}
-
-	private var clamped: Double {
-		min(1.0, max(0, percent))
-	}
+	let percent: Double          // 0.0 to 1.0
+	let percentLabel: String     // "66% left"
+	let detailText: String       // "145.2K / 200.0K"
+	var tint: Color = .accentColor
+	var resetText: String? = nil   // "Resets in 2h 58m"
+	var paceText: String? = nil    // "3% in deficit"
+	var etaText: String? = nil     // "Runs out in 4d 5h"
+	var paceStage: UsagePace.Stage? = nil
 
 	private var barColor: Color {
-		if let stage = paceStage {
-			switch stage {
-			case .comfortable: return .green
-			case .onTrack: return .green
-			case .moderate: return .yellow
-			case .concerning: return .orange
-			case .critical: return .red
-			}
+		switch paceStage {
+		case .comfortable, .onTrack:
+			return tint
+		case .moderate:
+			return .yellow
+		case .concerning:
+			return .orange
+		case .critical:
+			return .red
+		case nil:
+			return percent >= 1.0 ? .red : tint
 		}
-		if percent >= 1.0 { return .red }
-		if percent >= 0.8 { return .orange }
-		return tint
-	}
-
-	private var trackColor: Color {
-		#if os(macOS)
-		Color(nsColor: .separatorColor).opacity(0.3)
-		#else
-		Color.gray.opacity(0.25)
-		#endif
 	}
 
 	var body: some View {
-		VStack(alignment: .leading, spacing: 6) {
-			Text(title)
-				.font(.body)
-				.fontWeight(.medium)
+		VStack(alignment: .leading, spacing: 4) {
+			HStack {
+				Text(title)
+					.font(.subheadline)
+					.fontWeight(.medium)
+				Spacer()
+				Text(detailText)
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
 
-			GeometryReader { proxy in
+			GeometryReader { geometry in
 				ZStack(alignment: .leading) {
-					Capsule()
-						.fill(trackColor)
+					RoundedRectangle(cornerRadius: 3)
+						.fill(Color.primary.opacity(0.1))
+						.frame(height: 6)
 
-					Capsule()
+					RoundedRectangle(cornerRadius: 3)
 						.fill(barColor)
-						.frame(width: max(0, proxy.size.width * clamped))
+						.frame(width: max(0, geometry.size.width * min(percent, 1.0)), height: 6)
 				}
 			}
 			.frame(height: 6)
 
-			HStack(alignment: .firstTextBaseline) {
+			HStack {
 				Text(percentLabel)
-					.font(.footnote)
-					.lineLimit(1)
+					.font(.caption)
+					.foregroundStyle(.secondary)
 				Spacer()
-				if let reset = resetText {
-					Text(reset)
-						.font(.footnote)
+				if let resetText = resetText {
+					Text(resetText)
+						.font(.caption)
 						.foregroundStyle(.secondary)
-						.lineLimit(1)
-				} else if let detail = detailText {
-					Text(detail)
-						.font(.footnote)
-						.foregroundStyle(.secondary)
-						.lineLimit(1)
 				}
 			}
 
 			if paceText != nil || etaText != nil {
-				HStack(alignment: .firstTextBaseline) {
-					if let pace = paceText {
-						Text(pace)
-							.font(.footnote)
-							.foregroundStyle(.primary)
-							.lineLimit(1)
+				HStack {
+					if let paceText = paceText {
+						Text(paceText)
+							.font(.caption)
+							.foregroundStyle(.orange)
 					}
 					Spacer()
-					if let eta = etaText {
-						Text(eta)
-							.font(.footnote)
-							.foregroundStyle(.secondary)
-							.lineLimit(1)
+					if let etaText = etaText {
+						Text(etaText)
+							.font(.caption)
+							.foregroundStyle(.orange)
 					}
 				}
 			}
 		}
-		.frame(maxWidth: .infinity, alignment: .leading)
-		.animation(.easeInOut(duration: 0.3), value: percent)
 	}
 }
 
 #Preview {
-	VStack(spacing: 12) {
+	VStack(spacing: 20) {
 		UsageProgressBar(
-			title: "5-hour usage",
-			percent: 0.73,
-			percentLabel: "27% left",
-			detailText: "Resets in 2h 14m",
-			tint: .green
+			title: "Session",
+			percent: 0.34,
+			percentLabel: "66% left",
+			detailText: "145.2K / 200.0K",
+			tint: .green,
+			resetText: "Resets in 2h 58m"
 		)
+
 		UsageProgressBar(
 			title: "Weekly",
 			percent: 0.33,
 			percentLabel: "67% left",
-			tint: .green,
-			resetText: "Resets in 4d 2h",
+			detailText: "1.2M / 3.6M",
+			tint: .blue,
+			resetText: "Resets in 4d 5h",
 			paceText: "3% in deficit",
-			etaText: "Runs out in 4d 5h",
-			paceStage: .concerning
-		)
-		UsageProgressBar(
-			title: "Daily usage",
-			percent: 0.85,
-			percentLabel: "15% left",
-			detailText: "Resets tomorrow",
-			tint: .orange
-		)
-		UsageProgressBar(
-			title: "Monthly limit",
-			percent: 1.1,
-			percentLabel: "Exceeded",
-			detailText: "Resets Apr 1"
+			etaText: "Runs out 4d 5h",
+			paceStage: .moderate
 		)
 	}
-	.padding(16)
+	.padding()
 	.frame(width: 280)
 }
