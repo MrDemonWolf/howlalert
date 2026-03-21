@@ -21,12 +21,17 @@ public final class UserPreferences: ObservableObject {
         didSet { defaults.set(notificationsEnabled, forKey: "notificationsEnabled") }
     }
 
+    @Published public var selectedPlan: ClaudePlan {
+        didSet { defaults.set(selectedPlan.rawValue, forKey: "selectedPlan") }
+    }
+
     private init() {
         let suite = UserDefaults(suiteName: "group.com.mrdemonwolf.howlalert") ?? .standard
         self.defaults = suite
         self.isDemoMode = suite.bool(forKey: "isDemoMode")
         self.launchAtLogin = suite.bool(forKey: "launchAtLogin")
         self.notificationsEnabled = suite.bool(forKey: "notificationsEnabled")
+        self.selectedPlan = ClaudePlan(rawValue: suite.string(forKey: "selectedPlan") ?? "") ?? .free
         self.thresholds = UserPreferences.loadThresholds(from: suite)
     }
 
