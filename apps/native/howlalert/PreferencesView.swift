@@ -15,8 +15,6 @@ import UIKit
 // MARK: - Preferences View
 
 struct PreferencesView: View {
-	let apiClient: APIClient
-
 	@StateObject private var prefs = UserPreferences.shared
 	@StateObject private var notificationManager = NotificationManager.shared
 	@Environment(\.dismiss) private var dismiss
@@ -30,7 +28,6 @@ struct PreferencesView: View {
 
 	// MARK: Save feedback
 
-	@State private var isSaving: Bool = false
 	@State private var saveResult: SaveResult? = nil
 
 	private enum SaveResult {
@@ -68,9 +65,12 @@ struct PreferencesView: View {
 			Divider()
 
 			VStack(alignment: .leading, spacing: 16) {
+				claudePlanSection
+				hookSetupSection
 				notificationSection
 				thresholdSection
-				demoModeSection
+				proSection
+				generalSection
 				feedbackSection
 			}
 			.padding(12)
@@ -82,10 +82,9 @@ struct PreferencesView: View {
 				Button("Cancel") { dismiss() }
 					.keyboardShortcut(.cancelAction)
 				Button("Save") {
-					Task { await save() }
+					save()
 				}
 				.keyboardShortcut(.defaultAction)
-				.disabled(isSaving)
 			}
 			.padding(12)
 		}
@@ -100,9 +99,11 @@ struct PreferencesView: View {
 	private var iOSLayout: some View {
 		NavigationStack {
 			Form {
+				claudePlanSection
 				notificationSection
 				thresholdSection
-				demoModeSection
+				proSection
+				generalSection
 				feedbackSection
 			}
 			.navigationTitle("Preferences")
@@ -112,12 +113,8 @@ struct PreferencesView: View {
 					Button("Cancel") { dismiss() }
 				}
 				ToolbarItem(placement: .confirmationAction) {
-					if isSaving {
-						ProgressView()
-					} else {
-						Button("Save") {
-							Task { await save() }
-						}
+					Button("Save") {
+						save()
 					}
 				}
 			}
@@ -126,7 +123,79 @@ struct PreferencesView: View {
 	}
 	#endif
 
-	// MARK: - Shared Sub-Views
+	// MARK: - Claude Plan Section
+
+	private var claudePlanSection: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("Claude Plan")
+				.font(.subheadline)
+				.fontWeight(.semibold)
+				.foregroundStyle(.secondary)
+
+			VStack(alignment: .leading, spacing: 8) {
+				Picker("Plan", selection: $prefs.selectedPlan) {
+					ForEach(ClaudePlan.allCases, id: \.self) { plan in
+						Text(plan.displayName).tag(plan)
+					}
+				}
+				#if os(macOS)
+				.pickerStyle(.menu)
+				#endif
+
+				HStack {
+					Text("Monthly Price")
+					Spacer()
+					Text(String(format: "$%.2f", prefs.selectedPlan.monthlyPrice))
+						.foregroundStyle(.secondary)
+				}
+			}
+			.padding(10)
+			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+		}
+	}
+
+	// MARK: - Hook Setup Section (macOS only)
+
+	#if os(macOS)
+	private var hookSetupSection: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("Claude Code Hook")
+				.font(.subheadline)
+				.fontWeight(.semibold)
+				.foregroundStyle(.secondary)
+
+			VStack(alignment: .leading, spacing: 8) {
+				Text("Add a hook to Claude Code for real-time usage tracking.")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+
+				Button("Copy Hook Command") {
+					let hookPath = Bundle.main.path(forResource: "howlalert-hook", ofType: nil) ?? "/Applications/HowlAlert.app/Contents/Resources/howlalert-hook"
+					let hookJSON = """
+					{
+					  "hooks": {
+					    "Notification": [{
+					      "type": "command",
+					      "command": "\(hookPath)"
+					    }]
+					  }
+					}
+					"""
+					NSPasteboard.general.clearContents()
+					NSPasteboard.general.setString(hookJSON, forType: .string)
+				}
+
+				Text("Paste into ~/.claude/settings.json")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
+			.padding(10)
+			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+		}
+	}
+	#endif
+
+	// MARK: - Notifications Section
 
 	private var notificationSection: some View {
 		VStack(alignment: .leading, spacing: 12) {
@@ -202,24 +271,7 @@ struct PreferencesView: View {
 		}
 	}
 
-	private var demoModeSection: some View {
-		VStack(alignment: .leading, spacing: 12) {
-			Text("Demo Mode")
-				.font(.subheadline)
-				.fontWeight(.semibold)
-				.foregroundStyle(.secondary)
-
-			VStack(alignment: .leading, spacing: 6) {
-				Toggle("Demo Mode", isOn: $prefs.isDemoMode)
-					.toggleStyle(.switch)
-				Text("Show sample data for demonstration purposes")
-					.font(.caption)
-					.foregroundStyle(.secondary)
-			}
-			.padding(10)
-			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
-		}
-	}
+	// MARK: - Threshold Section
 
 	private var thresholdSection: some View {
 		VStack(alignment: .leading, spacing: 12) {
@@ -277,6 +329,53 @@ struct PreferencesView: View {
 			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
 		}
 	}
+
+	// MARK: - HowlAlert Pro Section
+
+	private var proSection: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("HowlAlert Pro")
+				.font(.subheadline)
+				.fontWeight(.semibold)
+				.foregroundStyle(.secondary)
+
+			VStack(alignment: .leading, spacing: 8) {
+				Label("Upgrade to Pro", systemImage: "star.fill")
+					.foregroundStyle(.orange)
+				Text("Widgets, Live Activities, usage history & more")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+				// RevenueCat PaywallView will go here later
+				Button("Coming Soon") {}
+					.disabled(true)
+			}
+			.padding(10)
+			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+		}
+	}
+
+	// MARK: - General Section (Demo Mode + Claude Directory on macOS)
+
+	private var generalSection: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("General")
+				.font(.subheadline)
+				.fontWeight(.semibold)
+				.foregroundStyle(.secondary)
+
+			VStack(alignment: .leading, spacing: 6) {
+				Toggle("Demo Mode", isOn: $prefs.isDemoMode)
+					.toggleStyle(.switch)
+				Text("Show sample data for demonstration purposes")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
+			.padding(10)
+			.background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+		}
+	}
+
+	// MARK: - Feedback Section
 
 	@ViewBuilder
 	private var feedbackSection: some View {
@@ -350,26 +449,17 @@ struct PreferencesView: View {
 		return result
 	}
 
-	private func save() async {
-		isSaving = true
+	private func save() {
 		saveResult = nil
-		defer { isSaving = false }
 
 		let thresholds = buildThresholds()
 
 		// Persist locally
 		prefs.thresholds = thresholds
-
-		// Push to API
-		do {
-			try await apiClient.updatePreferences(thresholds: thresholds)
-			saveResult = .success
-		} catch {
-			saveResult = .failure(error.localizedDescription)
-		}
+		saveResult = .success
 	}
 }
 
 #Preview {
-	PreferencesView(apiClient: APIClient())
+	PreferencesView()
 }
