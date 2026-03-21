@@ -165,7 +165,7 @@ struct DashboardView: View {
 				}
 			}
 			.sheet(isPresented: $showPreferences) {
-				PreferencesView(apiClient: apiClient)
+				PreferencesView()
 			}
 			.refreshable {
 				guard !isDemo else { return }
@@ -258,7 +258,7 @@ struct DashboardView: View {
 		.padding(.horizontal, 12)
 		.padding(.vertical, 6)
 		.sheet(isPresented: $showPreferences) {
-			PreferencesView(apiClient: apiClient)
+			PreferencesView()
 		}
 	}
 
