@@ -26,6 +26,8 @@ struct DashboardView: View {
 
 	#if os(macOS)
 	@State private var activeSession: ActiveClaudeSession?
+	@State private var snapshot: ProviderSnapshot?
+	@State private var hoveredFooterItem: String?
 	private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 	#endif
 
@@ -69,7 +71,7 @@ struct DashboardView: View {
 	#if os(macOS)
 	private var macDashboard: some View {
 		VStack(spacing: 0) {
-			headerBar
+			macHeaderSection
 
 			Divider()
 
@@ -78,42 +80,179 @@ struct DashboardView: View {
 					demoBanner
 				}
 
-				if let session = activeSession {
-					HStack(spacing: 4) {
-						Image(systemName: "folder.fill")
-							.font(.caption2)
-							.foregroundStyle(.secondary)
-						Text(session.projectName)
-							.font(.caption)
-							.foregroundStyle(.secondary)
-							.lineLimit(1)
-							.truncationMode(.middle)
-						Spacer()
-					}
-				}
-
-				if isLoading && usageState == .empty {
-					ProgressView("Loading…")
+				if isLoading && usageState == .empty && snapshot == nil {
+					ProgressView("Loading\u{2026}")
 						.padding()
 				} else {
-					statsSection
-					thresholdStatusSection
+					macRateWindowsSection
+					Divider()
+					macCostSection
 				}
 
 				if let err = errorMessage {
 					Text(err)
 						.font(.caption)
 						.foregroundStyle(.red)
-						.padding(.horizontal)
 				}
 			}
 			.padding(12)
 
 			Divider()
 
-			footerBar
+			macFooterSection
 		}
-		.frame(width: 280)
+		.frame(width: 300)
+	}
+
+	// MARK: - macOS Header
+
+	private var macHeaderSection: some View {
+		VStack(alignment: .leading, spacing: 2) {
+			HStack(alignment: .firstTextBaseline) {
+				Text(snapshot?.providerName ?? "Claude")
+					.font(.headline)
+					.fontWeight(.semibold)
+				Spacer()
+				if let plan = snapshot?.planName {
+					Text(plan)
+						.font(.subheadline)
+						.foregroundStyle(.secondary)
+				}
+			}
+
+			HStack(alignment: .firstTextBaseline) {
+				Text(lastUpdatedText)
+					.font(.footnote)
+					.foregroundStyle(.secondary)
+				Spacer()
+				if isLoading {
+					ProgressView()
+						.controlSize(.small)
+				}
+			}
+		}
+		.padding(.horizontal, 16)
+		.padding(.vertical, 10)
+	}
+
+	// MARK: - macOS Rate Windows
+
+	private var macRateWindowsSection: some View {
+		VStack(spacing: 12) {
+			if let primary = snapshot?.primary {
+				UsageProgressBar(
+					title: primary.label,
+					percent: primary.usedPercent / 100.0,
+					percentLabel: String(format: "%.0f%% left", primary.remainingPercent),
+					resetText: primary.resetText,
+					paceText: snapshot?.primaryPace?.paceText,
+					etaText: snapshot?.primaryPace?.etaText,
+					paceStage: snapshot?.primaryPace?.stage
+				)
+			} else {
+				macFallbackTokenBar
+			}
+
+			if let secondary = snapshot?.secondary {
+				UsageProgressBar(
+					title: secondary.label,
+					percent: secondary.usedPercent / 100.0,
+					percentLabel: String(format: "%.0f%% left", secondary.remainingPercent),
+					resetText: secondary.resetText,
+					paceText: snapshot?.secondaryPace?.paceText,
+					etaText: snapshot?.secondaryPace?.etaText,
+					paceStage: snapshot?.secondaryPace?.stage
+				)
+			}
+		}
+	}
+
+	/// Fallback progress bar when no rate windows are available (uses token threshold)
+	private var macFallbackTokenBar: some View {
+		let tokenThreshold = prefs.thresholds
+			.first(where: { $0.type == .tokenCount && $0.isEnabled })
+		let limit = tokenThreshold?.value ?? 200_000
+		let used = Double(usageState.totalTokens)
+		let percent = limit > 0 ? used / limit : 0
+		return UsageProgressBar(
+			title: "Tokens Today",
+			percent: percent,
+			percentLabel: "\(formatTokens(usageState.totalTokens)) / \(formatTokens(Int(limit)))",
+			tint: .accentColor
+		)
+	}
+
+	// MARK: - macOS Cost Section
+
+	private var macCostSection: some View {
+		CostSectionView(
+			todayCost: snapshot?.todayCost ?? usageState.dailyCost,
+			todayTokens: snapshot?.todayTokens ?? usageState.totalTokens,
+			last30DaysCost: snapshot?.last30DaysCost,
+			last30DaysTokens: snapshot?.last30DaysTokens
+		)
+	}
+
+	// MARK: - macOS Footer
+
+	private var macFooterSection: some View {
+		VStack(spacing: 0) {
+			macFooterButton(
+				id: "settings",
+				icon: "gear",
+				label: "Settings\u{2026}"
+			) {
+				showPreferences = true
+			}
+
+			macFooterButton(
+				id: "about",
+				icon: "info.circle",
+				label: "About HowlAlert"
+			) {
+				NSApplication.shared.orderFrontStandardAboutPanel(nil)
+			}
+
+			macFooterButton(
+				id: "quit",
+				icon: "xmark.circle",
+				label: "Quit"
+			) {
+				NSApplication.shared.terminate(nil)
+			}
+		}
+		.sheet(isPresented: $showPreferences) {
+			PreferencesView(apiClient: apiClient)
+		}
+	}
+
+	private func macFooterButton(
+		id: String,
+		icon: String,
+		label: String,
+		action: @escaping () -> Void
+	) -> some View {
+		Button(action: action) {
+			HStack(spacing: 8) {
+				Image(systemName: icon)
+					.font(.footnote)
+					.frame(width: 16, alignment: .center)
+				Text(label)
+					.font(.footnote)
+				Spacer()
+			}
+			.contentShape(Rectangle())
+			.padding(.horizontal, 16)
+			.padding(.vertical, 6)
+			.background(
+				RoundedRectangle(cornerRadius: 4, style: .continuous)
+					.fill(hoveredFooterItem == id ? Color.primary.opacity(0.08) : Color.clear)
+			)
+		}
+		.buttonStyle(.plain)
+		.onHover { isHovered in
+			hoveredFooterItem = isHovered ? id : nil
+		}
 	}
 	#endif
 
@@ -211,56 +350,6 @@ struct DashboardView: View {
 		.background(.orange.opacity(0.1), in: Capsule())
 	}
 
-	private var headerBar: some View {
-		HStack {
-			Image(systemName: "bell.badge.fill")
-				.foregroundStyle(Color.accentColor)
-			Text("HowlAlert")
-				.font(.headline)
-			Spacer()
-			if isLoading {
-				ProgressView()
-					.controlSize(.small)
-			} else if !isDemo {
-				Button {
-					Task { await loadData() }
-				} label: {
-					Image(systemName: "arrow.clockwise")
-						.font(.caption)
-				}
-				.buttonStyle(.plain)
-			}
-			Button {
-				showPreferences = true
-			} label: {
-				Image(systemName: "gear")
-					.font(.caption)
-			}
-			.buttonStyle(.plain)
-		}
-		.padding(.horizontal, 12)
-		.padding(.vertical, 8)
-	}
-
-	private var footerBar: some View {
-		HStack {
-			Text(lastUpdatedText)
-				.font(.caption2)
-				.foregroundStyle(.tertiary)
-			Spacer()
-			Button("Settings") {
-				showPreferences = true
-			}
-			.font(.caption)
-			.buttonStyle(.plain)
-			.foregroundStyle(Color.accentColor)
-		}
-		.padding(.horizontal, 12)
-		.padding(.vertical, 6)
-		.sheet(isPresented: $showPreferences) {
-			PreferencesView(apiClient: apiClient)
-		}
-	}
 
 	private var statsSection: some View {
 		VStack(spacing: 8) {
@@ -385,6 +474,17 @@ struct DashboardView: View {
 			projectName: DemoData.projectName,
 			lastActiveDate: Date()
 		)
+		snapshot = ProviderSnapshot(
+			providerName: "Claude",
+			planName: "Max",
+			updatedAt: Date(),
+			primary: nil,
+			secondary: nil,
+			todayCost: DemoData.dailyCost,
+			todayTokens: DemoData.tokensUsed,
+			last30DaysCost: 91.23,
+			last30DaysTokens: 2_100_000
+		)
 		#endif
 	}
 
@@ -397,13 +497,27 @@ struct DashboardView: View {
 			#if os(macOS)
 			if let url = StatsCacheParser.defaultURL() {
 				let cache = try StatsCacheParser.parse(from: url)
+				let cost = cache.totalCost ?? 0
+				let tokens = cache.totalTokens ?? 0
+				let sessions = cache.sessionCount ?? 0
 				usageState = UsageState(
-					dailyCost: cache.totalCost ?? 0,
-					totalInputTokens: cache.totalTokens ?? 0,
+					dailyCost: cost,
+					totalInputTokens: tokens,
 					totalOutputTokens: 0,
-					activeSessions: cache.sessionCount ?? 0,
+					activeSessions: sessions,
 					lastUpdated: Date(),
 					recentEvents: []
+				)
+				// Populate snapshot from cache — rate windows will be nil until
+				// ClaudeUsageFetcher is built; dashboard shows fallback bars.
+				snapshot = ProviderSnapshot(
+					providerName: "Claude",
+					planName: nil,
+					updatedAt: Date(),
+					primary: nil,
+					secondary: nil,
+					todayCost: cost,
+					todayTokens: tokens
 				)
 			}
 			#else

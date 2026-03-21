@@ -1,32 +1,43 @@
 import Foundation
 
-public struct RateWindow: Codable, Sendable, Equatable {
-	public let usedPercent: Double       // 0-100
-	public let windowMinutes: Int?       // e.g. 300 (5h), 10080 (7d)
+/// Represents a usage rate window (e.g. session, daily, weekly) with capacity and reset timing.
+public struct RateWindow: Equatable, Codable, Sendable {
+	public let label: String
+	public let usedPercent: Double
+	public let remainingPercent: Double
 	public let resetsAt: Date?
 	public let resetDescription: String?
 
-	public var remainingPercent: Double { max(0, 100 - usedPercent) }
-	public var isExhausted: Bool { usedPercent >= 99.9 }
+	public init(
+		label: String,
+		usedPercent: Double,
+		remainingPercent: Double,
+		resetsAt: Date? = nil,
+		resetDescription: String? = nil
+	) {
+		self.label = label
+		self.usedPercent = usedPercent
+		self.remainingPercent = remainingPercent
+		self.resetsAt = resetsAt
+		self.resetDescription = resetDescription
+	}
 
-	public var resetCountdown: String? {
+	/// Formatted string for time until reset, e.g. "Resets in 2h 58m"
+	public var resetText: String? {
 		guard let resetsAt else { return resetDescription }
-		let interval = resetsAt.timeIntervalSinceNow
-		guard interval > 0 else { return "Resetting..." }
+		let now = Date()
+		guard resetsAt > now else { return "Resets soon" }
+		let interval = resetsAt.timeIntervalSince(now)
 		let hours = Int(interval) / 3600
 		let minutes = (Int(interval) % 3600) / 60
-		if hours >= 24 {
+		if hours > 24 {
 			let days = hours / 24
 			let remainingHours = hours % 24
 			return "Resets in \(days)d \(remainingHours)h"
 		}
-		return "Resets in \(hours)h \(minutes)m"
-	}
-
-	public init(usedPercent: Double, windowMinutes: Int? = nil, resetsAt: Date? = nil, resetDescription: String? = nil) {
-		self.usedPercent = usedPercent
-		self.windowMinutes = windowMinutes
-		self.resetsAt = resetsAt
-		self.resetDescription = resetDescription
+		if hours > 0 {
+			return "Resets in \(hours)h \(minutes)m"
+		}
+		return "Resets in \(minutes)m"
 	}
 }
