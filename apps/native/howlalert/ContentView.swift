@@ -43,12 +43,12 @@ struct ContentView: View {
 	@ViewBuilder
 	private var authenticatedView: some View {
 		#if os(macOS)
-		DashboardView(apiClient: apiClient, isDemo: prefs.isDemoMode)
+		DashboardView(isDemo: prefs.isDemoMode)
 		#elseif os(iOS)
 		NavigationStack {
 			Group {
 				if isMacConfigured || prefs.isDemoMode {
-					DashboardView(apiClient: apiClient, isDemo: prefs.isDemoMode)
+					DashboardView(isDemo: prefs.isDemoMode)
 				} else {
 					SetupPromptView(showDemo: $prefs.isDemoMode)
 						.navigationTitle("HowlAlert")
@@ -60,7 +60,7 @@ struct ContentView: View {
 		NavigationStack {
 			Group {
 				if isMacConfigured || prefs.isDemoMode {
-					DashboardView(apiClient: apiClient, isDemo: prefs.isDemoMode)
+					DashboardView(isDemo: prefs.isDemoMode)
 				} else {
 					SetupPromptView(showDemo: $prefs.isDemoMode)
 				}
