@@ -21,6 +21,10 @@ public final class UserPreferences: ObservableObject {
         didSet { defaults.set(notificationsEnabled, forKey: "notificationsEnabled") }
     }
 
+    @Published public var selectedPlan: ClaudePlan {
+        didSet { defaults.set(selectedPlan.rawValue, forKey: "selectedPlan") }
+    }
+
     private init() {
         let suite = UserDefaults(suiteName: "group.com.mrdemonwolf.howlalert") ?? .standard
         self.defaults = suite
@@ -28,6 +32,7 @@ public final class UserPreferences: ObservableObject {
         self.launchAtLogin = suite.bool(forKey: "launchAtLogin")
         self.notificationsEnabled = suite.bool(forKey: "notificationsEnabled")
         self.thresholds = UserPreferences.loadThresholds(from: suite)
+        self.selectedPlan = ClaudePlan(rawValue: suite.string(forKey: "selectedPlan") ?? "") ?? .pro
     }
 
     private static func loadThresholds(from defaults: UserDefaults) -> [AlertThreshold] {
