@@ -19,7 +19,7 @@ This is a monorepo with three independent applications. No workspace tooling (np
 ### Core Architecture
 
 1.  **API (`apps/api`)**:
-    *   **Runtime**: Cloudflare Workers (using `bun`).
+    *   **Runtime**: Cloudflare Workers (using `bun`) with `nodejs_compat` enabled.
     *   **Framework**: Hono 4.x with `{ Bindings: Env }` pattern.
     *   **Storage**:
         *   **D1 (`DB`)**: Relational event history (`usage_events` table).
@@ -33,7 +33,11 @@ This is a monorepo with three independent applications. No workspace tooling (np
     *   **Language**: Swift 6.0+, SwiftUI.
     *   **Targets**: macOS (MenuBar app), iOS, watchOS.
     *   **Library**: `HowlAlertKit` (Local SPM package) contains all networking, parsing, and business logic.
-    *   **Mechanism**: Reads Claude Code session data from `~/.claude/projects/` to track token usage and costs.
+    *   **Mechanism**:
+        *   **macOS**: Reads Claude Code session data from `~/.claude/stats-cache.json` to track token usage and costs.
+        *   **Hooks**: `HookEventParser` is designed to parse usage events from stdin, potentially for integration as a Claude Code hook.
+    *   **Security**: Uses Keychain for secure token storage and App Groups (`group.com.mrdemonwolf.howlalert`) for sharing preferences between targets (App, Widget, Complication).
+    *   **Extensions**: Includes a WidgetKit extension for watchOS complications.
 
 3.  **Docs (`apps/docs`)**:
     *   **Framework**: Next.js 15 + React 19.
@@ -51,14 +55,17 @@ This is a monorepo with three independent applications. No workspace tooling (np
 | `session_id` | TEXT | Unique session identifier from Claude |
 | `timestamp` | TEXT | ISO8601 event time |
 | `model` | TEXT | Claude model name |
-| `cost_usd` | REAL | Total cost for this event |
 | `input_tokens` | INTEGER | Prompt tokens |
 | `output_tokens` | INTEGER | Completion tokens |
+| `cache_read_tokens` | INTEGER | Context caching read tokens |
+| `cache_write_tokens` | INTEGER | Context caching write tokens |
+| `cost_usd` | REAL | Total cost for this event |
+| `created_at` | TEXT | Record creation timestamp (DB default) |
 
 ### Threshold Config (KV `prefs:{userId}`)
-*   **Daily Cost**: Trigger when `SUM(cost_usd)` for the current date exceeds the value.
-*   **Token Count**: (Planned) Trigger on cumulative daily tokens.
-*   **Session Count**: (Planned) Trigger on number of active sessions.
+*   **Daily Cost**: Trigger when `SUM(cost_usd)` for the current date exceeds the value. (**Implemented**)
+*   **Token Count**: Trigger on cumulative daily tokens. (**Planned/Native Only**)
+*   **Session Count**: Trigger on number of active sessions. (**Planned/Native Only**)
 
 ---
 
@@ -77,25 +84,32 @@ The root `Makefile` is the primary entry point for development commands.
 *   `make build-mac`: Build the macOS MenuBar application.
 *   `make build-ios`: Build for iOS Simulator.
 *   `make build-watch`: Build for watchOS Simulator.
+*   `make build-all`: Build all three Apple targets.
 *   `make test`: Run Swift tests in the `HowlAlertKit` package.
 *   `make open-xcode`: Open the project in Xcode.
+*   `make update-deps`: Update Swift package dependencies.
+*   `make clean`: Clean build artifacts for Xcode and SPM.
 
 ### Docs
 *   `make docs-dev`: Start Next.js development server with Turbopack.
 *   `make docs-build`: Build the documentation site for production.
 
+### Full CI/CD
+*   `make ci`: Run all CI checks (API typecheck + docs build + Swift tests).
+*   `make prod-build`: Full production build (all Apple targets + worker deploy + docs build).
+
 ---
 
-## CI/CD Processes
+## Key Features & Modes
 
-*   **API**:
-    *   `ci-api.yml`: Runs on PRs to `main`. Performs `bun install`, `bun run lint`, and `bun run typecheck`.
-    *   `deploy-api.yml`: Triggers on push to `main`. Deploys to Cloudflare Workers using Wrangler.
-*   **Native**:
-    *   `ci-native.yml`: Runs `swift test` for the `HowlAlertKit` package.
-*   **Docs**:
-    *   `ci-docs.yml`: Validates the build.
-    *   `deploy-docs.yml`: Deploys to GitHub Pages or designated hosting.
+### Demo Mode
+For Apple App Store review, a **Demo Mode** can be toggled in `PreferencesView`. When enabled:
+*   The dashboard loads static data from `DemoData.swift`.
+*   The macOS MenuBar extra shows a synthetic "Active Claude Session".
+*   Network requests to the API are bypassed or mocked.
+
+### APNs Integration
+The API worker sends push notifications to all registered `deviceToken`s for a `userId` when a threshold is breached. It handles `410 Gone` (stale tokens) by automatically deregistering devices.
 
 ---
 
