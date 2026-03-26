@@ -1,0 +1,20 @@
+name = "howlalert-worker"
+main = "src/index.ts"
+compatibility_date = "2024-10-22"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "HOWLALERT_CONFIG"
+id = "placeholder-config-id"
+preview_id = "placeholder-config-preview-id"
+
+[[kv_namespaces]]
+binding = "HOWLALERT_PUSH_LOG"
+id = "placeholder-push-log-id"
+preview_id = "placeholder-push-log-preview-id"
+
+[vars]
+ENVIRONMENT = "development"

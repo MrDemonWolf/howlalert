@@ -1,68 +1,79 @@
-# HowlAlert Makefile
-# Usage: make help
-
-SCHEME        := howlalert
-PROJECT       := apps/native/howlalert.xcodeproj
-WORKER_DIR    := apps/api
-DOCS_DIR      := apps/docs
-
-.PHONY: help build-mac build-ios build-watch build-all clean test \
-        update-deps open-xcode worker-dev worker-deploy \
-        docs-dev docs-build prod-build ci
+.PHONY: help build-mac build-ios build-watch build-all test clean \
+       worker-dev worker-deploy worker-typecheck \
+       docs-dev docs-build \
+       admin-dev admin-build admin-deploy \
+       test-kit ci open-xcode update-deps
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-build-mac: ## Build macOS target
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) \
-		-destination 'platform=macOS' build | xcbeautify || true
+# ── Native (Swift) ──────────────────────────────────────────────
 
-build-ios: ## Build iOS target
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) \
-		-destination 'generic/platform=iOS Simulator' build | xcbeautify || true
+SCHEME     = howlalert
+XCPROJECT  = apps/native/howlalert.xcodeproj
 
-build-watch: ## Build watchOS target
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) \
-		-destination 'generic/platform=watchOS Simulator' build | xcbeautify || true
+build-mac: ## Build macOS app
+	xcodebuild -project $(XCPROJECT) -scheme $(SCHEME) \
+		-destination 'platform=macOS' build
 
-build-all: build-mac build-ios build-watch ## Build all Apple targets
+build-ios: ## Build iOS app (Simulator)
+	xcodebuild -project $(XCPROJECT) -scheme $(SCHEME) \
+		-destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
 
-test: ## Run Swift package tests
-	cd apps/native/howlalert/HowlAlertKit && swift test
+build-watch: ## Build watchOS app (Simulator)
+	xcodebuild -project $(XCPROJECT) -scheme $(SCHEME) \
+		-destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (46mm)' build
 
-clean: ## Clean build artifacts
-	xcodebuild clean -project $(PROJECT) || true
-	cd apps/native/howlalert/HowlAlertKit && swift package clean
-	rm -rf .build apps/native/.build
+build-all: build-mac build-ios build-watch ## Build all native targets
+
+test-kit: ## Run HowlAlertKit Swift tests
+	cd packages/HowlAlertKit && swift test
+
+test: test-kit ## Run all tests
+
+open-xcode: ## Open Xcode project
+	open $(XCPROJECT)
 
 update-deps: ## Update Swift package dependencies
-	cd apps/native/howlalert/HowlAlertKit && swift package update
+	cd packages/HowlAlertKit && swift package update
 
-open-xcode: ## Open project in Xcode
-	open $(PROJECT)
+# ── Cloudflare Worker ───────────────────────────────────────────
 
-worker-dev: ## Run Cloudflare Worker locally
-	cd $(WORKER_DIR) && bun run dev
+worker-dev: ## Run Worker locally
+	cd worker && bun run dev
 
-worker-deploy: ## Deploy Cloudflare Worker to production
-	cd $(WORKER_DIR) && bun run deploy
+worker-deploy: ## Deploy Worker to production
+	cd worker && bun run deploy
 
-docs-dev: ## Start docs dev server
-	cd $(DOCS_DIR) && bun run dev
+worker-typecheck: ## Typecheck Worker
+	cd worker && bun run typecheck
 
-docs-build: ## Build docs for production
-	cd $(DOCS_DIR) && bun run build
+# ── Docs (Fumadocs) ────────────────────────────────────────────
 
-prod-build: build-all worker-deploy docs-build ## Full production build
+docs-dev: ## Run docs dev server
+	cd apps/docs && bun run dev
 
-ci: ## Run CI checks (typecheck + docs build + Swift test)
-	cd $(WORKER_DIR) && bun install && bun run typecheck
-	cd $(DOCS_DIR) && bun install && bun run build
-	cd apps/native/howlalert/HowlAlertKit && swift test
+docs-build: ## Build docs site
+	cd apps/docs && bun run build
 
-apply-migrations: ## Apply D1 migrations to local dev database
-	cd $(WORKER_DIR) && wrangler d1 migrations apply howlalert-db --local
+# ── Admin Dashboard ─────────────────────────────────────────────
 
-apply-migrations-prod: ## Apply D1 migrations to production database
-	cd $(WORKER_DIR) && wrangler d1 migrations apply howlalert-db --env production
+admin-dev: ## Run admin dev server (port 3001)
+	cd admin && npm run dev -- -p 3001
+
+admin-build: ## Build admin dashboard
+	cd admin && npm run build
+
+admin-deploy: ## Deploy admin to Cloudflare Pages
+	cd admin && npx @cloudflare/next-on-pages && wrangler pages deploy .vercel/output/static
+
+# ── CI ──────────────────────────────────────────────────────────
+
+ci: worker-typecheck docs-build test-kit ## Run CI checks
+
+# ── Cleanup ─────────────────────────────────────────────────────
+
+clean: ## Clean build artifacts
+	cd packages/HowlAlertKit && swift package clean
+	rm -rf worker/node_modules admin/node_modules apps/docs/node_modules

@@ -1,0 +1,33 @@
+---
+title: Usage Guide
+description: Understanding the HowlAlert crit bar, pace system, and notification thresholds.
+---
+
+# Usage Guide
+
+## The Crit Bar
+
+The crit bar is HowlAlert's signature UI element. It shows your current usage as a color-coded progress bar:
+
+| State | Color | Condition |
+|-------|-------|-----------|
+| OK | Cyan | Usage below 60% of limit |
+| Approaching | Amber | Usage 60–85% of limit |
+| Limit Hit | Red | Usage 85% or above |
+| Reset | Green | New billing window started |
+
+## Pace System
+
+The pace system tells you whether you're burning through your limit too fast:
+
+- **On Track** — consuming at an even rate across the window
+- **In Reserve** — consuming slower than average, you have headroom
+- **In Debt** — consuming faster than average, shows estimated runout time
+
+## Notification Thresholds
+
+Configure which thresholds trigger push notifications in Preferences:
+
+- **60%** — approaching your limit
+- **85%** — close to limit
+- **100%** — limit hit or rate-limited

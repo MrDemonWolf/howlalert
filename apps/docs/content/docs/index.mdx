@@ -1,26 +1,33 @@
 ---
-title: Overview
-description: HowlAlert monitors your Claude Code usage and sends push notifications when you approach limits.
+title: Getting Started
+description: Get up and running with HowlAlert — Claude Code usage monitor for Apple platforms.
 ---
 
-> **TL;DR** — HowlAlert is a native Apple app suite (macOS menu bar + iOS + watchOS) that reads Claude Code's local journal files and fires push notifications before you hit usage limits.
+# Getting Started
 
-## What is HowlAlert?
+HowlAlert monitors your Claude Code usage in real-time and sends push notifications to your iPhone and Apple Watch when you're approaching your limits.
 
-HowlAlert bridges Claude Code's local usage data with your Apple devices. It watches the JSONL journal files that Claude Code writes, aggregates token and cost metrics, and delivers real-time push notifications to your iPhone and Apple Watch.
+## How It Works
 
-## How it works
+1. **macOS Menu Bar App** watches your Claude Code session files
+2. **Cloudflare Worker** relays usage alerts via APNs
+3. **iOS/watchOS** receives push notifications with your usage status
 
-1. The **macOS menu bar app** monitors Claude Code's journal directory via FSEvents
-2. Usage events are parsed and aggregated locally in real time
-3. When thresholds are approached, the Mac app sends events to the **Cloudflare Worker**
-4. The Worker persists history in D1 and delivers **APNs push notifications** to registered devices
-5. Your **iPhone and Apple Watch** receive instant alerts
+## Installation
 
-## Key features
+### macOS (Homebrew)
 
-- **Real-time monitoring** — FSEvents-based file watching with sub-second latency
-- **Cross-device alerts** — Native push to iOS and watchOS via APNs
-- **Privacy-first** — Usage data is processed locally; only aggregated events leave your Mac
-- **Complication support** — Current daily cost on your Apple Watch face
-- **Demo mode** — Try the UI without a Claude Code installation
+```bash
+brew install --cask mrdemonwolf/tap/howlalert
+```
+
+### iOS & watchOS
+
+Download from the [App Store](https://apps.apple.com/app/howlalert).
+
+## Setup
+
+1. Install the macOS app and the iOS app
+2. Sign in to the same iCloud account on both devices
+3. Pairing happens automatically via CloudKit
+4. You'll start receiving usage alerts on your iPhone and Apple Watch

@@ -1,24 +1,15 @@
-############################################################
-# macOS
-############################################################
+# ── macOS ────────────────────────────────────────────────────────
 .DS_Store
 Icon\r
 
-############################################################
-# Xcode
-############################################################
+# ── Xcode ────────────────────────────────────────────────────────
 DerivedData/
 build/
-.build/
-
-# User-specific data
 xcuserdata/
 *.xcuserstate
 *.xccheckout
 *.moved-aside
 *.xcscmblueprint
-
-# Project files that should not be committed
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -27,8 +18,6 @@ xcuserdata/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-
-# Build artifacts
 *.o
 *.linkfilelist
 *.hmap
@@ -37,59 +26,49 @@ xcuserdata/
 *.dSYM.zip
 *.xcresult
 *.xcarchive
-
-# Xcode debugger data
 xcdebugger/
-
-# User-specific Xcode data only — shared schemes are committed
 xcshareddata/UserData/
 
-############################################################
-# Swift Package Manager
-############################################################
-/.build/
-/.swiftpm/
+# ── Swift Package Manager ────────────────────────────────────────
+.build/
+.swiftpm/
 Package.pins
+Package.resolved
 
-############################################################
-# Node.js / Cloudflare Worker / Docs
-############################################################
+# ── Node.js / Bun / Cloudflare ───────────────────────────────────
 node_modules/
 .env
 .env.local
-.env.*
+.env.*.local
+.dev.vars
 .wrangler/
 dist/
 .next/
+.vercel/
 .source/
 next-env.d.ts
 out/
+bun.lockb
+package-lock.json
+*.tsbuildinfo
 
-############################################################
-# IDEs
-############################################################
+# ── IDEs ─────────────────────────────────────────────────────────
 .vscode/
 .idea/
-
-############################################################
-# Temporary files
-############################################################
 *~
 *.swp
 *.swo
 
-############################################################
-# Archives
-############################################################
+# ── Archives ─────────────────────────────────────────────────────
 *.zip
 *.tar.gz
 
-############################################################
-# Build output
-############################################################
+# ── Build output ─────────────────────────────────────────────────
 builds/
 
-############################################################
-# Claude Code
-############################################################
-.claude
+# ── Claude Code ──────────────────────────────────────────────────
+.claude/worktrees/
+
+# ── Misc ─────────────────────────────────────────────────────────
+*.log
+*.tmp
