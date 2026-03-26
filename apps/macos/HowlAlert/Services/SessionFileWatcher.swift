@@ -13,6 +13,8 @@ final class SessionFileWatcher: ObservableObject {
 	// MARK: - Published state
 
 	@Published var currentSnapshot: UsageSnapshot?
+	@Published var recentEvents: [JSONLEvent] = []
+	@Published var sessionCount: Int = 0
 	@Published var isWatching = false
 
 	// MARK: - Private
@@ -23,16 +25,27 @@ final class SessionFileWatcher: ObservableObject {
 
 	private let aggregator = UsageAggregator()
 	private var cancellable: AnyCancellable?
+	private var extraCancellables = Set<AnyCancellable>()
 
 	// MARK: - Init
 
 	init(watchPath: String = NSHomeDirectory() + "/.claude/projects") {
 		self.watchPath = watchPath
 
-		// Mirror aggregator snapshot to our published property
+		// Mirror aggregator state to our published properties
 		cancellable = aggregator.$snapshot
 			.receive(on: RunLoop.main)
 			.assign(to: \.currentSnapshot, on: self)
+
+		aggregator.$recentEvents
+			.receive(on: RunLoop.main)
+			.assign(to: \.recentEvents, on: self)
+			.store(in: &extraCancellables)
+
+		aggregator.$sessionCount
+			.receive(on: RunLoop.main)
+			.assign(to: \.sessionCount, on: self)
+			.store(in: &extraCancellables)
 	}
 
 	deinit {
@@ -139,6 +152,9 @@ final class SessionFileWatcher: ObservableObject {
 		fileOffsets[path] = offset + UInt64(newData.count)
 
 		guard let text = String(data: newData, encoding: .utf8) else { return }
+
+		// Track this file as a unique session
+		aggregator.trackSession(fileId: path)
 
 		let lines = text.components(separatedBy: .newlines)
 		for line in lines {

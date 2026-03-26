@@ -3,10 +3,14 @@ import SwiftUI
 @main
 struct HowlAlertApp: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+	@StateObject private var coordinator = AlertCoordinator()
 
 	var body: some Scene {
 		MenuBarExtra("HowlAlert", systemImage: "chart.bar.fill") {
-			MenuBarView()
+			MenuBarView(coordinator: coordinator)
+				.task {
+					await coordinator.start()
+				}
 		}
 		.menuBarExtraStyle(.window)
 	}
