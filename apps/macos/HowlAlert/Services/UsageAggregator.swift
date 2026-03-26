@@ -11,6 +11,8 @@ final class UsageAggregator: ObservableObject {
 	// MARK: - Published state
 
 	@Published var snapshot: UsageSnapshot?
+	@Published var recentEvents: [JSONLEvent] = []
+	@Published var sessionCount: Int = 0
 
 	// MARK: - Running totals
 
@@ -20,6 +22,10 @@ final class UsageAggregator: ObservableObject {
 	private var totalCacheWrite = 0
 	private var lastModel = ""
 	private var sessionStart: Date?
+	private var knownSessionIds: Set<String> = []
+
+	/// Maximum number of recent events to keep for the dashboard.
+	private let recentEventLimit = 20
 
 	// MARK: - Public API
 
@@ -37,6 +43,12 @@ final class UsageAggregator: ObservableObject {
 			sessionStart = event.timestamp ?? Date()
 		}
 
+		// Track recent events (keep last N)
+		recentEvents.append(event)
+		if recentEvents.count > recentEventLimit {
+			recentEvents.removeFirst(recentEvents.count - recentEventLimit)
+		}
+
 		snapshot = UsageSnapshot(
 			inputTokens: totalInput,
 			outputTokens: totalOutput,
@@ -48,6 +60,13 @@ final class UsageAggregator: ObservableObject {
 		)
 	}
 
+	/// Increment session count when a new JSONL file is first encountered.
+	func trackSession(fileId: String) {
+		if knownSessionIds.insert(fileId).inserted {
+			sessionCount += 1
+		}
+	}
+
 	func reset() {
 		totalInput = 0
 		totalOutput = 0
@@ -56,5 +75,8 @@ final class UsageAggregator: ObservableObject {
 		lastModel = ""
 		sessionStart = nil
 		snapshot = nil
+		recentEvents = []
+		sessionCount = 0
+		knownSessionIds = []
 	}
 }

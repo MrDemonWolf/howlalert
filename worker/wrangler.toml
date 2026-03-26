@@ -8,13 +8,13 @@ enabled = true
 
 [[kv_namespaces]]
 binding = "HOWLALERT_CONFIG"
-id = "placeholder-config-id"
-preview_id = "placeholder-config-preview-id"
+id = "17602c7e159d42c99af86eba9ec0cb2a"
+preview_id = "be21c6fa5f484ee8bc2a43ea805ac0e1"
 
 [[kv_namespaces]]
 binding = "HOWLALERT_PUSH_LOG"
-id = "placeholder-push-log-id"
-preview_id = "placeholder-push-log-preview-id"
+id = "9fb93291e9bc4a3c82c0e05834f7d57d"
+preview_id = "f777538780b64ab09e3a222b679e78e4"
 
 [vars]
 ENVIRONMENT = "development"
