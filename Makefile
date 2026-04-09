@@ -11,7 +11,7 @@ help: ## Show this help
 # ── Native (Swift) ──────────────────────────────────────────────
 
 SCHEME     = howlalert
-XCPROJECT  = apps/native/howlalert.xcodeproj
+XCPROJECT  = howlalert.xcodeproj
 
 build-mac: ## Build macOS app
 	xcodebuild -project $(XCPROJECT) -scheme $(SCHEME) \
@@ -34,6 +34,9 @@ test: test-kit ## Run all tests
 
 open-xcode: ## Open Xcode project
 	open $(XCPROJECT)
+
+xcodegen: ## Regenerate Xcode project from project.yml
+	xcodegen generate
 
 update-deps: ## Update Swift package dependencies
 	cd packages/HowlAlertKit && swift package update
