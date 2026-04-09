@@ -1,0 +1,23 @@
+name = "howlalert-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "CONFIG_KV"
+id = "REPLACE_WITH_CONFIG_KV_ID"
+preview_id = "REPLACE_WITH_CONFIG_KV_PREVIEW_ID"
+
+[[kv_namespaces]]
+binding = "PUSH_LOG_KV"
+id = "REPLACE_WITH_PUSH_LOG_KV_ID"
+preview_id = "REPLACE_WITH_PUSH_LOG_KV_PREVIEW_ID"
+
+[vars]
+APNS_BUNDLE_ID = "com.mrdemonwolf.howlalert"
+
+# Secrets (set via `wrangler secret put`):
+# ADMIN_SECRET
+# APNS_KEY_ID
+# APNS_TEAM_ID
+# APNS_PRIVATE_KEY
