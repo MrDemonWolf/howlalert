@@ -10,6 +10,7 @@ HowlAlert is a Claude Code usage monitor for macOS, iOS, and watchOS. It watches
 howlalert/
 ├── apps/
 │   ├── worker/          # Cloudflare Worker — APNs push relay (Hono)
+│   ├── docs/            # Fumadocs site — privacy policy, terms, product docs
 │   ├── macos/           # macOS menu bar app (Xcode)
 │   ├── ios/             # iOS companion app (Xcode)
 │   └── watchos/         # watchOS app (Xcode)
@@ -35,6 +36,7 @@ make build-macos     # Build macOS app via xcodebuild
 make build-ios       # Build iOS app via xcodebuild
 make test-kit        # Run HowlAlertKit Swift tests
 make deploy-worker   # Deploy Cloudflare Worker
+make deploy-docs     # Deploy docs site to Cloudflare Pages
 ```
 
 ## Architecture Overview
@@ -63,6 +65,18 @@ macOS app ──── reads ──────► ~/.claude/projects/*/*.jsonl
 4. **Local plan detection** — Plan tier (Free/Pro/Max5/Max20) is read from `~/.claude/.credentials.json`. No remote config needed.
 5. **Zero-build packages** — `packages/shared-types` exports raw `.ts` files. No build step needed.
 6. **HowlAlertKit** — All Swift business logic (pace engine, threshold notifier, token math, plan detection) lives in the Swift Package at `packages/howlalert-kit/`.
+7. **Zero retention** — No personal data is stored at any layer. GDPR erasure = uninstall the app.
+
+## Compliance & Privacy
+
+- **Privacy policy:** `apps/docs/content/legal/privacy-policy.mdx` — hosted at `https://howlalert.com/privacy`
+- **Terms of service:** `apps/docs/content/legal/terms-of-service.mdx` — hosted at `https://howlalert.com/terms`
+- **Apple privacy manifests:** `apps/ios/HowlAlert/PrivacyInfo.xcprivacy` and `apps/macos/HowlAlert/PrivacyInfo.xcprivacy`
+- **GDPR lawful basis:** Art. 6(1)(b) — contract performance (user installs app to receive push notifications)
+- **Data collected:** APNs device token only (pseudonymous, used solely for push delivery, not linked to identity)
+- **Processors:** Cloudflare Workers (push relay), Apple APNs (delivery), Apple CloudKit (device token sync)
+- **No DPIA required** — low-risk architecture, no special-category data, no large-scale tracking
+- **App Store Connect:** Declare "Device ID → App Functionality, not linked, not tracking" in privacy nutrition label
 
 ## Environment Variables
 
