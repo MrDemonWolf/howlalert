@@ -1,16 +1,23 @@
-import { Hono } from 'hono';
+import { Hono } from 'hono'
 
-import type { Env } from '../types';
-import { adminAuth } from '../middleware/admin-auth';
+import type { Env, PushLogEntry } from '../types'
+import { adminAuth } from '../middleware/admin-auth'
+
+const PUSH_LOG_KEY = 'push-log'
 
 export const pushLogRoutes = new Hono<{ Bindings: Env }>()
   .use('*', adminAuth)
   .get('/', async (c) => {
-    // TODO HAA-24: paginated push log listing
-    const list = await c.env.PUSH_LOG_KV.list({ limit: 100 });
-    return c.json({ entries: list.keys, cursor: list.cursor ?? null });
+    const raw = await c.env.HOWLALERT_PUSH_LOG.get(PUSH_LOG_KEY)
+    const entries: PushLogEntry[] = raw ? JSON.parse(raw) : []
+    return c.json({ entries })
   })
   .get('/stats', async (c) => {
-    // TODO HAA-24: aggregate push stats
-    return c.json({ total: 0, last24h: 0, last7d: 0 });
-  });
+    const raw = await c.env.HOWLALERT_PUSH_LOG.get(PUSH_LOG_KEY)
+    const entries: PushLogEntry[] = raw ? JSON.parse(raw) : []
+    const total = entries.length
+    const successful = entries.filter((e) => e.apnsResult === 'delivered').length
+    const failed = entries.filter((e) => e.apnsResult === 'failed').length
+    const successRate = total === 0 ? 0 : successful / total
+    return c.json({ total, successful, failed, successRate })
+  })
