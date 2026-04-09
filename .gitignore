@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+
+# Turbo
+.turbo
+
+# Build outputs
+dist
+.next
+out
+.open-next
+build
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Wrangler
+.wrangler
+
+# Xcode
+xcuserdata/
+DerivedData/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivex
+!default.perspectivex
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcuserstate
