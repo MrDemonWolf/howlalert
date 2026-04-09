@@ -3,12 +3,9 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { importPKCS8, SignJWT } from 'jose'
 
-import type { Env, PushLogEntry, RemoteConfig } from '../types'
-import { DEFAULT_CONFIG } from '../types'
+import type { Env } from '../types'
 
 const APNS_BUNDLE_ID = 'com.mrdemonwolf.howlalert'
-const PUSH_LOG_KEY = 'push-log'
-const CONFIG_KEY = 'config'
 
 const pushSchema = z.object({
   pairingSecret: z.string().min(1),
@@ -21,14 +18,6 @@ const pushSchema = z.object({
   sessionTokens: z.number().int().min(0).optional().default(0),
   plan: z.string().optional().default('pro'),
 })
-
-function isOffPeak(schedule: RemoteConfig['offPeakSchedule']): boolean {
-  if (!schedule) return false
-  const hour = new Date().getUTCHours()
-  const { startHour, endHour } = schedule
-  if (startHour <= endHour) return hour >= startHour && hour < endHour
-  return hour >= startHour || hour < endHour
-}
 
 function buildAlertBody(
   paceStatus: string,
@@ -65,30 +54,12 @@ async function signApnsJwt(authKey: string, keyId: string, teamId: string): Prom
     .sign(privateKey)
 }
 
-async function appendPushLog(env: Env, entry: PushLogEntry): Promise<void> {
-  const raw = await env.HOWLALERT_PUSH_LOG.get(PUSH_LOG_KEY)
-  const existing: PushLogEntry[] = raw ? JSON.parse(raw) : []
-  const updated = [...existing, entry].slice(-100)
-  await env.HOWLALERT_PUSH_LOG.put(PUSH_LOG_KEY, JSON.stringify(updated))
-}
-
 export const pushRoutes = new Hono<{ Bindings: Env }>().post(
   '/',
   zValidator('json', pushSchema),
   async (c) => {
     const body = c.req.valid('json')
 
-    // Load config
-    const rawConfig = await c.env.HOWLALERT_CONFIG.get(CONFIG_KEY)
-    const config: RemoteConfig = rawConfig ? JSON.parse(rawConfig) : { ...DEFAULT_CONFIG }
-
-    // Calculate effective limit
-    const offPeak = isOffPeak(config.offPeakSchedule)
-    const multiplier = config.multiplier
-    const baseLimit = config.planLimits[body.plan] ?? config.planLimits['pro'] ?? 200000
-    const effectiveLimit = Math.round(baseLimit * multiplier)
-
-    // Build APNs payload
     const alertBody = buildAlertBody(
       body.paceStatus,
       body.usagePercent,
@@ -107,20 +78,15 @@ export const pushRoutes = new Hono<{ Bindings: Env }>().post(
         paceStatus: body.paceStatus,
         pacePercent: body.pacePercent,
         runsOutInSeconds: body.runsOutInSeconds ?? null,
-        effectiveLimit,
-        isOffPeak: offPeak,
-        multiplier,
       },
     }
 
-    // Sign APNs JWT
     const apnsJwt = await signApnsJwt(
       c.env.APNS_AUTH_KEY,
       c.env.APNS_KEY_ID,
       c.env.APNS_TEAM_ID
     )
 
-    // Send to APNs
     const apnsUrl = `https://api.push.apple.com/3/device/${body.deviceToken}`
     const apnsResp = await fetch(apnsUrl, {
       method: 'POST',
@@ -134,24 +100,8 @@ export const pushRoutes = new Hono<{ Bindings: Env }>().post(
       body: JSON.stringify(apnsPayload),
     })
 
-    const apnsStatus = apnsResp.status
-    const apnsResult: PushLogEntry['apnsResult'] = apnsStatus === 200 ? 'delivered' : 'failed'
-
-    // Append to ring buffer log
-    const logEntry: PushLogEntry = {
-      id: crypto.randomUUID(),
-      deviceToken: body.deviceToken,
-      plan: body.plan,
-      usagePercent: body.usagePercent,
-      paceStatus: body.paceStatus,
-      apnsStatus,
-      apnsResult,
-      sentAt: new Date().toISOString(),
-    }
-    await appendPushLog(c.env, logEntry)
-
-    if (apnsResult === 'failed') {
-      return c.json({ error: 'APNs delivery failed', apnsStatus }, 502)
+    if (!apnsResp.ok) {
+      return c.json({ error: 'APNs delivery failed', apnsStatus: apnsResp.status }, 502)
     }
 
     return c.json({ ok: true })

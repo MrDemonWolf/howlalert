@@ -1,4 +1,4 @@
-.PHONY: dev build build-all build-macos build-ios test-kit package-macos clean deploy-worker deploy-admin
+.PHONY: dev build build-all build-macos build-ios test-kit package-macos clean deploy-worker
 
 # ── JS/TS ────────────────────────────────────────────────────────────────────
 
@@ -45,9 +45,6 @@ package-macos:
 
 deploy-worker:
 	bun run deploy --filter=@howlalert/worker
-
-deploy-admin:
-	bun run deploy --filter=@howlalert/admin
 
 # ── Cleanup ──────────────────────────────────────────────────────────────────
 

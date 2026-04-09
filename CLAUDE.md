@@ -9,8 +9,7 @@ HowlAlert is a Claude Code usage monitor for macOS, iOS, and watchOS. It watches
 ```
 howlalert/
 ├── apps/
-│   ├── worker/          # Cloudflare Worker — push relay + admin API (Hono)
-│   ├── admin/           # Next.js admin dashboard
+│   ├── worker/          # Cloudflare Worker — APNs push relay (Hono)
 │   ├── macos/           # macOS menu bar app (Xcode)
 │   ├── ios/             # iOS companion app (Xcode)
 │   └── watchos/         # watchOS app (Xcode)
@@ -26,18 +25,16 @@ howlalert/
 
 ```bash
 bun install          # Install all JS/TS dependencies
-bun dev              # Start all dev servers (worker + admin)
+bun dev              # Start worker dev server
 bun run build        # Build all packages and apps
 bun run typecheck    # Type-check all packages
 bun run test         # Run all tests
 bun run lint         # Lint all packages
-bun run check        # Lint + format check
 
 make build-macos     # Build macOS app via xcodebuild
 make build-ios       # Build iOS app via xcodebuild
 make test-kit        # Run HowlAlertKit Swift tests
 make deploy-worker   # Deploy Cloudflare Worker
-make deploy-admin    # Deploy admin dashboard
 ```
 
 ## Architecture Overview
@@ -46,9 +43,12 @@ make deploy-admin    # Deploy admin dashboard
 macOS app ──── reads ──────► ~/.claude/projects/*/*.jsonl
     │                         (Claude Code session files)
     │
+    ├─ detects plan ────────► ~/.claude/.credentials.json
+    │                         (subscriptionType → ClaudePlan)
+    │
     ├─ calculates pace (HowlAlertKit)
     ├─ CloudKit pairing (device token sync)
-    └─ POST /push ──────────► Cloudflare Worker
+    └─ POST /api/push ──────► Cloudflare Worker
                                     │
                                APNs push API
                                     │
@@ -57,20 +57,19 @@ macOS app ──── reads ──────► ~/.claude/projects/*/*.jsonl
 
 ## Key Design Rules
 
-1. **No database** — The worker is stateless. Config and device tokens live in Cloudflare KV. Push logs are append-only KV entries.
-2. **CloudKit pairing** — Device tokens are synced via CloudKit (no sign-in, no accounts). The macOS app writes tokens; the Worker reads them via a shared KV namespace.
-3. **Stateless Worker** — The worker never stores session data. It receives a push payload, validates the admin secret, calls APNs, and logs the result.
-4. **Zero-build packages** — `packages/shared-types` exports raw `.ts` files. No build step needed — bundlers resolve directly.
-5. **HowlAlertKit** — All Swift business logic (pace engine, threshold notifier, token math) lives in the Swift Package at `packages/howlalert-kit/`.
+1. **No database** — The worker is stateless. Device tokens live in CloudKit. No KV namespaces.
+2. **CloudKit pairing** — Device tokens are synced via CloudKit (no sign-in, no accounts).
+3. **Stateless Worker** — Receives a push payload, signs an APNs JWT, relays to Apple. Nothing stored.
+4. **Local plan detection** — Plan tier (Free/Pro/Max5/Max20) is read from `~/.claude/.credentials.json`. No remote config needed.
+5. **Zero-build packages** — `packages/shared-types` exports raw `.ts` files. No build step needed.
+6. **HowlAlertKit** — All Swift business logic (pace engine, threshold notifier, token math, plan detection) lives in the Swift Package at `packages/howlalert-kit/`.
 
 ## Environment Variables
 
-Worker (set in Cloudflare dashboard or `wrangler.toml` secrets):
-- `ADMIN_SECRET` — shared secret for admin API auth
-- `APNS_KEY_ID` — APNs key ID
-- `APNS_TEAM_ID` — Apple Developer Team ID
-- `APNS_PRIVATE_KEY` — APNs private key (p8 contents)
-- `APNS_BUNDLE_ID` — app bundle ID (com.mrdemonwolf.howlalert)
+Worker secrets (set via `wrangler secret put <NAME>`):
+- `APNS_AUTH_KEY` — PKCS#8 PEM private key (.p8 file contents)
+- `APNS_KEY_ID`   — 10-char key ID from Apple Developer portal
+- `APNS_TEAM_ID`  — 10-char team ID from Apple Developer portal
 
 ## Bundle IDs
 
