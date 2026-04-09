@@ -3,10 +3,6 @@ import HowlAlertKit
 import Combine
 
 /// Coordinates all services: watcher -> aggregator -> pace -> push.
-///
-/// Subscribes to ``SessionFileWatcher`` snapshot changes, recalculates pace
-/// and usage percentage, and fires push notifications through ``PushService``
-/// when thresholds are crossed.
 @MainActor
 final class AlertCoordinator: ObservableObject {
 
@@ -21,18 +17,13 @@ final class AlertCoordinator: ObservableObject {
 	// MARK: - Child services
 
 	let watcher = SessionFileWatcher()
-	let configService = RemoteConfigService()
 	let pushService = PushService()
 	let pairingReader = PairingReader()
 
 	// MARK: - Configuration
 
-	/// Selected plan identifier (matches RemoteConfig.PlanLimits keys).
-	@Published var selectedPlan: String = UserDefaults.standard.string(forKey: "selectedPlan") ?? "pro"
-
-	/// Billing window boundaries (5-hour session window).
-	var windowStart: Date = Date()
-	var windowEnd: Date = Date().addingTimeInterval(5 * 3600)
+	/// Base token limit derived from the detected plan.
+	var baseLimit: Int { ClaudePlan.detectFromDisk().sessionTokenLimit }
 
 	// MARK: - Private
 
@@ -45,7 +36,6 @@ final class AlertCoordinator: ObservableObject {
 		await pairingReader.fetchPairedDevices()
 		isPaired = pairingReader.isPaired
 
-		configService.startRefreshing()
 		watcher.startWatching()
 		isWatching = watcher.isWatching
 
@@ -56,7 +46,6 @@ final class AlertCoordinator: ObservableObject {
 	func stop() {
 		cancellables.removeAll()
 		watcher.stopWatching()
-		configService.stopRefreshing()
 		isWatching = false
 	}
 
@@ -84,45 +73,21 @@ final class AlertCoordinator: ObservableObject {
 			.map { !$0.isEmpty }
 			.assign(to: \.isPaired, on: self)
 			.store(in: &cancellables)
-
-		configService.$effectiveMultiplier
-			.removeDuplicates()
-			.receive(on: RunLoop.main)
-			.sink { [weak self] _ in
-				self?.pushService.resetThresholds()
-			}
-			.store(in: &cancellables)
 	}
 
 	/// Process a new usage snapshot: calculate pace, update UI state, push if needed.
 	private func handleNewSnapshot(_ snapshot: UsageSnapshot) async {
-		let config = configService.currentConfig ?? .default
-		let plan = selectedPlan
+		let limit = baseLimit
+		let windowDuration: TimeInterval = 5 * 3600
 
-		let baseLimit: Int
-		switch plan {
-		case "free":  baseLimit = config.planLimits.free
-		case "max5":  baseLimit = config.planLimits.max5
-		case "max20": baseLimit = config.planLimits.max20
-		default:      baseLimit = config.planLimits.pro
-		}
-
-		let effectiveLimit = LimitMultiplier.effectiveLimit(
-			basePlanLimit: baseLimit,
-			config: config,
-			at: Date()
-		)
-		let multiplier = configService.effectiveMultiplier
-
-		let percent = effectiveLimit > 0
-			? (Double(snapshot.sessionTokens) / Double(effectiveLimit)) * 100.0
+		let percent = limit > 0
+			? (Double(snapshot.sessionTokens) / Double(limit)) * 100.0
 			: 0
 		usagePercent = min(percent, 999)
 
-		let windowDuration: TimeInterval = 5 * 3600
 		let pace = PaceCalculator.calculate(
 			tokensUsed: snapshot.sessionTokens,
-			effectiveLimit: effectiveLimit,
+			effectiveLimit: limit,
 			windowStart: snapshot.sessionWindowStart,
 			windowDuration: windowDuration,
 			now: Date()
@@ -142,10 +107,10 @@ final class AlertCoordinator: ObservableObject {
 			usagePercent: usagePercent,
 			snapshot: snapshot,
 			paceState: pace,
-			pairingSecret: pairing.secret,
+			pairingSecret: pairing.pairingSecret,
 			deviceToken: pairing.deviceToken,
-			multiplier: multiplier,
-			limit: baseLimit,
+			multiplier: 1.0,
+			limit: limit,
 			windowStart: snapshot.sessionWindowStart,
 			windowEnd: windowEnd
 		)
