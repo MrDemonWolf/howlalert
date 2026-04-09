@@ -21,14 +21,13 @@ final class AlertCoordinator: ObservableObject {
 	// MARK: - Child services
 
 	let watcher = SessionFileWatcher()
-	let configService = RemoteConfigService()
 	let pushService = PushService()
 	let pairingReader = PairingReader()
 
 	// MARK: - Configuration
 
-	/// Base token limit for the current plan (before multiplier).
-	var baseLimit: Int = 100_000
+	/// Base token limit derived from the detected plan.
+	var baseLimit: Int { ClaudePlan.detectFromDisk().sessionTokenLimit }
 
 	/// Current billing window boundaries.
 	var windowStart: Date = Calendar.current.startOfDay(for: Date())
@@ -46,9 +45,6 @@ final class AlertCoordinator: ObservableObject {
 		await pairingReader.fetchPairedDevices()
 		isPaired = pairingReader.isPaired
 
-		// Start periodic remote config refresh
-		configService.startRefreshing()
-
 		// Start file system watcher
 		watcher.startWatching()
 		isWatching = watcher.isWatching
@@ -61,7 +57,6 @@ final class AlertCoordinator: ObservableObject {
 	func stop() {
 		cancellables.removeAll()
 		watcher.stopWatching()
-		configService.stopRefreshing()
 		isWatching = false
 	}
 
@@ -94,25 +89,15 @@ final class AlertCoordinator: ObservableObject {
 			.assign(to: \.isPaired, on: self)
 			.store(in: &cancellables)
 
-		// Reset push thresholds when a new window starts (multiplier changes
-		// are a good proxy for window resets from RemoteConfigService).
-		configService.$effectiveMultiplier
-			.removeDuplicates()
-			.receive(on: RunLoop.main)
-			.sink { [weak self] _ in
-				self?.pushService.resetThresholds()
-			}
-			.store(in: &cancellables)
 	}
 
 	/// Process a new usage snapshot: calculate pace, update UI state, push if needed.
 	private func handleNewSnapshot(_ snapshot: UsageSnapshot) async {
-		let multiplier = configService.effectiveMultiplier
-		let effectiveLimit = Double(baseLimit) * multiplier
+		let limit = baseLimit
 
 		// Calculate usage percentage
-		let percent = effectiveLimit > 0
-			? (Double(snapshot.totalTokens) / effectiveLimit) * 100.0
+		let percent = limit > 0
+			? (Double(snapshot.totalTokens) / Double(limit)) * 100.0
 			: 0
 
 		usagePercent = min(percent, 999) // cap for display sanity
@@ -120,11 +105,11 @@ final class AlertCoordinator: ObservableObject {
 		// Calculate pace
 		let pace = calculatePace(
 			consumed: snapshot.totalTokens,
-			limit: baseLimit,
+			limit: limit,
 			windowStart: windowStart,
 			windowEnd: windowEnd,
 			now: Date(),
-			multiplier: multiplier
+			multiplier: 1.0
 		)
 		paceState = pace
 
@@ -142,8 +127,8 @@ final class AlertCoordinator: ObservableObject {
 			paceState: pace,
 			pairingSecret: pairing.secret,
 			deviceToken: pairing.deviceToken,
-			multiplier: multiplier,
-			limit: baseLimit,
+			multiplier: 1.0,
+			limit: limit,
 			windowStart: windowStart,
 			windowEnd: windowEnd
 		)

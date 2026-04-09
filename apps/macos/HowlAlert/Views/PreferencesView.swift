@@ -2,9 +2,6 @@ import SwiftUI
 import HowlAlertKit
 
 struct PreferencesView: View {
-	// Claude Plan section
-	@AppStorage("selectedPlan") private var selectedPlan = "pro"
-
 	// Notification thresholds
 	@AppStorage("threshold60") private var threshold60 = true
 	@AppStorage("threshold85") private var threshold85 = true
@@ -13,22 +10,19 @@ struct PreferencesView: View {
 	// Worker URL
 	@AppStorage("workerURL") private var workerURL = "https://howlalert-worker.mrdemonwolf.workers.dev"
 
-	// Remote config
-	@ObservedObject var configService: RemoteConfigService
-
 	// Clipboard feedback
 	@State private var showCopiedFeedback = false
 
 	var body: some View {
 		Form {
-			// Section 1: Claude Plan
+			// Section 1: Claude Plan (auto-detected, read-only)
 			Section("Claude Plan") {
-				Picker("Plan", selection: $selectedPlan) {
-					Text("Free").tag("free")
-					Text("Pro").tag("pro")
-					Text("Max 5x").tag("max5")
-					Text("Max 20x").tag("max20")
-				}
+				let plan = ClaudePlan.detectFromDisk()
+				LabeledContent("Detected Plan", value: plan.label)
+				LabeledContent("Session Token Limit", value: plan.sessionTokenLimit.formatted())
+				Text("Detected from ~/.claude/.credentials.json")
+					.font(.caption2)
+					.foregroundStyle(.tertiary)
 			}
 
 			// Section 2: Notification Thresholds
@@ -69,27 +63,7 @@ struct PreferencesView: View {
 					.textFieldStyle(.roundedBorder)
 			}
 
-			// Section 5: Remote Config Status
-			Section("Remote Config") {
-				if let config = configService.currentConfig {
-					LabeledContent("Multiplier", value: "\(config.multiplier, specifier: "%.1f")x")
-					LabeledContent("Reason", value: config.reason)
-					LabeledContent("Last Updated", value: config.updatedAt.formatted())
-				} else {
-					Text("Not fetched yet")
-						.foregroundStyle(.secondary)
-				}
-				if let error = configService.lastFetchError {
-					Text(error)
-						.font(.caption)
-						.foregroundStyle(.red)
-				}
-				Button("Refresh Now") {
-					Task { await configService.refresh() }
-				}
-			}
-
-			// Section 6: About
+			// Section 5: About
 			Section("About") {
 				LabeledContent("Version", value: Bundle.main.shortVersion)
 				LabeledContent("Build", value: Bundle.main.buildNumber)

@@ -83,10 +83,7 @@ struct MenuBarView: View {
 				.font(.headline)
 				.foregroundStyle(.white)
 
-			if coordinator.configService.isMultiplierBoosted,
-			   let badgeText = coordinator.configService.multiplierBadgeText {
-				multiplierBadge(badgeText)
-			}
+			planBadge(ClaudePlan.detectFromDisk().label)
 
 			Spacer()
 
@@ -96,7 +93,7 @@ struct MenuBarView: View {
 		}
 	}
 
-	private func multiplierBadge(_ text: String) -> some View {
+	private func planBadge(_ text: String) -> some View {
 		Text(text)
 			.font(.system(.caption2, design: .rounded, weight: .bold))
 			.foregroundStyle(.black)
