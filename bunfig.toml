@@ -1,4 +1,0 @@
-[install]
-globalCache = true
-linker = "isolated"
-autoInstall = false
