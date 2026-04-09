@@ -4,20 +4,20 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 [[kv_namespaces]]
-binding = "CONFIG_KV"
-id = "REPLACE_WITH_CONFIG_KV_ID"
-preview_id = "REPLACE_WITH_CONFIG_KV_PREVIEW_ID"
+binding = "HOWLALERT_CONFIG"
+id = "REPLACE_WITH_REAL_ID"
+preview_id = "REPLACE_WITH_REAL_ID"
 
 [[kv_namespaces]]
-binding = "PUSH_LOG_KV"
-id = "REPLACE_WITH_PUSH_LOG_KV_ID"
-preview_id = "REPLACE_WITH_PUSH_LOG_KV_PREVIEW_ID"
+binding = "HOWLALERT_PUSH_LOG"
+id = "REPLACE_WITH_REAL_ID"
+preview_id = "REPLACE_WITH_REAL_ID"
 
 [vars]
-APNS_BUNDLE_ID = "com.mrdemonwolf.howlalert"
+WORKER_ENV = "development"
 
-# Secrets (set via `wrangler secret put`):
-# ADMIN_SECRET
-# APNS_KEY_ID
-# APNS_TEAM_ID
-# APNS_PRIVATE_KEY
+# Secrets — set via `wrangler secret put <NAME>`:
+#   ADMIN_AUTH_TOKEN   — shared secret for admin Bearer auth + JWT signing
+#   APNS_AUTH_KEY      — PKCS#8 PEM private key (.p8 file contents)
+#   APNS_KEY_ID        — 10-char key ID from Apple Developer portal
+#   APNS_TEAM_ID       — 10-char team ID from Apple Developer portal
