@@ -16,3 +16,13 @@ export function clearSession(): void {
 export function isAuthenticated(): boolean {
   return getSession() !== null;
 }
+
+export async function logout(): Promise<void> {
+  clearSession();
+  try {
+    await fetch('/api/auth/session', { method: 'DELETE' });
+  } catch {
+    // best-effort
+  }
+  window.location.href = '/login';
+}

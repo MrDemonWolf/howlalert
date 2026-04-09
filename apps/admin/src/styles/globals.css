@@ -2,15 +2,20 @@
 
 :root {
   --color-bg: #091533;
+  --color-surface: #0d1f45;
+  --color-border: #1a3060;
+  --color-cyan: #0faced;
   --color-accent: #0faced;
   --color-amber: #f5a623;
   --color-red: #ff3b30;
   --color-green: #34c759;
+  --color-text: #e8edf5;
+  --color-muted: #7a8ba8;
 }
 
 body {
   background-color: var(--color-bg);
-  color: #f0f4ff;
+  color: var(--color-text);
   font-family:
     -apple-system,
     BlinkMacSystemFont,
