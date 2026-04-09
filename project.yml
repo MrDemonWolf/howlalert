@@ -1,0 +1,81 @@
+name: howlalert
+options:
+  bundleIdPrefix: com.mrdemonwolf.howlalert
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+    watchOS: "10.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+packages:
+  HowlAlertKit:
+    path: packages/HowlAlertKit
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""  # fill in your Apple Developer Team ID
+    DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    ENABLE_TESTABILITY: YES
+
+targets:
+
+  # ── macOS ────────────────────────────────────────────────────────────
+  HowlAlert-macOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    bundleIdSuffix: ""
+    sources:
+      - path: apps/macos/HowlAlert
+    dependencies:
+      - package: HowlAlertKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mrdemonwolf.howlalert
+        PRODUCT_NAME: HowlAlert
+        INFOPLIST_FILE: apps/macos/HowlAlert/Info.plist
+        CODE_SIGN_ENTITLEMENTS: apps/macos/HowlAlert/HowlAlert.entitlements
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        LSUIElement: YES  # menu bar only, no dock icon
+    entitlements:
+      path: apps/macos/HowlAlert/HowlAlert.entitlements
+
+  # ── iOS ──────────────────────────────────────────────────────────────
+  HowlAlert-iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: apps/ios/HowlAlert
+    dependencies:
+      - package: HowlAlertKit
+      - target: HowlAlert-watchOS-App
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mrdemonwolf.howlalert.ios
+        PRODUCT_NAME: HowlAlert
+        INFOPLIST_FILE: apps/ios/HowlAlert/Info.plist
+        CODE_SIGN_ENTITLEMENTS: apps/ios/HowlAlert/HowlAlert.entitlements
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    entitlements:
+      path: apps/ios/HowlAlert/HowlAlert.entitlements
+
+  # ── watchOS App ───────────────────────────────────────────────────────
+  HowlAlert-watchOS-App:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: "apps/watchos/HowlAlert Watch"
+    dependencies:
+      - package: HowlAlertKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mrdemonwolf.howlalert.watchkitapp
+        PRODUCT_NAME: HowlAlert
+        INFOPLIST_FILE: "apps/watchos/HowlAlert Watch/Info.plist"
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
