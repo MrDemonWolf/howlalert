@@ -1,0 +1,19 @@
+// Better-T-Stack — https://www.better-t-stack.dev/
+// Add new addons with: bun create better-t-stack add
+{
+  "$schema": "https://r2.better-t-stack.dev/schema.json",
+  "version": "3.27.0",
+  "createdAt": "2026-04-13T02:21:55.210Z",
+  "database": "sqlite",
+  "orm": "drizzle",
+  "backend": "hono",
+  "runtime": "workers",
+  "frontend": [],
+  "addons": ["turborepo", "fumadocs"],
+  "examples": [],
+  "auth": "none",
+  "payments": "none",
+  "packageManager": "bun",
+  "dbSetup": "d1",
+  "api": "none"
+}
