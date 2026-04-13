@@ -1,0 +1,50 @@
+---
+title: FAQ
+description: Frequently asked questions about HowlAlert.
+---
+
+# FAQ
+
+## Does HowlAlert read my code or prompts?
+
+No. HowlAlert reads token count metadata from JSONL session files. It never accesses your code, prompts, or Claude's responses.
+
+## Do I need to create an account?
+
+No. HowlAlert uses your iCloud account for automatic device pairing. No login, no email, no password.
+
+## Is my data shared with anyone?
+
+No. Usage data stays in your own iCloud private database. The Cloudflare Worker only relays push notifications — it stores nothing about your usage. See our [Privacy Policy](/legal/privacy) for details.
+
+## Why does the macOS app need "no sandbox"?
+
+HowlAlert needs to read `~/.claude/projects/` which is outside the App Sandbox container. The app is notarized by Apple (malware-scanned) but not sandboxed.
+
+## What tokens are counted?
+
+- `output_tokens` — tokens Claude generates
+- `cache_read_input_tokens` — cached context read
+- `cache_creation_input_tokens` — new context cached
+
+Regular `input_tokens` are excluded as they don't contribute to rate limits the same way.
+
+## Can I use HowlAlert without an iPhone?
+
+The macOS menu bar app works standalone for basic monitoring (icon color, popover stats). Push notifications, Watch complications, and pace tracking require the iOS app with a Pro subscription.
+
+## What happens when my subscription expires?
+
+The macOS app shows a grayscale wolf icon and read-only token count. Push notifications stop. Cached entitlement state expires after 7 days offline.
+
+## Does it work with Gemini CLI?
+
+Not yet. The architecture supports multiple AI CLI providers, but only Claude Code is implemented in v1.0. Gemini CLI support is planned for v2.0.
+
+## How accurate is the pace math?
+
+Pace is an estimate based on your current burn rate within the usage window. It's most accurate after 15+ minutes of activity. Rate limit windows and exact thresholds depend on your Anthropic plan.
+
+## Can I disable "Claude is done" alerts?
+
+No. This is HowlAlert's killer feature and cannot be disabled.

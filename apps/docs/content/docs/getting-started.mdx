@@ -1,0 +1,55 @@
+---
+title: Getting Started
+description: Install HowlAlert on your Mac and iPhone in under 5 minutes.
+---
+
+# Getting Started
+
+## Requirements
+
+- macOS 15 (Sequoia) or later on Apple Silicon (M-series chips)
+- iOS 17 or later
+- watchOS 10 or later (optional)
+- Active Claude Code subscription from Anthropic
+
+## Install the macOS App
+
+1. Download the DMG from the [GitHub Releases](https://github.com/mrdemonwolf/howlalert/releases) page
+2. Drag HowlAlert to your Applications folder
+3. Launch HowlAlert — it appears as a wolf icon in your menu bar
+4. Grant notification permissions when prompted
+
+Alternatively, install via Homebrew:
+
+```bash
+brew install --cask mrdemonwolf/den/howlalert
+```
+
+## Install the iOS App
+
+1. Download HowlAlert from the App Store
+2. Open the app and allow push notifications
+3. Start your 7-day free trial or subscribe to Pro
+
+## Pairing
+
+HowlAlert pairs automatically via your iCloud account. No login, no account creation, no QR codes.
+
+Once both apps are installed on devices signed into the same Apple ID:
+- Your Mac will appear in the iOS app within seconds
+- The iOS app will show "Connected" with your Mac's name
+
+## Apple Watch
+
+If you have an Apple Watch paired with your iPhone:
+- Install the HowlAlert watchOS app from the Watch app on your iPhone
+- Add the HowlAlert complication to your watch face
+- The watch receives data from your iPhone via WatchConnectivity
+
+## What Happens Next
+
+Once paired, HowlAlert automatically:
+- Watches your Claude Code session files (`~/.claude/projects/`)
+- Calculates your token usage and pace
+- Sends push notifications at 60%, 85%, and 100% thresholds
+- Taps your wrist when Claude finishes replying
