@@ -15,6 +15,7 @@
 		A1C58D53641B428DB76931D3 /* HowlAlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83427BE8D5E72787EF608D00 /* HowlAlertKit */; };
 		A61BC0E18D3EC599FFE1E4A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */; };
 		C619628F667E8F53F7EB6E6F /* HowlAlertApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */; };
+		CAFF2C83C1DB9482464605B8 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFE6CDC0C7C6ED94C5A16FF3 /* PaywallView.swift */; };
 		D6EA2B76214C114CF5FC9758 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */; };
 		D8AA7CCF109AEB2476405626 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 07F1D790C33D3CC13F5B238D /* RevenueCat */; };
 		E36CBF35A1DE9AD084147E5B /* HowlAlertWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49CB4965F9F03507220B9597 /* HowlAlertWatchApp.swift */; };
@@ -61,6 +62,7 @@
 		E37CC314BD4182D79B040185 /* HowlAlertKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = HowlAlertKit; path = ../../packages/HowlAlertKit; sourceTree = SOURCE_ROOT; };
 		F3E44814D2EB0A55F658C146 /* HowlAlert.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HowlAlert.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FFE6CDC0C7C6ED94C5A16FF3 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 			children = (
 				46526C9490B4D29F4365EC97 /* DashboardView.swift */,
 				C0DFEE70061FF47C1E84ACB5 /* HowlAlertLiveActivity.swift */,
+				FFE6CDC0C7C6ED94C5A16FF3 /* PaywallView.swift */,
 				98442D263C57701A995F2AE4 /* SettingsView.swift */,
 			);
 			path = Views;
@@ -253,6 +256,7 @@
 				F450843D8C3B21F797963E1D /* DashboardView.swift in Sources */,
 				C619628F667E8F53F7EB6E6F /* HowlAlertApp.swift in Sources */,
 				2AECDE7B16B89BA049F4D7B8 /* HowlAlertLiveActivity.swift in Sources */,
+				CAFF2C83C1DB9482464605B8 /* PaywallView.swift in Sources */,
 				0E9B03078D87A3F6F56CA741 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
