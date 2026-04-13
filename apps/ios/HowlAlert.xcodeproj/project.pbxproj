@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0E9B03078D87A3F6F56CA741 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98442D263C57701A995F2AE4 /* SettingsView.swift */; };
 		2AECDE7B16B89BA049F4D7B8 /* HowlAlertLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DFEE70061FF47C1E84ACB5 /* HowlAlertLiveActivity.swift */; };
+		73767082CE1B8B2DAB506433 /* HowlAlertComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F885647704CC520B597905 /* HowlAlertComplication.swift */; };
 		786BED703B69F7F1C1B29B18 /* HowlAlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = D8B602FDD3A30579A273DD36 /* HowlAlertKit */; };
 		8C9169B99E13DA4873FE6996 /* HowlAlertWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 19F4F4CC051F5EC741ACADEA /* HowlAlertWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A1C58D53641B428DB76931D3 /* HowlAlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83427BE8D5E72787EF608D00 /* HowlAlertKit */; };
@@ -56,6 +57,7 @@
 		8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		98442D263C57701A995F2AE4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C0DFEE70061FF47C1E84ACB5 /* HowlAlertLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowlAlertLiveActivity.swift; sourceTree = "<group>"; };
+		D9F885647704CC520B597905 /* HowlAlertComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowlAlertComplication.swift; sourceTree = "<group>"; };
 		E37CC314BD4182D79B040185 /* HowlAlertKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = HowlAlertKit; path = ../../packages/HowlAlertKit; sourceTree = SOURCE_ROOT; };
 		F3E44814D2EB0A55F658C146 /* HowlAlert.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HowlAlert.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */,
+				D9F885647704CC520B597905 /* HowlAlertComplication.swift */,
 				601E6B30A9B13CD9E8C663D2 /* HowlAlertWatch.entitlements */,
 				49CB4965F9F03507220B9597 /* HowlAlertWatchApp.swift */,
 				3341896A68D2D391E5E6FABB /* Info.plist */,
@@ -258,6 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73767082CE1B8B2DAB506433 /* HowlAlertComplication.swift in Sources */,
 				E36CBF35A1DE9AD084147E5B /* HowlAlertWatchApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
