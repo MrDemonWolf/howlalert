@@ -1,8 +1,0 @@
-{
-	"name": "@howlalert/shared-types",
-	"private": true,
-	"exports": {
-		".": "./src/index.ts",
-		"./*": "./src/*"
-	}
-}
