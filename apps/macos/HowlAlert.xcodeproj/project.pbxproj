@@ -7,19 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09934CE2E5937445B4156E4D /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC4CFA3BAF4D88CFEB0570A7 /* MenuBarPopoverView.swift */; };
+		2DB3EEEE462A2CD63E160809 /* CritBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE2225755602D0CC76CED53 /* CritBarView.swift */; };
 		786BED703B69F7F1C1B29B18 /* HowlAlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = D8B602FDD3A30579A273DD36 /* HowlAlertKit */; };
 		C619628F667E8F53F7EB6E6F /* HowlAlertApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */; };
 		D6EA2B76214C114CF5FC9758 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */; };
 		D8AA7CCF109AEB2476405626 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 57EC8228E990790CBC503FAA /* Sparkle */; };
+		E00A773B17FB4142D209B3D6 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CAE87062415B0C21126E0A /* PreferencesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0B8BC359AC8AF1811D2E0466 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		134C46D5F4E5FC16FA27C230 /* HowlAlert.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HowlAlert.entitlements; sourceTree = "<group>"; };
 		2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowlAlertApp.swift; sourceTree = "<group>"; };
+		5CE2225755602D0CC76CED53 /* CritBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CritBarView.swift; sourceTree = "<group>"; };
 		8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D4CAE87062415B0C21126E0A /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		E37CC314BD4182D79B040185 /* HowlAlertKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = HowlAlertKit; path = ../../packages/HowlAlertKit; sourceTree = SOURCE_ROOT; };
 		F3E44814D2EB0A55F658C146 /* HowlAlert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HowlAlert.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC4CFA3BAF4D88CFEB0570A7 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +57,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		7969275683E88A3644DA29F0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2225755602D0CC76CED53 /* CritBarView.swift */,
+				FC4CFA3BAF4D88CFEB0570A7 /* MenuBarPopoverView.swift */,
+				D4CAE87062415B0C21126E0A /* PreferencesView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		79DB7BBFCA16D91EB8BD40BA /* HowlAlert */ = {
 			isa = PBXGroup;
 			children = (
@@ -58,6 +74,7 @@
 				134C46D5F4E5FC16FA27C230 /* HowlAlert.entitlements */,
 				2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */,
 				0B8BC359AC8AF1811D2E0466 /* Info.plist */,
+				7969275683E88A3644DA29F0 /* Views */,
 			);
 			path = HowlAlert;
 			sourceTree = "<group>";
@@ -145,7 +162,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2DB3EEEE462A2CD63E160809 /* CritBarView.swift in Sources */,
 				C619628F667E8F53F7EB6E6F /* HowlAlertApp.swift in Sources */,
+				09934CE2E5937445B4156E4D /* MenuBarPopoverView.swift in Sources */,
+				E00A773B17FB4142D209B3D6 /* PreferencesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
