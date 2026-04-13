@@ -1,0 +1,37 @@
+---
+title: How It Works
+description: Technical architecture of HowlAlert
+---
+
+# How It Works
+
+## Token Monitoring
+
+The macOS app uses FSEvents to watch `~/.claude/projects/*/*.jsonl` — the session files written by Claude Code. Each JSONL line contains token usage data that HowlAlert parses in real-time.
+
+## Plan Detection
+
+HowlAlert reads `~/.claude/.credentials.json` to detect your Claude plan tier (Pro, Max 5, Max 20). No network request needed.
+
+## Pace Engine
+
+HowlAlertKit's `PaceEngine` actor tracks token usage within the current 5-hour window and calculates:
+- Current usage ratio
+- Projected usage at window end
+- Pace state: calm / warn / critical
+
+## Push Delivery
+
+When pace state changes to warn or critical:
+1. macOS app calls `POST /push` on the Cloudflare Worker
+2. Worker verifies your entitlement in D1
+3. Worker fetches your device token from KV
+4. Worker signs an APNs JWT and delivers the push
+
+## Pairing
+
+macOS and iOS apps pair automatically via CloudKit's private database. No account creation required — your iCloud account handles identity.
+
+## Privacy
+
+The push relay is stateless. It receives a payload, signs a JWT, and forwards to Apple. Nothing is stored beyond a transient KV entry for your device token (1 year TTL, deleted on uninstall).
