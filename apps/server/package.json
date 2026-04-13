@@ -10,9 +10,11 @@
     "deploy:dry": "wrangler deploy --dry-run"
   },
   "dependencies": {
+    "@fivesheepco/cloudflare-apns2": "^13.0.0",
     "@howlalert/db": "workspace:*",
     "@howlalert/env": "workspace:*",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.8.2",
     "zod": "catalog:"
   },
