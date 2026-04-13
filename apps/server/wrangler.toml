@@ -1,0 +1,26 @@
+name = "howlalert-worker"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[kv_namespaces]]
+binding = "HOWLALERT_DEVICES"
+id = "PLACEHOLDER_DEVICES_KV_ID"
+
+[[kv_namespaces]]
+binding = "HOWLALERT_PUSH_LOG"
+id = "PLACEHOLDER_PUSH_LOG_KV_ID"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "howlalert-db"
+database_id = "PLACEHOLDER_D1_ID"
+
+# Secrets (set via `wrangler secret put`):
+# APNS_TEAM_ID
+# APNS_KEY_ID
+# APNS_SIGNING_KEY
+# REVENUECAT_WEBHOOK_SECRET
+# ADMIN_SECRET
