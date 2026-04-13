@@ -18,8 +18,9 @@ struct SettingsView: View {
                 }
                 if !appState.isEntitled {
                     NavigationLink("Upgrade to Pro") {
-                        // PaywallView placeholder — Phase 11
-                        Text("Paywall coming in Phase 11")
+                        PaywallView {
+                            appState.isEntitled = true
+                        }
                     }
                 }
             }
