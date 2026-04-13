@@ -49,3 +49,17 @@ coverage
 .cache
 tmp
 temp
+
+# Xcode / Swift
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+.build/
+.swiftpm/
+Package.resolved
+
+# Cloudflare
+.dev.vars
+.wrangler/
