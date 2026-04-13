@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		786BED703B69F7F1C1B29B18 /* HowlAlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = D8B602FDD3A30579A273DD36 /* HowlAlertKit */; };
+		8C9169B99E13DA4873FE6996 /* HowlAlertWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 19F4F4CC051F5EC741ACADEA /* HowlAlertWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1C58D53641B428DB76931D3 /* HowlAlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83427BE8D5E72787EF608D00 /* HowlAlertKit */; };
+		A61BC0E18D3EC599FFE1E4A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */; };
+		C619628F667E8F53F7EB6E6F /* HowlAlertApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */; };
+		D6EA2B76214C114CF5FC9758 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */; };
+		D8AA7CCF109AEB2476405626 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 07F1D790C33D3CC13F5B238D /* RevenueCat */; };
+		E36CBF35A1DE9AD084147E5B /* HowlAlertWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49CB4965F9F03507220B9597 /* HowlAlertWatchApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DD7B4BC2252B79330DD56558 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E780AD470C5335843EB3765F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF443709234BEB82590D509E;
+			remoteInfo = HowlAlertWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C6CC4E93F1A0378BB45273EB /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				8C9169B99E13DA4873FE6996 /* HowlAlertWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0B8BC359AC8AF1811D2E0466 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		134C46D5F4E5FC16FA27C230 /* HowlAlert.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HowlAlert.entitlements; sourceTree = "<group>"; };
+		19F4F4CC051F5EC741ACADEA /* HowlAlertWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HowlAlertWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowlAlertApp.swift; sourceTree = "<group>"; };
+		3341896A68D2D391E5E6FABB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		49CB4965F9F03507220B9597 /* HowlAlertWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowlAlertWatchApp.swift; sourceTree = "<group>"; };
+		601E6B30A9B13CD9E8C663D2 /* HowlAlertWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HowlAlertWatch.entitlements; sourceTree = "<group>"; };
+		8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E37CC314BD4182D79B040185 /* HowlAlertKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = HowlAlertKit; path = ../../packages/HowlAlertKit; sourceTree = SOURCE_ROOT; };
+		F3E44814D2EB0A55F658C146 /* HowlAlert.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HowlAlert.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3944474575B858F55396632E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				786BED703B69F7F1C1B29B18 /* HowlAlertKit in Frameworks */,
+				D8AA7CCF109AEB2476405626 /* RevenueCat in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D874EA8B2CB7249498C7A871 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1C58D53641B428DB76931D3 /* HowlAlertKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		091D5E7AEAF438934CDE922F /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				E37CC314BD4182D79B040185 /* HowlAlertKit */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		5E971085BED34AE3598BD385 /* HowlAlertWatch */ = {
+			isa = PBXGroup;
+			children = (
+				FAEBEAEA74DAA7D4D7F635E9 /* Assets.xcassets */,
+				601E6B30A9B13CD9E8C663D2 /* HowlAlertWatch.entitlements */,
+				49CB4965F9F03507220B9597 /* HowlAlertWatchApp.swift */,
+				3341896A68D2D391E5E6FABB /* Info.plist */,
+			);
+			path = HowlAlertWatch;
+			sourceTree = "<group>";
+		};
+		77E86DE96C84D90B1CDF48C8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F3E44814D2EB0A55F658C146 /* HowlAlert.app */,
+				19F4F4CC051F5EC741ACADEA /* HowlAlertWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		79DB7BBFCA16D91EB8BD40BA /* HowlAlert */ = {
+			isa = PBXGroup;
+			children = (
+				8CAA3FF1E1CBEEC9398807A8 /* Assets.xcassets */,
+				134C46D5F4E5FC16FA27C230 /* HowlAlert.entitlements */,
+				2FFD8971D9B2B2BE9D407BA8 /* HowlAlertApp.swift */,
+				0B8BC359AC8AF1811D2E0466 /* Info.plist */,
+			);
+			path = HowlAlert;
+			sourceTree = "<group>";
+		};
+		ECC0A827949D4BE1628D9D59 = {
+			isa = PBXGroup;
+			children = (
+				79DB7BBFCA16D91EB8BD40BA /* HowlAlert */,
+				5E971085BED34AE3598BD385 /* HowlAlertWatch */,
+				091D5E7AEAF438934CDE922F /* Packages */,
+				77E86DE96C84D90B1CDF48C8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		962EAB9EC8332447A1819B6A /* HowlAlert */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED7539C4B51AEEE8CCA45CD1 /* Build configuration list for PBXNativeTarget "HowlAlert" */;
+			buildPhases = (
+				54DAEBA03A2D22E44C27A65C /* Sources */,
+				309E64815541E46C7DD08819 /* Resources */,
+				3944474575B858F55396632E /* Frameworks */,
+				C6CC4E93F1A0378BB45273EB /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7CA3D563F8C3E8F162DAC452 /* PBXTargetDependency */,
+			);
+			name = HowlAlert;
+			packageProductDependencies = (
+				D8B602FDD3A30579A273DD36 /* HowlAlertKit */,
+				07F1D790C33D3CC13F5B238D /* RevenueCat */,
+			);
+			productName = HowlAlert;
+			productReference = F3E44814D2EB0A55F658C146 /* HowlAlert.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DF443709234BEB82590D509E /* HowlAlertWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EF2DCA52F7E19F917D162D6E /* Build configuration list for PBXNativeTarget "HowlAlertWatch" */;
+			buildPhases = (
+				E8F57F0FD36D92337DBB3CB4 /* Sources */,
+				2BF5E27CDB5D4B5C4F8806EB /* Resources */,
+				D874EA8B2CB7249498C7A871 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HowlAlertWatch;
+			packageProductDependencies = (
+				83427BE8D5E72787EF608D00 /* HowlAlertKit */,
+			);
+			productName = HowlAlertWatch;
+			productReference = 19F4F4CC051F5EC741ACADEA /* HowlAlertWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E780AD470C5335843EB3765F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 92A58FBC91E44FA9816276F9 /* Build configuration list for PBXProject "HowlAlert" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = ECC0A827949D4BE1628D9D59;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8E9D2875A75092265E514ACA /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				DE95A4F5DA6AA705AEB84EAB /* XCLocalSwiftPackageReference "../../packages/HowlAlertKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 77E86DE96C84D90B1CDF48C8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				962EAB9EC8332447A1819B6A /* HowlAlert */,
+				DF443709234BEB82590D509E /* HowlAlertWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2BF5E27CDB5D4B5C4F8806EB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A61BC0E18D3EC599FFE1E4A2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		309E64815541E46C7DD08819 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6EA2B76214C114CF5FC9758 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		54DAEBA03A2D22E44C27A65C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C619628F667E8F53F7EB6E6F /* HowlAlertApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8F57F0FD36D92337DBB3CB4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E36CBF35A1DE9AD084147E5B /* HowlAlertWatchApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7CA3D563F8C3E8F162DAC452 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF443709234BEB82590D509E /* HowlAlertWatch */;
+			targetProxy = DD7B4BC2252B79330DD56558 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0CF8F99CA53BC3F55B7A7A37 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HowlAlert/HowlAlert.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = HowlAlert/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		78C2EEE27AB2F8CB74F1602A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HowlAlertWatch/HowlAlertWatch.entitlements;
+				INFOPLIST_FILE = HowlAlertWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		8570D14BDB34E2776881C720 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HowlAlert/HowlAlert.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = HowlAlert/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9A798B39E37A075F4C44E87A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		A51B68BF71426F012B9E1081 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		EA004BB25E46F16F79DEAB5D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HowlAlertWatch/HowlAlertWatch.entitlements;
+				INFOPLIST_FILE = HowlAlertWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		92A58FBC91E44FA9816276F9 /* Build configuration list for PBXProject "HowlAlert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A798B39E37A075F4C44E87A /* Debug */,
+				A51B68BF71426F012B9E1081 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		ED7539C4B51AEEE8CCA45CD1 /* Build configuration list for PBXNativeTarget "HowlAlert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0CF8F99CA53BC3F55B7A7A37 /* Debug */,
+				8570D14BDB34E2776881C720 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EF2DCA52F7E19F917D162D6E /* Build configuration list for PBXNativeTarget "HowlAlertWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA004BB25E46F16F79DEAB5D /* Debug */,
+				78C2EEE27AB2F8CB74F1602A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DE95A4F5DA6AA705AEB84EAB /* XCLocalSwiftPackageReference "../../packages/HowlAlertKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../packages/HowlAlertKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8E9D2875A75092265E514ACA /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		07F1D790C33D3CC13F5B238D /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8E9D2875A75092265E514ACA /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		83427BE8D5E72787EF608D00 /* HowlAlertKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HowlAlertKit;
+		};
+		D8B602FDD3A30579A273DD36 /* HowlAlertKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HowlAlertKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E780AD470C5335843EB3765F /* Project object */;
+}
