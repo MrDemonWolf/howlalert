@@ -30,7 +30,7 @@ let package = Package(
         // ── Math & State ────────────────────────────────
         .target(name: "TokenMath", dependencies: ["Models"]),
         .target(name: "ColorState", dependencies: ["Models"]),
-        .target(name: "PaceEngine", dependencies: ["Models", "TokenMath", "ColorState"]),
+        .target(name: "PaceEngine", dependencies: ["Models", "TokenMath", "ColorState", "Providers"]),
 
         // ── Providers ───────────────────────────────────
         .target(name: "Providers", dependencies: ["Models"]),
