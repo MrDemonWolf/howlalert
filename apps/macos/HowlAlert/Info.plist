@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 MrDemonWolf, Inc.</string>
+	<key>SUPublicEDKey</key>
+	<string>PLACEHOLDER_SPARKLE_PUBLIC_KEY</string>
+	<key>SUFeedURL</key>
+	<string>https://github.com/mrdemonwolf/howlalert/releases/latest/download/appcast.xml</string>
+</dict>
+</plist>
