@@ -3,44 +3,88 @@
 
 import SwiftUI
 import Models
+import Config
+import TokenMath
+import ColorState
 
 @main
 struct HowlAlertApp: App {
+    @State private var appState = iOSAppState()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView(appState: appState)
+                .preferredColorScheme(.dark)
+                .onOpenURL { url in
+                    if url.scheme == "howlalert", url.host == "demo" {
+                        appState.isDemoMode = true
+                    }
+                }
         }
     }
 }
 
-struct ContentView: View {
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                Text("🐺")
-                    .font(.system(size: 64))
-                Text("HowlAlert")
-                    .font(.largeTitle.bold())
-                Text("Waiting for Mac...")
-                    .foregroundStyle(.secondary)
+@Observable
+final class iOSAppState {
+    var snapshots: [UsageSnapshot] = []
+    var aggregated: AggregatedUsage?
+    var paceState: PaceState?
+    var critState: CritState = .ok
+    var isEntitled = false
+    var isDemoMode = false
+    var isPaired = false
+
+    private let calculator = PaceCalculator()
+    private let thresholdColor = ThresholdColor()
+    private let aggregator = SnapshotAggregator()
+    private let syncManager = CloudKitSyncManager()
+    private let limit = 100_000
+
+    init() {
+        Task { await loadData() }
+    }
+
+    func loadData() async {
+        // Check entitlement
+        let ckState = try? await syncManager.fetchEntitlement()
+        let mgr = EntitlementManager()
+        isEntitled = mgr.isEntitled(cloudKitState: ckState)
+
+        // Fetch all Mac snapshots
+        if let fetched = try? await syncManager.fetchAllUsageSnapshots() {
+            await MainActor.run {
+                snapshots = fetched
+                isPaired = !fetched.isEmpty
+                recalculate()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(hex: "#091533"))
-            .preferredColorScheme(.dark)
         }
     }
-}
 
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-        let scanner = Scanner(string: hex)
-        var rgb: UInt64 = 0
-        scanner.scanHexInt64(&rgb)
-        self.init(
-            red: Double((rgb >> 16) & 0xFF) / 255,
-            green: Double((rgb >> 8) & 0xFF) / 255,
-            blue: Double(rgb & 0xFF) / 255
+    @MainActor
+    func recalculate() {
+        let agg = aggregator.aggregate(snapshots)
+        aggregated = agg
+
+        guard agg.totalBillableTokens > 0, let firstSnap = snapshots.first else { return }
+
+        let pace = calculator.calculate(
+            totalTokens: agg.totalBillableTokens,
+            limit: limit,
+            windowStart: firstSnap.windowStart,
+            windowEnd: firstSnap.windowEnd
         )
+        paceState = pace
+        critState = thresholdColor.state(
+            for: pace.usagePercent,
+            isReset: pace.status == .freshReset
+        )
+    }
+
+    var activeMacs: [AggregatedUsage.MacSummary] {
+        aggregated?.activeMacs ?? []
+    }
+
+    var showActiveMacs: Bool {
+        activeMacs.count > 1
     }
 }
