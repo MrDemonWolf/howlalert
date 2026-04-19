@@ -1,35 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
   "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "db:push": {
-      "cache": false
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
-    "db:generate": {
-      "cache": false
+    "lint": {},
+    "typecheck": {
+      "dependsOn": ["^build"]
     },
-    "db:migrate": {
-      "cache": false,
-      "persistent": true
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true
+    "test": {
+      "dependsOn": ["^build"]
     }
   }
 }

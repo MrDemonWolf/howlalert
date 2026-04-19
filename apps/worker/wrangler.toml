@@ -1,0 +1,22 @@
+name = "howlalert"
+main = "src/index.ts"
+compatibility_date = "2026-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Phase 1 will wire:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "howlalert"
+# database_id = "TBD"
+#
+# [[kv_namespaces]]
+# binding = "HOWLALERT_CONFIG"
+# id = "TBD"
+#
+# [[kv_namespaces]]
+# binding = "HOWLALERT_DEVICE_TOKENS"
+# id = "TBD"
+#
+# [[kv_namespaces]]
+# binding = "HOWLALERT_PUSH_LOG"
+# id = "TBD"

@@ -1,65 +1,74 @@
-# Dependencies
-node_modules
-.pnp
-.pnp.js
-
-# Build outputs
-dist
-build
-*.tsbuildinfo
-
-# Environment variables
-.env
-.env*.local
-
-# IDEs and editors
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.idea
-*.swp
-*.swo
-*~
+# ======= macOS =======
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+# ======= Node / Bun =======
+node_modules/
+bun.lockb
+.turbo/
+dist/
+build/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
 
-# Turbo
-.turbo
-.nx
-
-# Better-T-Stack
-.alchemy
-
-# Testing
-coverage
-.nyc_output
-
-# Misc
-*.tgz
-.cache
-tmp
-temp
-
-# Xcode / Swift
-DerivedData/
+# ======= Xcode =======
+## User-specific
+xcuserdata/
 *.xcuserstate
-*.xcworkspace/xcuserdata/
-*.xcodeproj/xcuserdata/
-*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-.build/
+*.xcuserdatad/
+
+## Build
+DerivedData/
+build/
+*.xcarchive
+
+## Swift Package Manager
 .swiftpm/
+.build/
+Packages/
 Package.resolved
 
-# Cloudflare
-.dev.vars
+## CocoaPods (just in case)
+Pods/
+
+## Carthage (just in case)
+Carthage/Build/
+
+# ======= Cloudflare =======
 .wrangler/
+.dev.vars
+.env.dev
+
+# ======= Editors =======
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+
+# ======= Sensitive =======
+*.p12
+*.p8
+*.mobileprovision
+AuthKey_*.p8
+secrets.local.json
+
+# ======= Claude Code =======
+.claude/settings.local.json
+
+# ======= Build artifacts =======
+*.log
+*.dmg
+*.zip.md5
+tmp/
+.tmp/
