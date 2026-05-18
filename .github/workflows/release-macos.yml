@@ -1,0 +1,210 @@
+name: Release · macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Marketing version (e.g. 0.1.0)"
+        required: true
+        type: string
+
+concurrency:
+  group: release-macos
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build · sign · notarize · DMG · appcast · tap PR
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      BUILD_VERSION: ${{ inputs.version }}
+      BUNDLE_ID: com.mrdemonwolf.howlalert.mac
+      APP_NAME: HowlAlert
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+
+      - name: Install toolchain (XcodeGen, appdmg, jq)
+        run: |
+          brew install xcodegen jq
+          npm install -g appdmg
+
+      - name: Import Developer ID certificate
+        env:
+          DEVELOPER_ID_CERT_P12: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -lut 7200 build.keychain
+          echo "$DEVELOPER_ID_CERT_P12" | base64 -d > cert.p12
+          security import cert.p12 -k build.keychain -P "$DEVELOPER_ID_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          rm -f cert.p12
+
+      - name: Stamp Sparkle public key into Info.plist
+        env:
+          SPARKLE_PUBLIC_KEY: ${{ secrets.SPARKLE_PUBLIC_KEY }}
+        run: |
+          # project.yml carries a placeholder; replace it before xcodegen runs.
+          sed -i '' "s|REPLACE_WITH_GENERATED_PUBLIC_KEY|${SPARKLE_PUBLIC_KEY}|g" apps/macos/project.yml
+
+      - name: Stamp version
+        run: |
+          sed -i '' "s|CFBundleShortVersionString: \"0.0.1\"|CFBundleShortVersionString: \"${BUILD_VERSION}\"|" apps/macos/project.yml
+          sed -i '' "s|CFBundleVersion: \"1\"|CFBundleVersion: \"$(date +%s)\"|" apps/macos/project.yml
+
+      - name: Generate Xcode project
+        working-directory: apps/macos
+        run: xcodegen generate
+
+      - name: Archive (Release, signed)
+        working-directory: apps/macos
+        run: |
+          xcodebuild \
+            -project HowlAlert.xcodeproj \
+            -scheme HowlAlert \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -archivePath build/HowlAlert.xcarchive \
+            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            archive
+
+      - name: Export .app
+        working-directory: apps/macos
+        run: |
+          cat > export.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>developer-id</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>teamID</key><string>${{ secrets.APPLE_TEAM_ID }}</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath build/HowlAlert.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist export.plist
+
+      - name: Notarize via notarytool
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          ASC_API_PRIVATE_KEY: ${{ secrets.ASC_API_PRIVATE_KEY }}
+        working-directory: apps/macos
+        run: |
+          mkdir -p ~/private_keys
+          echo "$ASC_API_PRIVATE_KEY" > ~/private_keys/AuthKey_$ASC_API_KEY_ID.p8
+          ditto -c -k --sequesterRsrc --keepParent "build/export/${APP_NAME}.app" "build/${APP_NAME}.zip"
+          xcrun notarytool submit "build/${APP_NAME}.zip" \
+            --key ~/private_keys/AuthKey_$ASC_API_KEY_ID.p8 \
+            --key-id "$ASC_API_KEY_ID" \
+            --issuer "$ASC_API_ISSUER_ID" \
+            --wait
+          xcrun stapler staple "build/export/${APP_NAME}.app"
+
+      - name: Build branded DMG via appdmg
+        working-directory: apps/macos
+        run: |
+          cat > build/dmg-spec.json <<JSON
+          {
+            "title": "HowlAlert ${BUILD_VERSION}",
+            "icon-size": 96,
+            "background": "../../distribution/dmg-assets/background.png",
+            "contents": [
+              { "x": 140, "y": 200, "type": "file", "path": "build/export/${APP_NAME}.app" },
+              { "x": 400, "y": 200, "type": "link", "path": "/Applications" }
+            ]
+          }
+          JSON
+          appdmg build/dmg-spec.json "build/HowlAlert-${BUILD_VERSION}.dmg"
+
+      - name: Sign + notarize DMG
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+        working-directory: apps/macos
+        run: |
+          codesign --sign "Developer ID Application: ${{ secrets.APPLE_TEAM_ID }}" \
+                   --options runtime --timestamp \
+                   "build/HowlAlert-${BUILD_VERSION}.dmg"
+          xcrun notarytool submit "build/HowlAlert-${BUILD_VERSION}.dmg" \
+            --key ~/private_keys/AuthKey_$ASC_API_KEY_ID.p8 \
+            --key-id "$ASC_API_KEY_ID" \
+            --issuer "$ASC_API_ISSUER_ID" \
+            --wait
+          xcrun stapler staple "build/HowlAlert-${BUILD_VERSION}.dmg"
+
+      - name: Sign DMG with Sparkle EdDSA + update appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        working-directory: apps/macos
+        run: |
+          echo "$SPARKLE_PRIVATE_KEY" > sparkle-key.priv
+          chmod 600 sparkle-key.priv
+          SIGN_TOOL=$(find ~/Library/Developer/Xcode/DerivedData -name sign_update -type f | head -1)
+          if [ -z "$SIGN_TOOL" ]; then
+            # Resolve Sparkle's bundled sign_update tool via SPM checkout
+            SIGN_TOOL=$(find build -name sign_update -type f | head -1)
+          fi
+          ED_SIG=$("$SIGN_TOOL" --ed-key-file sparkle-key.priv "build/HowlAlert-${BUILD_VERSION}.dmg" | tr -d '\n')
+          rm -f sparkle-key.priv
+          echo "EdDSA: $ED_SIG"
+          # Append appcast item.
+          node ../../scripts/appcast-append.mjs \
+            --version "${BUILD_VERSION}" \
+            --dmg "build/HowlAlert-${BUILD_VERSION}.dmg" \
+            --signature "$ED_SIG" \
+            --appcast ../../distribution/appcast.xml
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: apps/macos
+        run: |
+          gh release create "v${BUILD_VERSION}" \
+            --title "HowlAlert ${BUILD_VERSION}" \
+            --notes "See appcast.xml for the release feed entry." \
+            "build/HowlAlert-${BUILD_VERSION}.dmg"
+
+      - name: Commit appcast back to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add distribution/appcast.xml
+          git commit -m "release: appcast for v${BUILD_VERSION}"
+          git push
+
+      - name: Open PR to homebrew-den
+        env:
+          HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
+        run: |
+          SHA256=$(shasum -a 256 "apps/macos/build/HowlAlert-${BUILD_VERSION}.dmg" | awk '{print $1}')
+          git clone "https://x-access-token:${HOMEBREW_TAP_PAT}@github.com/mrdemonwolf/homebrew-den.git" tap
+          cp distribution/homebrew-tap/Casks/howlalert.rb tap/Casks/howlalert.rb
+          sed -i '' "s|__VERSION__|${BUILD_VERSION}|g" tap/Casks/howlalert.rb
+          sed -i '' "s|__SHA256__|${SHA256}|g" tap/Casks/howlalert.rb
+          cd tap
+          BRANCH="howlalert-${BUILD_VERSION}"
+          git checkout -b "$BRANCH"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/howlalert.rb
+          git commit -m "howlalert ${BUILD_VERSION}"
+          git push origin "$BRANCH"
+          GH_TOKEN="${HOMEBREW_TAP_PAT}" gh pr create \
+            --title "howlalert ${BUILD_VERSION}" \
+            --body "Automated bump from mrdemonwolf/howlalert release workflow." \
+            --head "$BRANCH" \
+            --base main

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>HowlAlert</title>
+    <link>https://mrdemonwolf.github.io/howlalert/appcast.xml</link>
+    <description>HowlAlert macOS release feed.</description>
+    <language>en</language>
+    <!-- Release workflow appends <item> entries per build. -->
+  </channel>
+</rss>

@@ -1,0 +1,72 @@
+name: CI · macOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/macos/**"
+      - "packages/howlalert-kit/**"
+      - ".github/workflows/ci-macos.yml"
+  pull_request:
+    paths:
+      - "apps/macos/**"
+      - "packages/howlalert-kit/**"
+      - ".github/workflows/ci-macos.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift-test:
+    name: HowlAlertKit · swift test
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+
+      - name: swift test
+        working-directory: packages/howlalert-kit
+        run: swift test --parallel
+
+  build-macos:
+    name: HowlAlert.app · debug build
+    runs-on: macos-26
+    timeout-minutes: 30
+    needs: swift-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        working-directory: apps/macos
+        run: xcodegen generate
+
+      - name: Build (ad-hoc signing)
+        working-directory: apps/macos
+        run: |
+          xcodebuild \
+            -project HowlAlert.xcodeproj \
+            -scheme HowlAlert \
+            -configuration Debug \
+            -destination "platform=macOS" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build | xcbeautify --renderer github-actions
+
+      - name: Upload build log artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: apps/macos/build/Logs
+          retention-days: 7
