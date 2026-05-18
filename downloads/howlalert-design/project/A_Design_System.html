@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1400" />
+<title>HowlAlert — Design System Reference</title>
+<style>
+  /* ============================================================
+     HOWLALERT — design tokens (single source of truth)
+     ============================================================ */
+  :root {
+    /* Brand core — navy */
+    --howl-navy-900:#091533;
+    --howl-navy-800:#0E1B42;
+    --howl-navy-700:#15275A;
+    --howl-navy-600:#1E3475;
+
+    /* Brand core — cyan */
+    --howl-cyan-500:#0FACED;
+    --howl-cyan-400:#3DBEF1;
+    --howl-cyan-300:#7BD3F6;
+    --howl-cyan-100:#D5F0FB;
+
+    /* States */
+    --howl-state-fresh:#3DDC97;
+    --howl-state-ok:#0FACED;
+    --howl-state-warn:#FFA533;
+    --howl-state-crit:#FF4D4D;
+
+    /* Neutrals on navy */
+    --howl-ink-100:#F4F7FB;
+    --howl-ink-300:#A8B5CF;
+    --howl-ink-500:#6A7A99;
+    --howl-ink-700:#3A4666;
+
+    /* Light surfaces (iOS light mode) */
+    --howl-light-surface:#F8FAFE;
+    --howl-light-surface-2:#EEF2F9;
+    --howl-light-ink:#091533;
+    --howl-light-ink-2:#3A4666;
+    --howl-light-ink-3:#6A7A99;
+
+    /* Spacing — 4pt grid */
+    --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px;
+    --space-5:20px; --space-6:24px; --space-7:28px; --space-8:32px;
+    --space-9:36px; --space-10:40px;
+
+    /* Radii */
+    --radius-sm:6px; --radius-md:10px; --radius-lg:16px;
+    --radius-xl:24px; --radius-pill:9999px;
+
+    /* Type scale */
+    --t-crit-display: 700 56px/60px var(--font-system);
+    --t-display:      700 34px/40px var(--font-system);
+    --t-title-1:      600 22px/28px var(--font-system);
+    --t-title-2:      600 17px/22px var(--font-system);
+    --t-body:         400 15px/22px var(--font-system);
+    --t-caption:      500 13px/18px var(--font-system);
+    --t-micro:        600 11px/14px var(--font-system);
+
+    /* Font stacks — SF Pro on Apple, system fallbacks elsewhere */
+    --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                   "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --font-mono:   ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+
+    /* Page chrome */
+    --page-bg:#1A1A1F;
+    --page-bg-2:#22232A;
+    --page-rule:#2E2F38;
+  }
+
+  /* ============================================================
+     PAGE LAYOUT — design-doc shell
+     ============================================================ */
+  *,*::before,*::after { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    background:var(--page-bg);
+    color:var(--howl-ink-100);
+    font: var(--t-body);
+    font-feature-settings:"ss01","cv11";
+    -webkit-font-smoothing:antialiased;
+    padding: 56px 48px 120px;
+  }
+  .page { max-width:1300px; margin:0 auto; }
+
+  /* numbers — tabular figures everywhere they're shown as data */
+  .num, .mono, .crit-display, .display, .timer, .pct,
+  .swatch__hex, .scale__size, .scale__sample .n,
+  .meta-num, .row__n {
+    font-feature-settings:"tnum","cv01";
+    font-variant-numeric: tabular-nums;
+  }
+  .mono { font-family:var(--font-mono); }
+
+  /* doc heads */
+  .doc-head {
+    display:flex; align-items:center; gap:20px;
+    padding-bottom:32px; border-bottom:1px solid var(--page-rule);
+    margin-bottom:48px;
+  }
+  .doc-head__mark {
+    width:64px; height:64px; border-radius:18px;
+    background:linear-gradient(145deg,#0e1b42,#091533);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 28px rgba(0,0,0,.5);
+  }
+  .doc-head__mark img { width:48px; height:48px; }
+  .doc-head__title { font:var(--t-display); margin:0 0 4px; letter-spacing:-0.01em; }
+  .doc-head__sub { font:var(--t-body); color:var(--howl-ink-300); margin:0; }
+  .doc-head__meta {
+    margin-left:auto; text-align:right;
+    color:var(--howl-ink-500); font:var(--t-caption);
+  }
+  .doc-head__meta strong { color:var(--howl-ink-100); font-weight:600; }
+
+  /* section heads */
+  .section { margin: 64px 0 0; }
+  .section__hdr {
+    display:flex; align-items:baseline; gap:16px;
+    margin-bottom:24px;
+  }
+  .section__no {
+    font:var(--t-micro);
+    color:var(--howl-cyan-300);
+    letter-spacing:.14em; text-transform:uppercase;
+  }
+  .section__title { font:var(--t-title-1); margin:0; letter-spacing:-0.005em; }
+  .section__sub   { color:var(--howl-ink-300); font:var(--t-caption); margin-left:auto; max-width:480px; text-align:right; }
+
+  /* card surface for grouping specs */
+  .card {
+    background:var(--page-bg-2);
+    border:1px solid var(--page-rule);
+    border-radius:var(--radius-lg);
+    padding:24px;
+  }
+  .card--navy {
+    background:var(--howl-navy-900);
+    border:1px solid var(--howl-navy-700);
+  }
+  .card__title {
+    font:var(--t-title-2);
+    margin:0 0 16px;
+    color:var(--howl-ink-100);
+    display:flex; align-items:center; gap:10px;
+  }
+  .card__title .pill { font:var(--t-micro); color:var(--howl-ink-300); background:rgba(255,255,255,.04); padding:3px 8px; border-radius:var(--radius-pill); }
+  .card__caption { color:var(--howl-ink-300); font:var(--t-caption); margin: -8px 0 16px; }
+
+  /* annotations — cyan caption beneath mockups */
+  .annot {
+    color:var(--howl-cyan-300);
+    font:var(--t-caption);
+    margin-top:10px;
+  }
+  .annot::before {
+    content:"";
+    display:inline-block; width:10px; height:1px;
+    background:var(--howl-cyan-500);
+    vertical-align:middle; margin-right:8px;
+  }
+
+  /* ============================================================
+     COLOR TOKENS
+     ============================================================ */
+  .swatch-grid {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap:14px;
+  }
+  .swatch {
+    border-radius:var(--radius-md);
+    padding:16px;
+    min-height:128px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    position:relative;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .swatch__top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .swatch__dot {
+    width:14px; height:14px; border-radius:50%;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 0 0 1px rgba(0,0,0,.4);
+  }
+  .swatch__name { font:var(--t-micro); letter-spacing:.06em; opacity:.85; text-transform:uppercase; }
+  .swatch__hex { font: 500 13px/16px var(--font-mono); opacity:.9; }
+  .swatch__use { font:var(--t-caption); opacity:.75; max-width:18ch; }
+
+  /* navy stack */
+  .sw-navy-900 { background:var(--howl-navy-900); color:var(--howl-ink-100); }
+  .sw-navy-800 { background:var(--howl-navy-800); color:var(--howl-ink-100); }
+  .sw-navy-700 { background:var(--howl-navy-700); color:var(--howl-ink-100); }
+  .sw-navy-600 { background:var(--howl-navy-600); color:var(--howl-ink-100); }
+  /* cyan stack */
+  .sw-cy-500 { background:var(--howl-cyan-500); color:#062242; }
+  .sw-cy-400 { background:var(--howl-cyan-400); color:#062242; }
+  .sw-cy-300 { background:var(--howl-cyan-300); color:#062242; }
+  .sw-cy-100 { background:var(--howl-cyan-100); color:#062242; }
+  /* state */
+  .sw-fresh  { background:var(--howl-state-fresh); color:#003822; }
+  .sw-ok     { background:var(--howl-state-ok);    color:#062242; }
+  .sw-warn   { background:var(--howl-state-warn);  color:#3a2200; }
+  .sw-crit   { background:var(--howl-state-crit);  color:#400; }
+  /* ink */
+  .sw-ink-100 { background:var(--howl-ink-100); color:#091533; }
+  .sw-ink-300 { background:var(--howl-ink-300); color:#091533; }
+  .sw-ink-500 { background:var(--howl-ink-500); color:#fff; }
+  .sw-ink-700 { background:var(--howl-ink-700); color:#fff; }
+  /* light */
+  .sw-light-surface { background:var(--howl-light-surface); color:#091533; }
+  .sw-light-surface-2 { background:var(--howl-light-surface-2); color:#091533; }
+  .sw-light-ink { background:var(--howl-light-ink); color:#F4F7FB; }
+  .sw-light-ink-2 { background:var(--howl-light-ink-2); color:#F4F7FB; }
+
+  /* token table for trigger conditions */
+  .triggers {
+    display:grid; grid-template-columns: 14px 1fr auto; gap:10px 14px;
+    margin-top:14px; padding-top:14px; border-top:1px dashed var(--page-rule);
+    color:var(--howl-ink-300); font:var(--t-caption);
+  }
+  .triggers__dot { width:10px; height:10px; border-radius:50%; align-self:center; }
+
+  /* ============================================================
+     TYPOGRAPHY SCALE
+     ============================================================ */
+  .scale {
+    display:grid;
+    grid-template-columns: 140px 100px 80px 1fr;
+    gap:24px 20px;
+    align-items:baseline;
+    padding:8px 0;
+  }
+  .scale + .scale { border-top:1px solid var(--page-rule); padding-top:20px; margin-top:8px; }
+  .scale__name { font:var(--t-micro); letter-spacing:.12em; text-transform:uppercase; color:var(--howl-cyan-300); }
+  .scale__size { font: 500 13px/18px var(--font-mono); color:var(--howl-ink-300); }
+  .scale__wt   { font:var(--t-caption); color:var(--howl-ink-500); }
+  .scale__sample { color:var(--howl-ink-100); }
+  .sample-crit { font:var(--t-crit-display); letter-spacing:-0.02em; }
+  .sample-disp { font:var(--t-display);      letter-spacing:-0.01em; }
+  .sample-t1   { font:var(--t-title-1); }
+  .sample-t2   { font:var(--t-title-2); }
+  .sample-body { font:var(--t-body); color:var(--howl-ink-100); }
+  .sample-cap  { font:var(--t-caption); color:var(--howl-ink-300); }
+  .sample-mic  { font:var(--t-micro);   color:var(--howl-cyan-300); letter-spacing:.12em; text-transform:uppercase; }
+
+  /* ============================================================
+     SPACING / RADII / MOTION
+     ============================================================ */
+  .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:24px; }
+  .spacing-row { display:flex; align-items:center; gap:14px; padding:8px 0; border-bottom:1px solid var(--page-rule); }
+  .spacing-row:last-child { border-bottom:0; }
+  .spacing-row .bar { height:14px; background:var(--howl-cyan-500); border-radius:3px; }
+  .spacing-row .lbl { font:var(--t-micro); color:var(--howl-cyan-300); width:64px; letter-spacing:.1em; }
+  .spacing-row .val { margin-left:auto; font: 500 13px/18px var(--font-mono); color:var(--howl-ink-300); }
+
+  .radii-row { display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+  .radii-row .demo {
+    width:96px; height:64px; background:var(--howl-navy-700);
+    border:1px solid var(--howl-navy-600);
+    display:flex; align-items:flex-end; justify-content:center;
+    padding:6px; color:var(--howl-ink-300); font:var(--t-micro); letter-spacing:.1em;
+  }
+  .radii-row .demo.r-sm  { border-radius:var(--radius-sm); }
+  .radii-row .demo.r-md  { border-radius:var(--radius-md); }
+  .radii-row .demo.r-lg  { border-radius:var(--radius-lg); }
+  .radii-row .demo.r-xl  { border-radius:var(--radius-xl); }
+  .radii-row .demo.r-pl  { border-radius:var(--radius-pill); }
+
+  .motion-row { display:grid; grid-template-columns: 160px 1fr; gap:8px 16px; align-items:center; }
+  .motion-row .lbl { font:var(--t-caption); color:var(--howl-ink-300); }
+  .motion-row .val { font:500 13px/18px var(--font-mono); color:var(--howl-ink-100); }
+  .motion-trace {
+    height:8px; background:rgba(255,255,255,.04); border-radius:99px; overflow:hidden; position:relative;
+  }
+  .motion-trace > i {
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, var(--howl-cyan-500), var(--howl-cyan-300));
+    transform-origin: left center;
+    animation: fill 2.4s cubic-bezier(.18,.89,.32,1.28) infinite;
+  }
+  .motion-trace.linear > i { animation: fill-l 2.4s linear infinite; }
+  @keyframes fill   { 0%{transform:scaleX(0)} 60%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
+  @keyframes fill-l { 0%{transform:scaleX(0)} 40%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
+
+  /* ============================================================
+     LIQUID GLASS DEMO
+     ============================================================ */
+  .glass-stage {
+    position:relative;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    background:
+      radial-gradient(60% 80% at 12% 24%, rgba(15,172,237,.35), transparent 65%),
+      radial-gradient(40% 60% at 85% 70%, rgba(61,190,241,.32), transparent 60%),
+      radial-gradient(40% 60% at 70% 18%, rgba(123,211,246,.22), transparent 55%),
+      linear-gradient(180deg, #0c1839, #060d24);
+    min-height:320px;
+    padding:40px;
+    display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:center;
+  }
+  .glass-stage::after {
+    /* subtle "bokeh" content — gives glass something to refract */
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.18) 0 2px, transparent 3px),
+      radial-gradient(circle at 78% 22%, rgba(255,255,255,.12) 0 3px, transparent 4px),
+      radial-gradient(circle at 42% 78%, rgba(255,255,255,.14) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 80%, rgba(255,255,255,.10) 0 2px, transparent 3px);
+  }
+  .glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(15,172,237,.06);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.15),
+      0 8px 32px rgba(0,0,0,.40);
+    border-radius:var(--radius-lg);
+    padding:18px 20px;
+    color:var(--howl-ink-100);
+    position:relative; z-index:1;
+  }
+  .glass--prom {
+    background: rgba(15,172,237,.18);
+    border:1px solid rgba(123,211,246,.30);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      0 10px 36px rgba(15,172,237,.20);
+  }
+  .glass--pressed { box-shadow: inset 0 4px 0 rgba(255,255,255,.18), 0 4px 18px rgba(0,0,0,.35); }
+  .glass h4 { font:var(--t-title-2); margin:0 0 4px; }
+  .glass p  { font:var(--t-caption); color:var(--howl-ink-300); margin:0; }
+
+  .rules { display:grid; gap:10px; }
+  .rules li { font:var(--t-caption); color:var(--howl-ink-300); padding-left:18px; position:relative; list-style:none; }
+  .rules li::before {
+    content:"";
+    position:absolute; left:0; top:6px;
+    width:6px; height:6px; border-radius:50%;
+    background:var(--howl-cyan-500);
+    box-shadow: 0 0 0 4px rgba(15,172,237,.18);
+  }
+  .rules ul { padding:0; margin:0; display:grid; gap:8px; }
+
+  /* ============================================================
+     COMPONENTS — used in spec sheet, and reused on real screens
+     ============================================================ */
+
+  /* CritBar */
+  .critbar {
+    position:relative;
+    width:100%;
+    background:rgba(255,255,255,.06);
+    border-radius:var(--radius-pill);
+    overflow:hidden;
+  }
+  .critbar > .fill {
+    position:absolute; inset:0 auto 0 0;
+    border-radius:var(--radius-pill);
+    background:var(--howl-state-ok);
+    transition: width 250ms linear, background 250ms linear;
+  }
+  .critbar > .pct {
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    color:var(--howl-ink-100); font: 600 12px/16px var(--font-mono);
+    text-shadow: 0 0 6px rgba(0,0,0,.35);
+  }
+  .critbar.cb-compact { height:6px; }
+  .critbar.cb-compact .pct { display:none; }
+  .critbar.cb-default { height:18px; }
+  .critbar.cb-large   { height:28px; }
+  .critbar.cb-large .pct { right:14px; font-size:14px; }
+  .critbar.s-fresh > .fill { background:var(--howl-state-fresh); }
+  .critbar.s-ok    > .fill { background:var(--howl-state-ok); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+  .critbar.s-warn  > .fill { background:var(--howl-state-warn); }
+  .critbar.s-crit  > .fill { background:var(--howl-state-crit); }
+
+  /* TwoBarMeter */
+  .twobar { display:grid; gap:14px; }
+  .twobar__row {
+    display:grid; grid-template-columns: 120px 1fr 90px; align-items:center; gap:14px;
+  }
+  .twobar__row .lbl  { font:var(--t-caption); color:var(--howl-ink-300); }
+  .twobar__row .time { text-align:right; font: 500 13px/18px var(--font-mono); color:var(--howl-ink-100); }
+
+  /* PaceChip */
+  .pace {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 12px 6px 10px;
+    border-radius:var(--radius-pill);
+    font:var(--t-caption); font-weight:600;
+    border:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.04);
+  }
+  .pace .dot { width:7px; height:7px; border-radius:50%; }
+  .pace.p-ok    { color:var(--howl-cyan-300);   background:rgba(15,172,237,.10);   border-color:rgba(15,172,237,.28); }
+  .pace.p-ok    .dot { background:var(--howl-cyan-400); box-shadow:0 0 0 3px rgba(15,172,237,.18); }
+  .pace.p-warn  { color:#FFC580;                 background:rgba(255,165,51,.10);   border-color:rgba(255,165,51,.28); }
+  .pace.p-warn  .dot { background:var(--howl-state-warn); }
+  .pace.p-fresh { color:#9CEDC8;                 background:rgba(61,220,151,.10);   border-color:rgba(61,220,151,.28); }
+  .pace.p-fresh .dot { background:var(--howl-state-fresh); }
+
+  /* ResetCountdown */
+  .countdown {
+    display:inline-flex; flex-direction:column; gap:2px; align-items:flex-start;
+  }
+  .countdown__lbl { font:var(--t-micro); color:var(--howl-ink-500); letter-spacing:.14em; text-transform:uppercase; }
+  .countdown__val { font: 600 22px/26px var(--font-mono); color:var(--howl-ink-100); letter-spacing:-0.01em; }
+  .countdown.pulse .countdown__val {
+    animation: pulse 1s ease-in-out infinite;
+    color:var(--howl-state-warn);
+  }
+  .countdown.celebrate .countdown__val {
+    color:var(--howl-cyan-300);
+    text-shadow: 0 0 18px rgba(15,172,237,.55);
+  }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.55 } }
+
+  /* ModelRow */
+  .model-row {
+    display:grid; grid-template-columns: 1fr auto 64px; align-items:center;
+    padding:10px 0; gap:14px;
+    border-bottom:1px solid var(--howl-ink-700);
+  }
+  .model-row:last-child { border-bottom:0; }
+  .model-row__name { font:var(--t-caption); color:var(--howl-ink-100); }
+  .model-row__name .tag { color:var(--howl-cyan-300); font: 500 11px/14px var(--font-mono); margin-right:8px; }
+  .model-row__tokens { font: 500 13px/18px var(--font-mono); color:var(--howl-ink-300); }
+  .model-row__spark { height:18px; width:64px; }
+
+  /* Buttons */
+  .btn-row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .btn {
+    display:inline-flex; align-items:center; gap:10px;
+    height:36px; padding:0 16px;
+    border-radius:var(--radius-md);
+    border:1px solid transparent;
+    font:var(--t-title-2); font-size:14px;
+    cursor:pointer; user-select:none;
+    transition: transform 120ms ease, background 200ms ease, box-shadow 200ms ease;
+  }
+  .btn--prom {
+    color:#062242; background:rgba(15,172,237,.92);
+    border-color:rgba(123,211,246,.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.45),
+      0 6px 18px rgba(15,172,237,.35);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+  .btn--prom:hover { background:rgba(61,190,241,.95); }
+  .btn--prom.is-pressed { box-shadow: inset 0 4px 0 rgba(255,255,255,.35), 0 2px 8px rgba(15,172,237,.30); transform: translateY(1px); }
+  .btn--prom[disabled]  { background:rgba(15,172,237,.30); color:rgba(6,34,66,.60); cursor:not-allowed; box-shadow:none; }
+
+  .btn--sec {
+    color:var(--howl-ink-100);
+    background:rgba(255,255,255,.06);
+    border-color:rgba(255,255,255,.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+  .btn--sec:hover { background:rgba(255,255,255,.10); }
+  .btn--sec.is-pressed { box-shadow: inset 0 3px 0 rgba(255,255,255,.10); transform: translateY(1px); }
+  .btn--sec[disabled]  { color:var(--howl-ink-500); cursor:not-allowed; }
+
+  .btn--ghost {
+    color:var(--howl-cyan-300);
+    background:transparent;
+    border-color:transparent;
+    padding:0 6px;
+    height:auto;
+  }
+  .btn--ghost:hover { color:var(--howl-cyan-400); }
+  .btn--ghost:hover .lbl { border-bottom:1px solid var(--howl-cyan-400); }
+  .btn--ghost.is-pressed { color:var(--howl-cyan-500); }
+  .btn--ghost[disabled]  { color:var(--howl-ink-500); cursor:not-allowed; }
+  .btn--ghost .lbl { border-bottom:1px solid transparent; padding-bottom:1px; }
+
+  /* StateIcon (bolt) */
+  .bolt {
+    width:18px; height:18px;
+    display:inline-block;
+    color: var(--state, var(--howl-ink-300));
+  }
+  .bolt svg { width:100%; height:100%; display:block; fill:currentColor; }
+
+  /* WolfMark — supplied SVG, rendered with state-coloured halo */
+  .wolf {
+    --wolf-size:32px;
+    --state-glow: transparent;
+    width:var(--wolf-size); height:var(--wolf-size);
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    box-shadow: 0 0 0 0 var(--state-glow);
+    transition: box-shadow 200ms ease;
+  }
+  .wolf img { width:100%; height:100%; object-fit:contain; display:block; }
+  .wolf.s-fresh { --state-glow: rgba(61,220,151,.45); box-shadow: 0 0 24px var(--state-glow); }
+  .wolf.s-ok    { --state-glow: rgba(15,172,237,.45); box-shadow: 0 0 24px var(--state-glow); }
+  .wolf.s-warn  { --state-glow: rgba(255,165,51,.45); box-shadow: 0 0 24px var(--state-glow); }
+  .wolf.s-crit  { --state-glow: rgba(255,77,77,.45);  box-shadow: 0 0 24px var(--state-glow); }
+
+  /* PairingCard */
+  .pair-card {
+    display:grid; grid-template-columns: 140px 1fr; gap:18px;
+    background:var(--howl-navy-800);
+    border:1px solid var(--howl-navy-700);
+    border-radius:var(--radius-lg);
+    padding:18px;
+  }
+  .qr {
+    width:140px; height:140px;
+    background:#fff;
+    border-radius:var(--radius-md);
+    position:relative; overflow:hidden;
+    --qr: 11px;
+  }
+  /* hand-rolled "QR" pattern using CSS — synthetic, identifiable as a QR */
+  .qr::before, .qr::after {
+    content:""; position:absolute; width:42px; height:42px;
+    border:7px solid #091533;
+  }
+  .qr::before { top:8px; left:8px; box-shadow: inset 0 0 0 7px #fff, inset 0 0 0 14px #091533; }
+  .qr::after  { top:8px; right:8px; box-shadow: inset 0 0 0 7px #fff, inset 0 0 0 14px #091533; }
+  .qr i {
+    position:absolute; bottom:8px; left:8px; width:42px; height:42px;
+    border:7px solid #091533;
+    box-shadow: inset 0 0 0 7px #fff, inset 0 0 0 14px #091533;
+  }
+  .qr u {
+    position:absolute; inset:60px 12px 12px 60px;
+    background-image:
+      conic-gradient(from 0deg at 50% 50%, #091533 0 25%, transparent 0 50%, #091533 0 75%, transparent 0);
+    background-size: 8px 8px;
+    background-position: 0 0;
+    text-decoration:none;
+  }
+  .pair-card__code {
+    font: 700 26px/30px var(--font-mono);
+    letter-spacing:.18em;
+    color:var(--howl-ink-100);
+    margin: 8px 0 6px;
+  }
+  .pair-card__cap { font:var(--t-caption); color:var(--howl-ink-300); margin:0 0 14px; }
+
+  /* EmptyState */
+  .empty {
+    text-align:center;
+    padding:32px 24px;
+    background:var(--howl-navy-800);
+    border:1px solid var(--howl-navy-700);
+    border-radius:var(--radius-lg);
+    max-width:360px;
+    margin:0 auto;
+  }
+  .empty .wolf { --wolf-size:72px; margin: 8px auto 16px; }
+  .empty h5 { font:var(--t-title-1); margin:0 0 6px; color:var(--howl-ink-100); }
+  .empty p  { font:var(--t-body); color:var(--howl-ink-300); margin:0 0 18px; }
+  .empty .actions { display:flex; flex-direction:column; gap:10px; align-items:center; }
+
+  /* NotificationCard */
+  .notif {
+    display:grid; grid-template-columns: 32px 1fr auto; gap:12px; align-items:flex-start;
+    padding:14px;
+    background:var(--howl-navy-800);
+    border:1px solid var(--howl-navy-700);
+    border-radius:var(--radius-md);
+  }
+  .notif__wolf { width:32px; height:32px; }
+  .notif__wolf img { width:100%; height:100%; object-fit:contain; display:block; }
+  .notif__title { font:var(--t-title-2); margin:0 0 2px; }
+  .notif__body  { font:var(--t-caption); color:var(--howl-ink-300); margin:0; }
+  .notif__time  { font: 500 12px/16px var(--font-mono); color:var(--howl-ink-500); white-space:nowrap; }
+  .notif--warn  { border-color: rgba(255,165,51,.45); }
+  .notif--warn .notif__title { color:var(--howl-state-warn); }
+  .notif--crit  { border-color: rgba(255,77,77,.45); }
+  .notif--crit .notif__title { color:var(--howl-state-crit); }
+  .notif--fresh { border-color: rgba(61,220,151,.45); }
+  .notif--fresh .notif__title { color:var(--howl-state-fresh); }
+
+  /* SettingsRow */
+  .srow {
+    display:grid; grid-template-columns: 1fr auto; gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid var(--howl-ink-700);
+    align-items:center;
+  }
+  .srow:last-child { border-bottom:0; }
+  .srow__lbl { font:var(--t-title-2); }
+  .srow__cap { font:var(--t-caption); color:var(--howl-ink-300); margin-top:2px; }
+  .switch {
+    width:44px; height:26px;
+    background:rgba(255,255,255,.10);
+    border-radius:var(--radius-pill);
+    position:relative; cursor:pointer;
+    transition: background 200ms ease;
+  }
+  .switch::after {
+    content:""; position:absolute; top:2px; left:2px;
+    width:22px; height:22px; border-radius:50%;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
+    transition: left 250ms cubic-bezier(.18,.89,.32,1.28);
+  }
+  .switch.on { background: var(--howl-cyan-500); }
+  .switch.on::after { left:20px; }
+
+  /* sparkline helper */
+  .spark { stroke: var(--howl-cyan-400); fill:none; stroke-width:1.5; }
+  .spark.s-warn { stroke: var(--howl-state-warn); }
+  .spark.s-fresh { stroke: var(--howl-state-fresh); }
+
+  /* utility */
+  .row    { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .stack  { display:flex; flex-direction:column; gap:16px; }
+  .col-2  { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .col-3  { display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; }
+  .meta-num { color:var(--howl-ink-300); font:500 12px/16px var(--font-mono); }
+  .divider { height:1px; background:var(--page-rule); margin:32px 0; }
+
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- =================== HEADER =================== -->
+  <header class="doc-head" data-screen-label="A. Design System">
+    <div class="doc-head__mark">
+      <img src="assets/wolf.png" alt="HowlAlert" />
+    </div>
+    <div>
+      <h1 class="doc-head__title">HowlAlert Design System</h1>
+      <p class="doc-head__sub">A wolf-themed companion for Claude Code usage — tokens, type, components.</p>
+    </div>
+    <div class="doc-head__meta">
+      <div><strong>Section A · Reference</strong></div>
+      <div>v0.1 · macOS 26 · iOS 26 · watchOS 26</div>
+    </div>
+  </header>
+
+  <!-- =================== BRAND VOICE =================== -->
+  <section class="section">
+    <div class="section__hdr">
+      <div class="section__no">01</div>
+      <h2 class="section__title">Brand &amp; Voice</h2>
+      <p class="section__sub">A friendly blue wolf keeping tabs on your Claude usage — guide, not guard dog.</p>
+    </div>
+
+    <div class="col-2">
+      <div class="card card--navy">
+        <h3 class="card__title">Voice rules</h3>
+        <ul class="rules"><ul>
+          <li>Plain language first, technical terms after.</li>
+          <li>Never say <em>monitoring</em> — say <em>watching</em> or <em>keeping tabs</em>.</li>
+          <li>Status uses natural time: <span class="mono">Runs out in 47m</span>, not <span class="mono">47 minutes until limit</span>.</li>
+          <li>Errors stay calm: <span class="mono">Couldn’t reach Claude. Trying again in 30s.</span></li>
+          <li>No exclamation points except for clear wins (<span class="mono">Reset just hit!</span>).</li>
+        </ul></ul>
+      </div>
+
+      <div class="card card--navy">
+        <h3 class="card__title">Persona &amp; tone</h3>
+        <div class="row" style="margin-bottom:14px;">
+          <div class="wolf s-ok" style="--wolf-size:64px;"><img src="assets/wolf.png" alt="" /></div>
+          <div>
+            <div style="font:var(--t-title-2);">MrDemonWolf</div>
+            <div style="font:var(--t-caption); color:var(--howl-ink-300);">Playful, technical, reassuring.</div>
+          </div>
+        </div>
+        <p style="font:var(--t-caption); color:var(--howl-ink-300); margin:0;">
+          The wolf sits at the edge of your workspace and watches your Claude limits so you don’t have to. They speak softly when things are fine, clearly when they aren’t, and never panic.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== COLOR =================== -->
+  <section class="section">
+    <div class="section__hdr">
+      <div class="section__no">02</div>
+      <h2 class="section__title">Color system</h2>
+      <p class="section__sub">Every screen consumes these via CSS custom properties. No hard-coded hex inside components.</p>
+    </div>
+
+    <div class="stack">
+
+      <div class="card">
+        <h3 class="card__title">Brand core <span class="pill">--howl-navy-* / --howl-cyan-*</span></h3>
+        <div class="swatch-grid">
+          <div class="swatch sw-navy-900">
+            <div class="swatch__top"><span class="swatch__name">navy-900</span><span class="swatch__dot" style="background:#091533;"></span></div>
+            <div><div class="swatch__hex">#091533</div><div class="swatch__use">Primary background · popover surface</div></div>
+          </div>
+          <div class="swatch sw-navy-800">
+            <div class="swatch__top"><span class="swatch__name">navy-800</span><span class="swatch__dot" style="background:#0E1B42;"></span></div>
+            <div><div class="swatch__hex">#0E1B42</div><div class="swatch__use">Elevated surface · cards · sheets</div></div>
+          </div>
+          <div class="swatch sw-navy-700">
+            <div class="swatch__top"><span class="swatch__name">navy-700</span><span class="swatch__dot" style="background:#15275A;"></span></div>
+            <div><div class="swatch__hex">#15275A</div><div class="swatch__use">Hover / pressed on navy</div></div>
+          </div>
+          <div class="swatch sw-navy-600">
+            <div class="swatch__top"><span class="swatch__name">navy-600</span><span class="swatch__dot" style="background:#1E3475;"></span></div>
+            <div><div class="swatch__hex">#1E3475</div><div class="swatch__use">Borders on navy</div></div>
+          </div>
+
+          <div class="swatch sw-cy-500">
+            <div class="swatch__top"><span class="swatch__name">cyan-500</span><span class="swatch__dot" style="background:#fff;"></span></div>
+            <div><div class="swatch__hex">#0FACED</div><div class="swatch__use">Primary CTA · brand accent · active progress</div></div>
+          </div>
+          <div class="swatch sw-cy-400">
+            <div class="swatch__top"><span class="swatch__name">cyan-400</span><span class="swatch__dot" style="background:#fff;"></span></div>
+            <div><div class="swatch__hex">#3DBEF1</div><div class="swatch__use">Cyan hover</div></div>
+          </div>
+          <div class="swatch sw-cy-300">
+            <div class="swatch__top"><span class="swatch__name">cyan-300</span><span class="swatch__dot" style="background:#062242;"></span></div>
+            <div><div class="swatch__hex">#7BD3F6</div><div class="swatch__use">Cyan text on navy</div></div>
+          </div>
+          <div class="swatch sw-cy-100">
+            <div class="swatch__top"><span class="swatch__name">cyan-100</span><span class="swatch__dot" style="background:#062242;"></span></div>
+            <div><div class="swatch__hex">#D5F0FB</div><div class="swatch__use">Cyan tint background</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="card">
+          <h3 class="card__title">Crit states <span class="pill">meter colors</span></h3>
+          <div class="swatch-grid" style="grid-template-columns:repeat(2,1fr);">
+            <div class="swatch sw-fresh">
+              <div class="swatch__top"><span class="swatch__name">state-fresh</span></div>
+              <div><div class="swatch__hex">#3DDC97</div><div class="swatch__use">Reset just hit · heavy reserve</div></div>
+            </div>
+            <div class="swatch sw-ok">
+              <div class="swatch__top"><span class="swatch__name">state-ok</span></div>
+              <div><div class="swatch__hex">#0FACED</div><div class="swatch__use">Normal pace</div></div>
+            </div>
+            <div class="swatch sw-warn">
+              <div class="swatch__top"><span class="swatch__name">state-warn</span></div>
+              <div><div class="swatch__hex">#FFA533</div><div class="swatch__use">70–89% used · pace deficit</div></div>
+            </div>
+            <div class="swatch sw-crit">
+              <div class="swatch__top"><span class="swatch__name">state-crit</span></div>
+              <div><div class="swatch__hex">#FF4D4D</div><div class="swatch__use">90%+ used · runs out soon</div></div>
+            </div>
+          </div>
+          <div class="triggers">
+            <div class="triggers__dot" style="background:var(--howl-state-fresh);"></div><div>Used &lt; 10%</div><div class="mono">fresh</div>
+            <div class="triggers__dot" style="background:var(--howl-state-ok);"></div><div>10–69% used</div><div class="mono">ok</div>
+            <div class="triggers__dot" style="background:var(--howl-state-warn);"></div><div>70–89% used</div><div class="mono">warn</div>
+            <div class="triggers__dot" style="background:var(--howl-state-crit);"></div><div>90%+ used</div><div class="mono">crit</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card__title">Neutrals on navy <span class="pill">--howl-ink-*</span></h3>
+          <div class="swatch-grid" style="grid-template-columns:repeat(2,1fr);">
+            <div class="swatch sw-ink-100">
+              <div class="swatch__top"><span class="swatch__name">ink-100</span></div>
+              <div><div class="swatch__hex">#F4F7FB</div><div class="swatch__use">Primary text on navy</div></div>
+            </div>
+            <div class="swatch sw-ink-300">
+              <div class="swatch__top"><span class="swatch__name">ink-300</span></div>
+              <div><div class="swatch__hex">#A8B5CF</div><div class="swatch__use">Secondary text</div></div>
+            </div>
+            <div class="swatch sw-ink-500">
+              <div class="swatch__top"><span class="swatch__name">ink-500</span></div>
+              <div><div class="swatch__hex">#6A7A99</div><div class="swatch__use">Tertiary · metadata</div></div>
+            </div>
+            <div class="swatch sw-ink-700">
+              <div class="swatch__top"><span class="swatch__name">ink-700</span></div>
+              <div><div class="swatch__hex">#3A4666</div><div class="swatch__use">Dividers on navy</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card__title">Light mode mirror <span class="pill">iOS only · macOS app stays dark</span></h3>
+        <div class="swatch-grid">
+          <div class="swatch sw-light-surface">
+            <div class="swatch__top"><span class="swatch__name">light-surface</span></div>
+            <div><div class="swatch__hex">#F8FAFE</div><div class="swatch__use">Primary surface</div></div>
+          </div>
+          <div class="swatch sw-light-surface-2">
+            <div class="swatch__top"><span class="swatch__name">light-surface-2</span></div>
+            <div><div class="swatch__hex">#EEF2F9</div><div class="swatch__use">Grouped row · sheet base</div></div>
+          </div>
+          <div class="swatch sw-light-ink">
+            <div class="swatch__top"><span class="swatch__name">light-ink</span></div>
+            <div><div class="swatch__hex">#091533</div><div class="swatch__use">Primary text</div></div>
+          </div>
+          <div class="swatch sw-light-ink-2">
+            <div class="swatch__top"><span class="swatch__name">light-ink-2</span></div>
+            <div><div class="swatch__hex">#3A4666</div><div class="swatch__use">Secondary text</div></div>
+          </div>
+        </div>
+        <p class="annot" style="margin-top:14px;">Cyan stays cyan in light mode. Surfaces invert. State colors keep their hex; contrast against light surface still passes WCAG AA.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== TYPE =================== -->
+  <section class="section">
+    <div class="section__hdr">
+      <div class="section__no">03</div>
+      <h2 class="section__title">Typography</h2>
+      <p class="section__sub">System font (SF Pro on Apple). Monospaced digits via <span class="mono">tnum</span> for all numerics.</p>
+    </div>
+
+    <div class="card card--navy">
+      <div class="scale">
+        <div class="scale__name">crit-display</div>
+        <div class="scale__size">56 / 60</div>
+        <div class="scale__wt">700</div>
+        <div class="scale__sample sample-crit"><span class="n">87%</span></div>
+      </div>
+      <div class="scale">
+        <div class="scale__name">display</div>
+        <div class="scale__size">34 / 40</div>
+        <div class="scale__wt">700</div>
+        <div class="scale__sample sample-disp">Keep tabs on Claude.</div>
+      </div>
+      <div class="scale">
+        <div class="scale__name">title-1</div>
+        <div class="scale__size">22 / 28</div>
+        <div class="scale__wt">600</div>
+        <div class="scale__sample sample-t1">5-Hour Window</div>
+      </div>
+      <div class="scale">
+        <div class="scale__name">title-2</div>
+        <div class="scale__size">17 / 22</div>
+        <div class="scale__wt">600</div>
+        <div class="scale__sample sample-t2">Recent activity</div>
+      </div>
+      <div class="scale">
+        <div class="scale__name">body</div>
+        <div class="scale__size">15 / 22</div>
+        <div class="scale__wt">400</div>
+        <div class="scale__sample sample-body">The wolf is watching <span class="mono">claude-sonnet-4-5</span> burn through tokens at a fair pace — should last until <span class="mono">8:42 PM</span>.</div>
+      </div>
+      <div class="scale">
+        <div class="scale__name">caption</div>
+        <div class="scale__size">13 / 18</div>
+        <div class="scale__wt">500</div>
+        <div class="scale__sample sample-cap">Runs out in <span class="mono">47m</span> at current pace</div>
+      </div>
+      <div class="scale">
+        <div class="scale__name">micro</div>
+        <div class="scale__size">11 / 14</div>
+        <div class="scale__wt">600</div>
+        <div class="scale__sample sample-mic">DEMO MODE · PRO · PAIRED</div>
+      </div>
+    </div>
+    <p class="annot">All numeric values — timers, percentages, token counts — render with <span class="mono">font-feature-settings:"tnum"</span>. SF Mono is reserved for raw identifiers (model slugs, codes).</p>
+  </section>
+
+  <!-- =================== SPACING / RADII / MOTION =================== -->
+  <section class="section">
+    <div class="section__hdr">
+      <div class="section__no">04</div>
+      <h2 class="section__title">Spacing · radii · motion</h2>
+      <p class="section__sub">4-point grid. Five radii. Two motion curves — spring for state changes, linear for progress fills.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card card--navy">
+        <h3 class="card__title">Spacing scale</h3>
+        <div class="spacing-row"><span class="lbl">space-1</span><span class="bar" style="width:4px;"></span><span class="val">4px</span></div>
+        <div class="spacing-row"><span class="lbl">space-2</span><span class="bar" style="width:8px;"></span><span class="val">8px</span></div>
+        <div class="spacing-row"><span class="lbl">space-3</span><span class="bar" style="width:12px;"></span><span class="val">12px</span></div>
+        <div class="spacing-row"><span class="lbl">space-4</span><span class="bar" style="width:16px;"></span><span class="val">16px</span></div>
+        <div class="spacing-row"><span class="lbl">space-5</span><span class="bar" style="width:20px;"></span><span class="val">20px</span></div>
+        <div class="spacing-row"><span class="lbl">space-6</span><span class="bar" style="width:24px;"></span><span class="val">24px</span></div>
+        <div class="spacing-row"><span class="lbl">space-7</span><span class="bar" style="width:28px;"></span><span class="val">28px</span></div>
+        <div class="spacing-row"><span class="lbl">space-8</span><span class="bar" style="width:32px;"></span><span class="val">32px</span></div>
+        <div class="spacing-row"><span class="lbl">space-9</span><span class="bar" style="width:36px;"></span><span class="val">36px</span></div>
+        <div class="spacing-row"><span class="lbl">space-10</span><span class="bar" style="width:40px;"></span><span class="val">40px</span></div>
+      </div>
+
+      <div class="card card--navy">
+        <h3 class="card__title">Corner radii</h3>
+        <div class="radii-row">
+          <div class="demo r-sm">sm · 6</div>
+          <div class="demo r-md">md · 10</div>
+          <div class="demo r-lg">lg · 16</div>
+          <div class="demo r-xl">xl · 24</div>
+          <div class="demo r-pl">pill</div>
+        </div>
+        <p class="annot">Glass surfaces use <span class="mono">--radius-lg</span> or <span class="mono">--radius-xl</span>. Pills are reserved for status chips and progress bars.</p>
+      </div>
+
+      <div class="card card--navy">
+        <h3 class="card__title">Motion</h3>
+        <div class="motion-row">
+          <span class="lbl">State change</span><span class="val">spring(response: 0.4, damping: 0.8)</span>
+          <span></span>
+          <div class="motion-trace"><i></i></div>
+          <span class="lbl">Progress fill</span><span class="val">linear · 250ms</span>
+          <span></span>
+          <div class="motion-trace linear"><i></i></div>
+        </div>
+        <p class="annot">Reset countdown pulses on the last 60s; fires a celebratory cyan glow at <span class="mono">00:00</span>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== LIQUID GLASS =================== -->
+  <section class="section">
+    <div class="section__hdr">
+      <div class="section__no">05</div>
+      <h2 class="section__title">Liquid Glass rules</h2>
+      <p class="section__sub">Navigation layer only. Lensing, not blur. Faint cyan tint. Specular top edge, soft bottom shadow.</p>
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="glass-stage">
+        <div>
+          <div class="glass glass--prom" style="display:inline-flex; align-items:center; gap:10px;">
+            <span class="bolt" style="--state:var(--howl-cyan-300);"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>
+            <span style="font:var(--t-title-2);">Open HowlAlert</span>
+          </div>
+          <div style="height:14px;"></div>
+          <div class="glass" style="max-width:280px;">
+            <h4>5-Hour Window</h4>
+            <p>Runs out in <span class="mono">47m</span> at current pace</p>
+            <div style="height:10px;"></div>
+            <div class="critbar cb-default s-warn"><div class="fill" style="width:72%;"></div><div class="pct">72%</div></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font:var(--t-title-2); margin:0 0 12px;">When glass applies</h3>
+          <ul class="rules"><ul>
+            <li>Navigation layer only — toolbars, popovers, floating CTAs, tab bars.</li>
+            <li>Only over real content — never on solid navy. Needs something to refract.</li>
+            <li>Two glass elements near each other? Wrap in a virtual <span class="mono">GlassEffectContainer</span>; merge highlights along the shared edge.</li>
+            <li>Faint cyan tint via <span class="mono">.tint(.cyan)</span> — 6% cyan overlay with a 1px inner highlight.</li>
+            <li>Lensing, not blur — specular highlight on top edge, soft shadow on bottom.</li>
+            <li>Pressed state shifts highlight ~3px down.</li>
+          </ul></ul>
+        </div>
+      </div>
+    </div>
+    <p class="annot">CSS recipe: <span class="mono">backdrop-filter: blur(20px) saturate(180%); background: rgba(15,172,237,.06); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 32px rgba(0,0,0,.4);</span></p>
+  </section>
+
+  <!-- =================== COMPONENT LIBRARY =================== -->
+  <section class="section">
+    <div class="section__hdr">
+      <div class="section__no">06</div>
+      <h2 class="section__title">Component library</h2>
+      <p class="section__sub">Built once here, reused on every screen. Each variant labelled.</p>
+    </div>
+
+    <div class="stack">
+
+      <!-- CritBar -->
+      <div class="card card--navy">
+        <h3 class="card__title">CritBar <span class="pill">compact · default · large · 4 states</span></h3>
+        <div class="col-3">
+          <div>
+            <div class="meta-num" style="margin-bottom:6px;">compact · 6px</div>
+            <div class="critbar cb-compact s-fresh"><div class="fill" style="width:8%;"></div></div>
+            <div style="height:8px;"></div>
+            <div class="critbar cb-compact s-ok"><div class="fill" style="width:48%;"></div></div>
+            <div style="height:8px;"></div>
+            <div class="critbar cb-compact s-warn"><div class="fill" style="width:78%;"></div></div>
+            <div style="height:8px;"></div>
+            <div class="critbar cb-compact s-crit"><div class="fill" style="width:94%;"></div></div>
+          </div>
+          <div>
+            <div class="meta-num" style="margin-bottom:6px;">default · 18px</div>
+            <div class="critbar cb-default s-fresh"><div class="fill" style="width:8%;"></div><div class="pct">8%</div></div>
+            <div style="height:10px;"></div>
+            <div class="critbar cb-default s-ok"><div class="fill" style="width:48%;"></div><div class="pct">48%</div></div>
+            <div style="height:10px;"></div>
+            <div class="critbar cb-default s-warn"><div class="fill" style="width:78%;"></div><div class="pct">78%</div></div>
+            <div style="height:10px;"></div>
+            <div class="critbar cb-default s-crit"><div class="fill" style="width:94%;"></div><div class="pct">94%</div></div>
+          </div>
+          <div>
+            <div class="meta-num" style="margin-bottom:6px;">large · 28px</div>
+            <div class="critbar cb-large s-warn"><div class="fill" style="width:72%;"></div><div class="pct">72%</div></div>
+            <div style="height:14px;"></div>
+            <div class="critbar cb-large s-crit"><div class="fill" style="width:94%;"></div><div class="pct">94%</div></div>
+          </div>
+        </div>
+        <p class="annot">Fill animates with <span class="mono">linear 250ms</span>. Color crosses thresholds at 10% (fresh→ok), 70% (ok→warn), 90% (warn→crit).</p>
+      </div>
+
+      <!-- TwoBarMeter & PaceChip -->
+      <div class="col-2">
+        <div class="card card--navy">
+          <h3 class="card__title">TwoBarMeter <span class="pill">popover hero</span></h3>
+          <div class="twobar">
+            <div class="twobar__row">
+              <div class="lbl">5-Hour Window</div>
+              <div class="critbar cb-default s-warn"><div class="fill" style="width:72%;"></div><div class="pct">72%</div></div>
+              <div class="time">2h 14m</div>
+            </div>
+            <div class="twobar__row">
+              <div class="lbl">Weekly</div>
+              <div class="critbar cb-default s-ok"><div class="fill" style="width:38%;"></div><div class="pct">38%</div></div>
+              <div class="time">4d 22h</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card--navy">
+          <h3 class="card__title">PaceChip <span class="pill">auto-hides &lt; 3% elapsed</span></h3>
+          <div class="row" style="gap:10px;">
+            <span class="pace p-fresh"><span class="dot"></span> Lasts until reset</span>
+            <span class="pace p-ok"><span class="dot"></span> On track</span>
+            <span class="pace p-warn"><span class="dot"></span> Runs out in 47m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ResetCountdown & ModelRow -->
+      <div class="col-2">
+        <div class="card card--navy">
+          <h3 class="card__title">ResetCountdown</h3>
+          <div class="row" style="gap:36px;">
+            <div class="countdown">
+              <span class="countdown__lbl">Resets in</span>
+              <span class="countdown__val">3:14:22</span>
+            </div>
+            <div class="countdown pulse">
+              <span class="countdown__lbl">Resets in</span>
+              <span class="countdown__val">0:00:42</span>
+            </div>
+            <div class="countdown celebrate">
+              <span class="countdown__lbl">Window reset</span>
+              <span class="countdown__val">0:00:00</span>
+            </div>
+          </div>
+          <p class="annot">Idle · pulse (last 60s) · celebrate (at 0:00, holds cyan glow for 4s).</p>
+        </div>
+
+        <div class="card card--navy">
+          <h3 class="card__title">ModelRow</h3>
+          <div class="model-row">
+            <div class="model-row__name"><span class="tag">opus</span>claude-opus-4-5-20251101</div>
+            <div class="model-row__tokens">42,108 tok</div>
+            <svg class="model-row__spark" viewBox="0 0 64 18" preserveAspectRatio="none">
+              <polyline class="spark" points="0,14 6,12 12,13 18,10 24,11 30,7 36,8 42,5 48,6 54,3 60,4 64,2"/>
+            </svg>
+          </div>
+          <div class="model-row">
+            <div class="model-row__name"><span class="tag">sonnet</span>claude-sonnet-4-5-20250929</div>
+            <div class="model-row__tokens">67,432 tok</div>
+            <svg class="model-row__spark" viewBox="0 0 64 18" preserveAspectRatio="none">
+              <polyline class="spark s-warn" points="0,12 6,10 12,8 18,9 24,7 30,9 36,5 42,7 48,4 54,5 60,3 64,4"/>
+            </svg>
+          </div>
+          <div class="model-row">
+            <div class="model-row__name"><span class="tag">haiku</span>claude-haiku-4-5</div>
+            <div class="model-row__tokens">12,840 tok</div>
+            <svg class="model-row__spark" viewBox="0 0 64 18" preserveAspectRatio="none">
+              <polyline class="spark s-fresh" points="0,15 6,14 12,15 18,13 24,14 30,12 36,13 42,11 48,12 54,10 60,11 64,9"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="card">
+        <h3 class="card__title">Buttons <span class="pill">Liquid Glass</span></h3>
+        <div class="glass-stage" style="grid-template-columns: 1fr; padding:32px; min-height:auto;">
+          <div class="stack">
+            <div>
+              <div class="meta-num" style="margin-bottom:10px;">PrimaryButton — glassProminent · cyan</div>
+              <div class="btn-row">
+                <button class="btn btn--prom"><span>Start free trial</span></button>
+                <button class="btn btn--prom" style="background:rgba(61,190,241,.95);"><span>Hover</span></button>
+                <button class="btn btn--prom is-pressed"><span>Pressed</span></button>
+                <button class="btn btn--prom" disabled><span>Disabled</span></button>
+              </div>
+            </div>
+            <div>
+              <div class="meta-num" style="margin-bottom:10px;">SecondaryButton — neutral glass</div>
+              <div class="btn-row">
+                <button class="btn btn--sec"><span>Pair another device</span></button>
+                <button class="btn btn--sec" style="background:rgba(255,255,255,.10);"><span>Hover</span></button>
+                <button class="btn btn--sec is-pressed"><span>Pressed</span></button>
+                <button class="btn btn--sec" disabled><span>Disabled</span></button>
+              </div>
+            </div>
+            <div>
+              <div class="meta-num" style="margin-bottom:10px;">GhostButton — text-only · cyan underline on hover</div>
+              <div class="btn-row">
+                <button class="btn btn--ghost"><span class="lbl">Try Demo Mode</span></button>
+                <button class="btn btn--ghost" style="color:var(--howl-cyan-400);"><span class="lbl" style="border-bottom:1px solid var(--howl-cyan-400);">Hover</span></button>
+                <button class="btn btn--ghost is-pressed"><span class="lbl">Pressed</span></button>
+                <button class="btn btn--ghost" disabled><span class="lbl">Disabled</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- StateIcon / WolfMark -->
+      <div class="col-2">
+        <div class="card card--navy">
+          <h3 class="card__title">StateIcon <span class="pill">bolt</span></h3>
+          <div class="row" style="gap:28px;">
+            <span class="row" style="gap:8px;"><span class="bolt" style="--state:var(--howl-state-fresh);"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span><span class="meta-num">fresh</span></span>
+            <span class="row" style="gap:8px;"><span class="bolt" style="--state:var(--howl-state-ok);"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span><span class="meta-num">ok</span></span>
+            <span class="row" style="gap:8px;"><span class="bolt" style="--state:var(--howl-state-warn);"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span><span class="meta-num">warn</span></span>
+            <span class="row" style="gap:8px;"><span class="bolt" style="--state:var(--howl-state-crit);"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span><span class="meta-num">crit</span></span>
+          </div>
+        </div>
+
+        <div class="card card--navy">
+          <h3 class="card__title">WolfMark <span class="pill">brand · state glow</span></h3>
+          <div class="row" style="gap:24px;">
+            <div class="wolf s-fresh" style="--wolf-size:56px;"><img src="assets/wolf.png" alt=""/></div>
+            <div class="wolf s-ok" style="--wolf-size:56px;"><img src="assets/wolf.png" alt=""/></div>
+            <div class="wolf s-warn" style="--wolf-size:56px;"><img src="assets/wolf.png" alt=""/></div>
+            <div class="wolf s-crit" style="--wolf-size:56px;"><img src="assets/wolf.png" alt=""/></div>
+          </div>
+          <p class="annot">Size prop drives <span class="mono">--wolf-size</span>. State prop swaps the glow color. Never recolor the wolf itself.</p>
+        </div>
+      </div>
+
+      <!-- PairingCard, EmptyState -->
+      <div class="col-2">
+        <div class="card">
+          <h3 class="card__title">PairingCard</h3>
+          <div class="pair-card">
+            <div class="qr"><i></i><u></u></div>
+            <div>
+              <div class="meta-num">Or enter 6-digit code</div>
+              <div class="pair-card__code">W7K · 3FQ</div>
+              <p class="pair-card__cap">Open HowlAlert on your iPhone and point the camera at this QR.</p>
+              <button class="btn btn--prom"><span>Pair with iPhone</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card__title">EmptyState</h3>
+          <div class="empty">
+            <div class="wolf s-ok"><img src="assets/wolf.png" alt=""/></div>
+            <h5>Nothing to watch yet</h5>
+            <p>Pair a Mac to start tracking Claude Code usage.</p>
+            <div class="actions">
+              <button class="btn btn--prom"><span>Pair with Mac</span></button>
+              <button class="btn btn--ghost"><span class="lbl">Continue with Demo Mode</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NotificationCard -->
+      <div class="card card--navy">
+        <h3 class="card__title">NotificationCard <span class="pill">history · 4 severities</span></h3>
+        <div class="stack" style="gap:10px;">
+          <div class="notif notif--fresh">
+            <div class="notif__wolf"><img src="assets/wolf.png" alt=""/></div>
+            <div>
+              <div class="notif__title">Reset just hit!</div>
+              <div class="notif__body">Your 5-hour window is full again.</div>
+            </div>
+            <div class="notif__time">just now</div>
+          </div>
+          <div class="notif">
+            <div class="notif__wolf"><img src="assets/wolf.png" alt=""/></div>
+            <div>
+              <div class="notif__title">Claude Desktop is waiting on you</div>
+              <div class="notif__body">A long-running task paused for your approval.</div>
+            </div>
+            <div class="notif__time">4:12 PM</div>
+          </div>
+          <div class="notif notif--warn">
+            <div class="notif__wolf"><img src="assets/wolf.png" alt=""/></div>
+            <div>
+              <div class="notif__title">Approaching limit</div>
+              <div class="notif__body">5-hour window 80% used. Runs out in 47m at current pace.</div>
+            </div>
+            <div class="notif__time">3:58 PM</div>
+          </div>
+          <div class="notif notif--crit">
+            <div class="notif__wolf"><img src="assets/wolf.png" alt=""/></div>
+            <div>
+              <div class="notif__title">Limit in sight</div>
+              <div class="notif__body">5-hour window 94% used. Resets in 38m.</div>
+            </div>
+            <div class="notif__time">3:31 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SettingsRow -->
+      <div class="card card--navy">
+        <h3 class="card__title">SettingsRow</h3>
+        <div class="srow">
+          <div>
+            <div class="srow__lbl">Notify at 80%</div>
+            <div class="srow__cap">A gentle nudge when the 5-hour window passes 80% used.</div>
+          </div>
+          <div class="switch on"></div>
+        </div>
+        <div class="srow">
+          <div>
+            <div class="srow__lbl">Notify at 95%</div>
+            <div class="srow__cap">Final heads-up before the limit.</div>
+          </div>
+          <div class="switch on"></div>
+        </div>
+        <div class="srow">
+          <div>
+            <div class="srow__lbl">Notify on reset</div>
+            <div class="srow__cap">Wolf howls when the window refills.</div>
+          </div>
+          <div class="switch"></div>
+        </div>
+        <div class="srow">
+          <div>
+            <div class="srow__lbl">Quiet hours</div>
+            <div class="srow__cap">No alerts between these times.</div>
+          </div>
+          <div class="meta-num">10:00 PM &nbsp;→&nbsp; 7:30 AM</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== FOOTER =================== -->
+  <footer style="margin-top:80px; padding-top:24px; border-top:1px solid var(--page-rule); color:var(--howl-ink-500); font:var(--t-caption); display:flex; gap:16px; align-items:center;">
+    <span>HowlAlert · Section A · Design System Reference</span>
+    <span style="margin-left:auto;">Next: <strong style="color:var(--howl-cyan-300);">B — macOS Menu Bar App</strong></span>
+  </footer>
+
+</div>
+
+</body>
+</html>

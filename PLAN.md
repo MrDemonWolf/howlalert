@@ -102,6 +102,8 @@ Phase 3 ships both.
 
 ## 8. Brand system
 
+**Canonical design source:** [`downloads/howlalert-design/howlalert/project/HowlAlert.html`](downloads/howlalert-design/howlalert/project/HowlAlert.html) (exported from claude.ai/design). Browsable at [`docs/design/HowlAlert.html`](docs/design/HowlAlert.html). All tokens live in `packages/howlalert-kit/Sources/HowlAlertKit/Theme/` — `HowlColor`, `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`. Never hard-code hex anywhere else.
+
 - **Colors:** navy `#091533` (bg), cyan `#0FACED` (accent), green `#3DDC97` (idle), amber `#FFA533` (warn), red `#FF4D4D` (crit).
 - **Typography:** SF Pro everywhere. Match Apple system styles — no custom fonts.
 - **Liquid Glass** is for navigation surfaces only — toolbars, popovers, floating CTAs, paywall background. Never on content cards.

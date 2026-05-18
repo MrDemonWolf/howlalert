@@ -8,10 +8,13 @@
 
 **Goal:** a working, local-only menu bar app that can be handed to 5 friends.
 **Jira:** HAA-15 → HAA-22.
+**Design reference:** Section B of [`docs/design/HowlAlert.html`](docs/design/HowlAlert.html). Match the menu-bar icon states, popover layout, Settings window, and Demo / error states pixel-for-pixel.
 
 ### Tasks
 
 - [ ] Xcode project scaffold for `apps/macos/` (verify existing scaffold, fill gaps).
+- [ ] Wire `HowlAlertKit.Theme` (`HowlColor`, `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`) into the macOS app. No hard-coded hex.
+- [ ] Build menu-bar popover per Section B — `TwoBarMeter`, `PaceChip`, `ResetCountdown`, model rows. Liquid Glass nav surfaces only.
 - [ ] `MenuBarExtra` with three icon states (idle / warn / crit).
 - [ ] FSEvents watcher on `~/.claude/projects/**/*.jsonl`.
 - [ ] Stop hook handler binary (reads JSON from stdin, exits 0 in <5s).
@@ -38,6 +41,7 @@
 - Apple Developer ID certificate + notarization API key in GH Actions secrets.
 - Create `mrdemonwolf/homebrew-den` repo.
 - Sparkle EdDSA private key in GH Actions secrets; public key in app bundle.
+- **Generate app icons in Apple's Icon Composer.app** from `downloads/howlalert-design/howlalert/project/assets/wolf.png` (1024×1024). Export macOS / iOS / watchOS appiconsets and drop into `apps/{macos,ios,watchos}/Sources/Assets.xcassets/AppIcon.appiconset/`. Same for the 22pt menu-bar template (template image, three states: idle / warn / crit).
 
 ---
 
@@ -45,6 +49,7 @@
 
 **Goal:** Mac → Worker → iPhone push works end-to-end.
 **Jira:** HAA-23 → HAA-30.
+**Design reference:** Section C of [`docs/design/HowlAlert.html`](docs/design/HowlAlert.html) — Welcome, Pair (QR scanner), dashboard, history, settings on iPhone 17 Pro. Light + dark token mirrors throughout.
 
 ### Tasks
 
@@ -77,6 +82,7 @@
 
 **Goal:** glanceable usage everywhere on Apple.
 **Jira:** HAA-31 → HAA-36.
+**Design reference:** Sections D + E of [`docs/design/HowlAlert.html`](docs/design/HowlAlert.html) — Apple Watch Series 10 / 49mm app + four complication families, Dynamic Island compact/minimal/expanded, Lockscreen Live Activity.
 
 ### Tasks
 
@@ -132,6 +138,7 @@
 
 **Goal:** monetized iOS + watchOS app live on the App Store.
 **Jira:** HAA-41 → HAA-45.
+**Design reference:** Section F of [`docs/design/HowlAlert.html`](docs/design/HowlAlert.html) — RevenueCat sheet, Max default-selected with "Save $30 vs Pro" badge, Pro card secondary, 7-day trial CTA. No fake scarcity, no countdown timers.
 
 ### Tasks
 

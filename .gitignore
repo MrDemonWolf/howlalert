@@ -19,7 +19,7 @@ xcuserdata/
 DerivedData/
 build/
 .build/
-Packages/
+**/.build/Packages/
 *.xcconfig.local
 
 # Secrets
