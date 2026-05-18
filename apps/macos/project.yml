@@ -1,0 +1,92 @@
+name: HowlAlert
+options:
+  bundleIdPrefix: com.mrdemonwolf
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_UPCOMING_FEATURE_BARE_SLASH_REGEX_LITERALS: YES
+    DEAD_CODE_STRIPPING: YES
+    OTHER_SWIFT_FLAGS: "-warnings-as-errors"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "-"
+    GENERATE_INFOPLIST_FILE: YES
+
+packages:
+  HowlAlertKit:
+    path: ../../packages/howlalert-kit
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.4"
+
+targets:
+  HowlAlert:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Sources/App
+      - path: Resources/Assets.xcassets
+        buildPhase: resources
+    dependencies:
+      - package: HowlAlertKit
+      - package: Sparkle
+        product: Sparkle
+    info:
+      path: Resources/HowlAlert-Info.plist
+      properties:
+        CFBundleDisplayName: HowlAlert
+        CFBundleShortVersionString: "0.0.1"
+        CFBundleVersion: "1"
+        LSUIElement: true
+        LSMinimumSystemVersion: "26.0"
+        NSHumanReadableCopyright: "© 2026 MrDemonWolf, Inc."
+        NSAppleEventsUsageDescription: "HowlAlert reads Claude Code's local transcript files to track your 5-hour window. Nothing leaves your Mac."
+        NSDesktopFolderUsageDescription: "HowlAlert watches Claude Code transcripts in your home folder."
+        NSUserNotificationsUsageDescription: "Used to alert you when your Claude Code window is about to run out."
+        ITSAppUsesNonExemptEncryption: false
+        SUFeedURL: "https://mrdemonwolf.github.io/howlalert/appcast.xml"
+        SUPublicEDKey: "REPLACE_WITH_GENERATED_PUBLIC_KEY"
+        SUEnableInstallerLauncherService: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mrdemonwolf.howlalert.mac
+        PRODUCT_NAME: HowlAlert
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: Resources/HowlAlert.entitlements
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_PREVIEWS: YES
+
+  HowlAlertHook:
+    type: tool
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Sources/Hook
+    settings:
+      base:
+        PRODUCT_NAME: HowlAlertHook
+        SKIP_INSTALL: NO
+        INSTALL_PATH: "$(LOCAL_APPS_DIR)"
+
+schemes:
+  HowlAlert:
+    build:
+      targets:
+        HowlAlert: all
+        HowlAlertHook: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    archive:
+      config: Release
