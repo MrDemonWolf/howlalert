@@ -12,20 +12,20 @@
 
 ### Tasks
 
-- [ ] Xcode project scaffold for `apps/macos/` (verify existing scaffold, fill gaps).
-- [ ] Wire `HowlAlertKit.Theme` (`HowlColor`, `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`) into the macOS app. No hard-coded hex.
-- [ ] Build menu-bar popover per Section B — `TwoBarMeter`, `PaceChip`, `ResetCountdown`, model rows. Liquid Glass nav surfaces only.
-- [ ] `MenuBarExtra` with three icon states (idle / warn / crit).
-- [ ] FSEvents watcher on `~/.claude/projects/**/*.jsonl`.
-- [ ] Stop hook handler binary (reads JSON from stdin, exits 0 in <5s).
-- [ ] 5-hour window math: floor first timestamp to UTC hour, add 5h.
-- [ ] P90 plan-limit auto-detect (no hard-coded values).
-- [ ] Local `UNUserNotificationCenter` notifications at 80% / 95% / reset.
-- [ ] Popover UI: `TwoBarMeter` + `PaceChip` + `ResetCountdown` + model rows.
-- [ ] Demo Mode toggle in Settings.
-- [ ] Sparkle 2.x integration with EdDSA keys.
-- [ ] Notarized DMG via `appdmg` + GitHub Actions release workflow.
-- [ ] Homebrew tap at `mrdemonwolf/homebrew-den`.
+- [x] Xcode project scaffold for `apps/macos/` (verify existing scaffold, fill gaps).
+- [x] Wire `HowlAlertKit.Theme` (`HowlColor`, `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`) into the macOS app. No hard-coded hex.
+- [x] Build menu-bar popover per Section B — `TwoBarMeter`, `PaceChip`, `ResetCountdown`, model rows. Liquid Glass nav surfaces only.
+- [x] `MenuBarExtra` with three icon states (idle / warn / crit).
+- [x] FSEvents watcher on `~/.claude/projects/**/*.jsonl`.
+- [x] Stop hook handler binary (reads JSON from stdin, exits 0 in <5s).
+- [x] 5-hour window math: floor first timestamp to UTC hour, add 5h.
+- [x] P90 plan-limit auto-detect (no hard-coded values).
+- [x] Local `UNUserNotificationCenter` notifications at 80% / 95% / reset.
+- [x] Popover UI: `TwoBarMeter` + `PaceChip` + `ResetCountdown` + model rows.
+- [x] Demo Mode toggle in Settings.
+- [x] Sparkle 2.x integration with EdDSA keys.
+- [x] Notarized DMG via `appdmg` + GitHub Actions release workflow.
+- [x] Homebrew tap at `mrdemonwolf/homebrew-den`.
 
 ### You can now test
 
