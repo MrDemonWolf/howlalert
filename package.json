@@ -1,0 +1,31 @@
+{
+  "name": "howlalert",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Claude Code usage limit watcher — macOS menu bar + iOS + watchOS.",
+  "license": "MIT",
+  "author": "Nathanial Henniges <nathanial.henniges@mrdemonwolf.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrdemonwolf/howlalert.git"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/shared-types"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "packageManager": "bun@1.1.42"
+}

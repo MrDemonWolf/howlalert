@@ -1,0 +1,21 @@
+{
+  "name": "@howlalert/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared TypeScript types + Zod schemas across Worker + admin + future surfaces.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
