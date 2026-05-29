@@ -19,6 +19,7 @@
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",
+    "ioredis": "^5.11.0",
     "zod": "catalog:"
   },
   "devDependencies": {

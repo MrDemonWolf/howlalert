@@ -1,0 +1,39 @@
+name: howlalert
+
+services:
+  postgres:
+    image: postgres
+    container_name: howlalert-postgres
+    environment:
+      POSTGRES_DB: howlalert
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - howlalert_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: howlalert-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - howlalert_redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  howlalert_postgres_data:
+  howlalert_redis_data:
