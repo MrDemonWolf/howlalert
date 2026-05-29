@@ -1,0 +1,24 @@
+{
+  "name": "@howlalert/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@howlalert/db": "workspace:*",
+    "@howlalert/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@howlalert/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
