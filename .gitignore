@@ -49,3 +49,10 @@ coverage
 .cache
 tmp
 temp
+
+# Swift / Xcode (apps/macos, apps/mobile, packages/HowlAlertUI)
+DerivedData/
+xcuserdata/
+*.xcuserstate
+.swiftpm/
+packages/HowlAlertUI/.build/

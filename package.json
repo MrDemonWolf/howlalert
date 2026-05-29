@@ -4,7 +4,10 @@
   "workspaces": {
     "packages": [
       "apps/*",
-      "packages/*"
+      "packages/*",
+      "!apps/macos",
+      "!apps/mobile",
+      "!packages/HowlAlertUI"
     ],
     "catalog": {
       "dotenv": "^17.2.2",
