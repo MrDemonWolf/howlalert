@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · E · Dynamic Island + Live Activity</title>
+<style>
+  :root {
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-400: #3DBEF1;
+    --howl-cyan-300: #7BD3F6;
+    --howl-state-fresh: #3DDC97;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5;
+    --howl-ink-700: #3A4666;
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page-bg); color: var(--howl-ink-100); font-family: var(--font-sys); -webkit-font-smoothing: antialiased; }
+  body { padding: 56px 48px 96px; }
+  .doc { max-width: 1320px; margin: 0 auto; }
+  .num, .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+  /* Top nav */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex; align-items: center; gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-right: auto; }
+  .topnav-tab {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 11px; border-radius: 999px;
+    color: var(--howl-ink-300); text-decoration: none;
+    border: 1px solid transparent; transition: all 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover { color: var(--howl-cyan-300); background: rgba(15,172,237,0.06); }
+  .topnav-tab.active { color: var(--howl-cyan-300); background: rgba(15,172,237,0.10); border-color: rgba(15,172,237,0.30); }
+  .topnav-tab.disabled { color: var(--howl-ink-500); opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+  /* Page header */
+  .doc-head { display: flex; align-items: center; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--panel-border); margin-bottom: 56px; }
+  .doc-head .wm { width: 56px; height: 56px; flex: none; }
+  .doc-head h1 { margin: 0; font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; }
+  .doc-head h1 .sub { color: var(--howl-cyan-300); font-weight: 500; margin-left: 10px; font-size: 22px; }
+  .doc-head p { margin: 6px 0 0; color: var(--howl-ink-300); font-size: 15px; line-height: 22px; max-width: 720px; }
+  .doc-head .meta { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--howl-ink-500); font-size: 12px; }
+  .doc-head .meta .v { color: var(--howl-ink-300); font-family: var(--font-mono); }
+
+  section { margin-bottom: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+  .sec-head .n { font-family: var(--font-mono); color: var(--howl-cyan-300); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+  .sec-head h2 { margin: 0; font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.01em; }
+  .sec-head .lede { margin-left: auto; color: var(--howl-ink-300); font-size: 13px; max-width: 520px; text-align: right; line-height: 18px; }
+  .anno { font-size: 12px; line-height: 16px; color: var(--howl-cyan-300); font-family: var(--font-mono); margin-top: 12px; }
+
+  /* Wallpaper stage */
+  .stage {
+    position: relative; border-radius: 16px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background:
+      radial-gradient(ellipse at 18% 22%, rgba(15,172,237,0.45), transparent 42%),
+      radial-gradient(ellipse at 82% 70%, rgba(157,89,255,0.30), transparent 48%),
+      radial-gradient(ellipse at 60% 18%, rgba(255,165,51,0.22), transparent 38%),
+      linear-gradient(180deg, #163576 0%, #0a1a44 60%, #050a1f 100%);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    padding: 48px 24px;
+  }
+  .stage-row { display: flex; gap: 28px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+
+  /* ============== iPhone frame (corrected status bar geometry) ============== */
+  .phone {
+    --phone-w: 320px;
+    --phone-h: 692px;
+    --bezel: 6px;
+    --status-h: 54px;             /* iPhone Pro status bar 54pt */
+    --island-w: 122px;            /* HIG: 122pt default */
+    --island-h: 37px;             /* HIG: 36-37pt tall */
+    --island-top: 11px;           /* HIG: 11pt from screen top */
+    width: var(--phone-w);
+    height: var(--phone-h);
+    border-radius: 50px;
+    background: #050507;
+    padding: var(--bezel);
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.08),
+      inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+    flex: none;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    border-radius: 44px;
+    background: var(--howl-navy-900);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  /* Status bar — sits at top, time on left, indicators on right, island OVERLAID centered */
+  .ios-statusbar {
+    flex: none;
+    height: var(--status-h);
+    padding: 18px 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    position: relative;
+    z-index: 3;
+  }
+  .ios-status-right {
+    display: flex; gap: 5px;
+    align-items: center;
+  }
+  .ios-batt {
+    width: 22px; height: 11px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    padding: 1px;
+    position: relative;
+  }
+  .ios-batt::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 3.5px; background: currentColor; border-radius: 0 1px 1px 0; }
+  .ios-batt span { display: block; width: 80%; height: 100%; background: currentColor; border-radius: 1px; }
+
+  /* Dynamic Island — absolutely positioned overlay, NOT in the statusbar grid */
+  .island {
+    position: absolute;
+    top: var(--island-top);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--island-w);
+    height: var(--island-h);
+    background: #000;
+    border-radius: 999px;
+    z-index: 10;
+    overflow: hidden;
+    color: white;
+    display: flex; align-items: center;
+    transition: width 320ms cubic-bezier(.34, 1.3, .64, 1),
+                height 320ms cubic-bezier(.34, 1.3, .64, 1),
+                border-radius 320ms ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  /* Camera cluster inside the island — always visible. Front camera dot at right. */
+  .island::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #1a1a1f;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  /* ============== Island states ============== */
+  /* COMPACT — leading icon left of camera + trailing value right of camera */
+  .island.compact {
+    --island-w: 122px;
+    padding: 0 14px 0 10px;
+    justify-content: space-between;
+  }
+  .island.compact .lead {
+    display: flex; align-items: center;
+    color: var(--howl-state-warn);
+    width: 20px; height: 20px;
+  }
+  .island.compact.fresh .lead { color: var(--howl-state-fresh); }
+  .island.compact.crit  .lead { color: var(--howl-state-crit); }
+  .island.compact .lead svg { width: 100%; height: 100%; fill: currentColor; }
+  .island.compact .trail {
+    margin-right: 18px;  /* snug to camera dot, per HIG "no wasted space" */
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--howl-state-warn);
+    font-feature-settings: "tnum";
+    line-height: 1;
+  }
+  .island.compact.fresh .trail { color: var(--howl-state-fresh); }
+  .island.compact.crit  .trail { color: var(--howl-state-crit); }
+
+  /* MINIMAL — when another app is in compact, ours becomes a tiny dot */
+  .island.minimal {
+    --island-w: 90px;
+    padding: 0 10px 0 8px;
+    justify-content: space-between;
+  }
+  .island.minimal .lead { display: none; }
+  .island.minimal .glyph {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--howl-state-warn);
+    color: black;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .island.minimal .glyph svg { width: 11px; height: 11px; fill: currentColor; }
+  .island.minimal::after { right: 8px; }
+
+  /* EXPANDED — max height 144pt per HIG. Variable height, rounded corners */
+  .island.expanded {
+    --island-w: 360px;
+    height: 144px;
+    border-radius: 42px;
+    padding: 14px 18px 14px 18px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .island.expanded::after { top: 18px; right: 18px; transform: none; }
+  .island.expanded .exp-top {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+  }
+  .island.expanded .exp-logo {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(255,165,51,0.16);
+    color: var(--howl-state-warn);
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+  .island.expanded.fresh .exp-logo { background: rgba(61,220,151,0.16); color: var(--howl-state-fresh); }
+  .island.expanded.crit  .exp-logo { background: rgba(255,77,77,0.16);  color: var(--howl-state-crit); }
+  .island.expanded .exp-logo svg { width: 16px; height: 16px; fill: currentColor; }
+  .island.expanded .exp-titles { flex: 1; min-width: 0; }
+  .island.expanded .exp-app {
+    font-size: 10px;
+    color: var(--howl-ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .island.expanded .exp-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: -0.005em;
+  }
+  .island.expanded .exp-trail {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-state-warn);
+    font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
+    margin-right: 28px;  /* clear camera */
+  }
+  .island.expanded.fresh .exp-trail { color: var(--howl-state-fresh); }
+  .island.expanded.crit  .exp-trail { color: var(--howl-state-crit); }
+  .island.expanded .exp-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .island.expanded .exp-bar i {
+    display: block; height: 100%;
+    background: var(--howl-state-warn);
+    border-radius: inherit;
+  }
+  .island.expanded.fresh .exp-bar i { background: var(--howl-state-fresh); }
+  .island.expanded.crit  .exp-bar i { background: var(--howl-state-crit); }
+  .island.expanded .exp-meta {
+    width: 100%;
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--howl-ink-300);
+    font-feature-settings: "tnum";
+  }
+  .island.expanded .exp-meta .left { color: white; font-weight: 500; }
+
+  /* Phone body (below status bar) */
+  .phone-body {
+    flex: 1; background: var(--howl-navy-900);
+    overflow: hidden; position: relative;
+  }
+  .home-indicator {
+    position: absolute; bottom: 8px;
+    left: 50%; transform: translateX(-50%);
+    width: 110px; height: 4px;
+    background: white; border-radius: 2px; opacity: 0.85;
+  }
+
+  /* Phone caption */
+  .phone-with-cap { display: flex; flex-direction: column; align-items: center; }
+  .phone-cap { margin-top: 14px; text-align: center; max-width: 320px; min-height: 76px; display: flex; flex-direction: column; }
+  .phone-cap .ix { font-family: var(--font-mono); font-size: 10px; color: var(--howl-cyan-300); letter-spacing: 0.08em; font-weight: 600; }
+  .phone-cap .nm { font-size: 14px; font-weight: 600; color: var(--howl-ink-100); margin-top: 4px; }
+  .phone-cap .ds { font-size: 12px; color: var(--howl-ink-300); margin-top: 4px; line-height: 16px; }
+
+  /* hide the unused home-indicator on lockscreen — the shortcuts row replaces it visually */
+  .phone-screen .lock-screen ~ .home-indicator { display: none; }
+
+  /* ============== Wallpaper for the phone screen ============== */
+  .wallpaper {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 35%, rgba(180,90,255,0.55), transparent 50%),
+      radial-gradient(ellipse at 75% 60%, rgba(15,172,237,0.5), transparent 50%),
+      radial-gradient(ellipse at 50% 90%, rgba(61,220,151,0.30), transparent 55%),
+      linear-gradient(180deg, #2a1a5a 0%, #0a1a44 60%, #050a1f 100%);
+  }
+  .wallpaper::after {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 22% 30%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(1px 1px at 72% 18%, rgba(255,255,255,0.4), transparent 60%),
+      radial-gradient(1.5px 1.5px at 48% 48%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(1px 1px at 88% 72%, rgba(255,255,255,0.35), transparent 60%);
+  }
+
+  /* ============== iso showcase — better spacing ============== */
+  .island-showcase {
+    background: linear-gradient(180deg, #0a1538 0%, #050a1f 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 64px 48px;
+    display: flex; flex-direction: column; gap: 48px;
+    align-items: center;
+  }
+  .island-row {
+    display: flex; gap: 40px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
+    width: 100%;
+  }
+  .island-card {
+    display: flex; flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .island-card .iso {
+    position: relative;
+    background: #050507;
+    border-radius: 22px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .island-card .iso .island {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+  }
+  .island-card .iso-cap {
+    text-align: center;
+    max-width: 220px;
+  }
+  .island-card .iso-cap .nm {
+    font-size: 13px; font-weight: 600;
+    color: var(--howl-ink-100);
+  }
+  .island-card .iso-cap .ds {
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    margin-top: 4px;
+    line-height: 16px;
+  }
+
+  /* ============== Lock screen Live Activity — PROPER POSITION ============== */
+  /* iOS 16+ Live Activities sit at TOP of the notification stack, which itself 
+     lives at the BOTTOM of the lockscreen (above home indicator). Time at top, 
+     LA + notifications at bottom. Below the time, above the notifications. */
+  .lock-screen {
+    position: absolute; inset: 0;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    color: white;
+  }
+  .lock-clock {
+    text-align: center;
+    padding-top: 64px;
+    flex: none;
+  }
+  .lock-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    opacity: 0.95;
+  }
+  .lock-time {
+    font-family: var(--font-sys);
+    font-size: 86px;
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    color: white;
+    margin-top: 4px;
+    font-feature-settings: "tnum";
+  }
+  /* Spacer pushes the notification stack to the bottom */
+  .lock-spacer { flex: 1; }
+  /* Notification stack lives at bottom — LA first (top of stack), then standard notifs */
+  .lock-stack {
+    flex: none;
+    margin: 0 14px 22px;  /* HIG: 14pt horizontal margins */
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  /* Bottom shortcuts (flashlight / camera) sit below stack */
+  .lock-shortcuts {
+    flex: none;
+    display: flex; justify-content: space-between;
+    padding: 0 32px 18px;
+  }
+  .lock-shortcut {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.30);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .lock-shortcut svg { width: 16px; height: 16px; fill: currentColor; }
+  /* Notification rows below the Live Activity */
+  .lock-notif {
+    border-radius: 18px;
+    padding: 11px 14px;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(28,28,32,0.55);
+    border: 1px solid rgba(255,255,255,0.07);
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .lock-notif .nico {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #34c759, #28a745);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .lock-notif .nico.blue { background: linear-gradient(135deg, #007aff, #0051d5); }
+  .lock-notif .nm { font-size: 13px; font-weight: 600; color: white; }
+  .lock-notif .body { font-size: 12px; color: rgba(255,255,255,0.70); margin-top: 1px; }
+  .lock-notif .when { font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.55); font-feature-settings: "tnum"; }
+  /* Live Activity card */
+  .la-card {
+    border-radius: 22px;
+    padding: 14px 16px;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(28,28,32,0.62);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 30px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column;
+    gap: 10px;
+  }
+  .la-head {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .la-head .ico {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--howl-state-warn);
+    color: white;
+    flex: none;
+  }
+  .la-card.fresh .la-head .ico { background: var(--howl-state-fresh); }
+  .la-card.crit  .la-head .ico { background: var(--howl-state-crit); }
+  .la-head .ico svg { width: 12px; height: 12px; fill: currentColor; }
+  .la-head .ttl {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.85);
+  }
+  .la-head .when {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    font-feature-settings: "tnum";
+  }
+  .la-body {
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .la-body .text {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+  }
+  .la-body .pct {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-state-warn);
+    font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
+  }
+  .la-card.fresh .la-body .pct { color: var(--howl-state-fresh); }
+  .la-card.crit  .la-body .pct { color: var(--howl-state-crit); }
+  .la-bar {
+    width: 100%; height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.14);
+    overflow: hidden;
+  }
+  .la-bar i {
+    display: block; height: 100%;
+    background: var(--howl-state-warn);
+    border-radius: inherit;
+  }
+  .la-card.fresh .la-bar i { background: var(--howl-state-fresh); }
+  .la-card.crit  .la-bar i { background: var(--howl-state-crit); }
+  .la-meta {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    font-feature-settings: "tnum";
+  }
+  .la-meta .left { color: white; font-weight: 500; }
+  .la-meta .right { color: rgba(255,255,255,0.65); }
+
+  /* annotation row */
+  .annot-row {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: 28px;
+    align-items: center;
+  }
+  .annot { display: flex; flex-direction: column; gap: 12px; }
+  .annot.right { text-align: right; }
+  .annot .a-card {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(15,172,237,0.06);
+    border: 1px solid rgba(15,172,237,0.18);
+  }
+  .annot .a-card .a-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .annot .a-card p { margin: 0; color: var(--howl-ink-100); font-size: 13px; line-height: 18px; }
+
+  /* footer */
+  .doc-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between;
+    color: var(--howl-ink-500); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ic-wolf-filled" viewBox="0 0 24 24">
+      <path d="M 4 11 L 7 3 L 10 9 L 14 9 L 17 3 L 20 11 C 20 18, 16 22, 12 22 C 8 22, 4 18, 4 11 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="ic-bolt" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10" fill="currentColor"/></symbol>
+    <symbol id="ic-cell" viewBox="0 0 18 11"><rect x="0" y="7" width="2.5" height="4" fill="currentColor"/><rect x="4" y="5" width="2.5" height="6" fill="currentColor"/><rect x="8" y="3" width="2.5" height="8" fill="currentColor"/><rect x="12" y="1" width="2.5" height="10" fill="currentColor"/></symbol>
+    <symbol id="ic-wifi" viewBox="0 0 16 11"><path d="M1 4 c2-2.5 5-3.5 7-3.5 s5 1 7 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M3 6.5 c1.5-1.5 3-2 5-2 s3.5 .5 5 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 9 c.8-.8 1.6-1 2.5-1 s1.7 .2 2.5 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="10.4" r="0.8" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <!-- ============== TOP NAV ============== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab" href="index.html">Index</a>
+      <a class="topnav-tab" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab active" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+  </nav>
+
+  <!-- ============== HEADER ============== -->
+  <header class="doc-head">
+    <img src="assets/logo-dark.svg" class="wm" alt="HowlAlert" />
+    <div>
+      <h1>Dynamic Island + Live Activity <span class="sub">Section E</span></h1>
+      <p>iPhone 17 Pro · iOS 26. Dynamic Island in idle, compact, minimal, expanded; lockscreen Live Activity card. All states match real hardware geometry — pill cutout, not a top bar.</p>
+    </div>
+    <div class="meta">
+      <div>Island · 122×37pt → 360×160pt expanded</div>
+      <div class="v">iOS 26 · iPhone 17 Pro</div>
+      <div>11pt from screen top · 20pt radius</div>
+    </div>
+  </header>
+
+  <!-- ============== E.1 · ISLAND ANATOMY ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">E.1</span>
+      <h2>The pill · anatomy</h2>
+      <div class="lede">122pt × 37pt by default. Sits 11pt from the screen edge. The front camera lives inside it as a 7pt dark dot at the right.</div>
+    </div>
+
+    <div class="island-showcase">
+      <div class="island-row">
+        <div class="island-card">
+          <div class="iso">
+            <div class="island" style="position: relative; top: 0; left: 0; transform: none;"></div>
+          </div>
+          <div class="iso-cap">
+            <div class="nm">Idle · default pill</div>
+            <div class="ds">No activity. Pure black, looks like a slightly oversized camera cutout. 122 × 37pt.</div>
+          </div>
+        </div>
+
+        <div class="island-card">
+          <div class="iso">
+            <div class="island compact" style="position: relative; top: 0; left: 0; transform: none;">
+              <span class="lead"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+              <span class="trail">84%</span>
+            </div>
+          </div>
+          <div class="iso-cap">
+            <div class="nm">Compact · single activity</div>
+            <div class="ds">Leading wolf on the left, trailing % on the right. Camera dot sits between.</div>
+          </div>
+        </div>
+
+        <div class="island-card">
+          <div class="iso">
+            <div class="island minimal" style="position: relative; top: 0; left: 0; transform: none;">
+              <span class="glyph"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+            </div>
+          </div>
+          <div class="iso-cap">
+            <div class="nm">Minimal · sharing the stage</div>
+            <div class="ds">When another app is also active (e.g. timer), ours collapses to a small dot.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="island-row">
+        <div class="island-card">
+          <div class="iso">
+            <div class="island expanded" style="position: relative; top: 0; left: 0; transform: none;">
+              <div class="exp-top">
+                <span class="exp-logo"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                <div class="exp-titles">
+                  <div class="exp-app">HowlAlert · Claude</div>
+                  <div class="exp-title">5-hour window</div>
+                </div>
+                <span class="exp-trail">84%</span>
+              </div>
+              <div class="exp-bar"><i style="width: 84%;"></i></div>
+              <div class="exp-meta"><span class="left">Runs out in 47m</span><span>Resets 12:47 PM</span></div>
+            </div>
+          </div>
+          <div class="iso-cap">
+            <div class="nm">Expanded · tap or long-press</div>
+            <div class="ds">Animates from compact to a 360 × 160pt rounded card. Slots: leading (logo) + center (title) + trailing (value) + bottom (bar &amp; meta).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="anno">SwiftUI: ActivityKit · DynamicIsland(compactLeading:trailingLeading:expandedRegion:minimal:) · attribute updates push to all four regions atomically.</p>
+  </section>
+
+  <!-- ============== E.2 · STATES IN CONTEXT ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">E.2</span>
+      <h2>In context · on the phone</h2>
+      <div class="lede">Same iPhone, same dashboard, four different island states. Notice how the pill sits ON the status bar, not as a top bar — time + signal flank it.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+
+        <!-- Idle (no activity) -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island"></div>
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body" style="background: transparent;"></div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.2.a · IDLE</div>
+            <div class="nm">No activity</div>
+            <div class="ds">App not in foreground, no live activity running. Default pill.</div>
+          </div>
+        </div>
+
+        <!-- Compact (active, on track) -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island compact fresh">
+                <span class="lead"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                <span class="trail">62%</span>
+              </div>
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body" style="background: transparent;"></div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.2.b · COMPACT · on track</div>
+            <div class="nm">Live activity active</div>
+            <div class="ds">Wolf glyph + % readout in green. Updates every minute.</div>
+          </div>
+        </div>
+
+        <!-- Compact (approaching) -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island compact">
+                <span class="lead"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                <span class="trail">47m</span>
+              </div>
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body" style="background: transparent;"></div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.2.c · COMPACT · approaching</div>
+            <div class="nm">Runs out in 47m</div>
+            <div class="ds">Amber. When &lt; 1h to limit, % readout switches to time remaining.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== E.3 · EXPANDED ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">E.3</span>
+      <h2>Expanded · tap to open</h2>
+      <div class="lede">Long-press or tap the compact island. Animates open to a 360pt-wide card with full UsageRow inside.</div>
+    </div>
+
+    <div class="stage">
+      <div class="annot-row">
+        <div class="annot right">
+          <div class="a-card">
+            <div class="a-tag">LEADING SLOT</div>
+            <p>App icon + brand color tag. 28pt. Distinguishes HowlAlert at a glance even when iconography is shared with notifications.</p>
+          </div>
+          <div class="a-card">
+            <div class="a-tag">CENTER SLOT</div>
+            <p>App label + 1-line title. Sentence case. Title swaps to "Runs out in 47m" when warn.</p>
+          </div>
+        </div>
+
+        <div class="phone-with-cap" style="margin: 0 auto;">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island expanded">
+                <div class="exp-top">
+                  <span class="exp-logo"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                  <div class="exp-titles">
+                    <div class="exp-app">HowlAlert · Claude</div>
+                    <div class="exp-title">5-hour window</div>
+                  </div>
+                  <span class="exp-trail">84%</span>
+                </div>
+                <div class="exp-bar"><i style="width: 84%;"></i></div>
+                <div class="exp-meta"><span class="left">Runs out in 47m</span><span>Resets 12:47 PM</span></div>
+              </div>
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body" style="background: transparent;"></div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.3 · EXPANDED</div>
+            <div class="nm">Tap to open</div>
+            <div class="ds">Hides status bar text (Apple does this automatically). Tap the card to launch the app.</div>
+          </div>
+        </div>
+
+        <div class="annot">
+          <div class="a-card">
+            <div class="a-tag">TRAILING SLOT</div>
+            <p>Big numeric — 22pt mono. State-tinted. Always the headline metric.</p>
+          </div>
+          <div class="a-card">
+            <div class="a-tag">BOTTOM REGION</div>
+            <p>Full-width slim bar + tabular meta. Mirrors the iOS dashboard usage row.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== E.4 · LOCK SCREEN LIVE ACTIVITY ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">E.4</span>
+      <h2>Lock screen · Live Activity card</h2>
+      <div class="lede">Per HIG: <em>“a rectangular area that appears above notifications but below the time”</em>. The card sits at the <strong>top of the notification stack</strong> — which itself lives at the bottom of the lockscreen.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+
+        <!-- On-pace -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island compact fresh">
+                <span class="lead"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                <span class="trail">62%</span>
+              </div>
+              <div class="lock-screen">
+                <div class="lock-clock">
+                  <div class="lock-date">Thursday, May 28</div>
+                  <div class="lock-time">9:41</div>
+                </div>
+                <div class="lock-spacer"></div>
+                <div class="lock-stack">
+                  <div class="la-card fresh">
+                    <div class="la-head">
+                      <span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                      <span class="ttl">HowlAlert · 5-hour</span>
+                      <span class="when">now</span>
+                    </div>
+                    <div class="la-body">
+                      <span class="text">On track</span>
+                      <span class="pct">62<small style="font-size:14px;color:rgba(255,255,255,0.5);">%</small></span>
+                    </div>
+                    <div class="la-bar"><i style="width: 38%;"></i></div>
+                    <div class="la-meta">
+                      <span class="left">3h 14m to reset</span>
+                      <span class="right">Resets 12:55 PM</span>
+                    </div>
+                  </div>
+                  <div class="lock-notif">
+                    <span class="nico"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                    <div>
+                      <div class="nm">Messages</div>
+                      <div class="body">Jamie · ok sounds good</div>
+                    </div>
+                    <span class="when">9:38</span>
+                  </div>
+                  <div class="lock-notif">
+                    <span class="nico blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/></svg></span>
+                    <div>
+                      <div class="nm">Calendar</div>
+                      <div class="body">Standup in 5 min</div>
+                    </div>
+                    <span class="when">9:35</span>
+                  </div>
+                </div>
+                <div class="lock-shortcuts">
+                  <span class="lock-shortcut"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 2h8v4l-1 8h-6L8 6z"/></svg></span>
+                  <span class="lock-shortcut"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.5" fill="#050507"/></svg></span>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.4.a · FRESH</div>
+            <div class="nm">On track</div>
+            <div class="ds">Green pct, full-bar at 38%, ample reset window.</div>
+          </div>
+        </div>
+
+        <!-- Warn -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island compact">
+                <span class="lead"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                <span class="trail">47m</span>
+              </div>
+              <div class="lock-screen">
+                <div class="lock-clock">
+                  <div class="lock-date">Thursday, May 28</div>
+                  <div class="lock-time">11:13</div>
+                </div>
+                <div class="lock-spacer"></div>
+                <div class="lock-stack">
+                  <div class="la-card">
+                    <div class="la-head">
+                      <span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-bolt"/></svg></span>
+                      <span class="ttl">HowlAlert · 5-hour</span>
+                      <span class="when">2m ago</span>
+                    </div>
+                    <div class="la-body">
+                      <span class="text">Runs out in 47m</span>
+                      <span class="pct">84<small style="font-size:14px;color:rgba(255,255,255,0.5);">%</small></span>
+                    </div>
+                    <div class="la-bar"><i style="width: 84%;"></i></div>
+                    <div class="la-meta">
+                      <span class="left">Slow down to last</span>
+                      <span class="right">Resets 12:00 PM</span>
+                    </div>
+                  </div>
+                  <div class="lock-notif">
+                    <span class="nico"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                    <div>
+                      <div class="nm">Messages</div>
+                      <div class="body">Jamie · lunch?</div>
+                    </div>
+                    <span class="when">11:10</span>
+                  </div>
+                </div>
+                <div class="lock-shortcuts">
+                  <span class="lock-shortcut"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 2h8v4l-1 8h-6L8 6z"/></svg></span>
+                  <span class="lock-shortcut"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.5" fill="#050507"/></svg></span>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.4.b · WARN</div>
+            <div class="nm">Approaching limit</div>
+            <div class="ds">Amber pct. Text flips to "Runs out in 47m". Bar at 84%.</div>
+          </div>
+        </div>
+
+        <!-- Crit -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="wallpaper"></div>
+              <div class="island compact crit">
+                <span class="lead"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                <span class="trail">9m</span>
+              </div>
+              <div class="lock-screen">
+                <div class="lock-clock">
+                  <div class="lock-date">Thursday, May 28</div>
+                  <div class="lock-time">11:51</div>
+                </div>
+                <div class="lock-spacer"></div>
+                <div class="lock-stack">
+                  <div class="la-card crit">
+                    <div class="la-head">
+                      <span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-bolt"/></svg></span>
+                      <span class="ttl">HowlAlert · 5-hour</span>
+                      <span class="when">just now</span>
+                    </div>
+                    <div class="la-body">
+                      <span class="text">9 minutes left</span>
+                      <span class="pct">97<small style="font-size:14px;color:rgba(255,255,255,0.5);">%</small></span>
+                    </div>
+                    <div class="la-bar"><i style="width: 97%;"></i></div>
+                    <div class="la-meta">
+                      <span class="left">Reset at 12:00 PM</span>
+                      <span class="right">Weekly · 7% left</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="lock-shortcuts">
+                  <span class="lock-shortcut"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 2h8v4l-1 8h-6L8 6z"/></svg></span>
+                  <span class="lock-shortcut"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.5" fill="#050507"/></svg></span>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">E.4.c · CRITICAL</div>
+            <div class="nm">9 minutes left</div>
+            <div class="ds">Red. Island shows "9m" trailing. Card includes weekly secondary.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="anno">Per HIG: lock screen Live Activities live at the top of the list alongside notifications, with 14pt margins on all edges. Same ActivityKit attributes power both the island + this card.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Section E · Dynamic Island + Live Activity</div>
+    <div>4 island states · 3 lockscreen cards</div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · Design Index</title>
+<style>
+  :root {
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-navy-700: #15275A;
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-300: #7BD3F6;
+    --howl-state-fresh: #3DDC97;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5;
+    --howl-ink-700: #3A4666;
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--howl-ink-100);
+    font-family: var(--font-sys);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body { padding: 56px 48px 96px; }
+  .doc { max-width: 1320px; margin: 0 auto; }
+
+  .num, .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+  /* ----------- NAV ----------- */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; flex: none; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs {
+    display: flex; gap: 4px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .topnav-tab {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    color: var(--howl-ink-300);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: color 140ms, background 140ms, border-color 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover {
+    color: var(--howl-cyan-300);
+    background: rgba(15,172,237,0.06);
+  }
+  .topnav-tab.active {
+    color: var(--howl-cyan-300);
+    background: rgba(15,172,237,0.10);
+    border-color: rgba(15,172,237,0.30);
+  }
+  .topnav-tab.disabled {
+    color: var(--howl-ink-500);
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ----------- HERO ----------- */
+  .hero {
+    position: relative;
+    border-radius: var(--radius-xl);
+    padding: 56px 56px 56px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 14% 28%, rgba(15,172,237,0.42), transparent 38%),
+      radial-gradient(circle at 86% 72%, rgba(61,220,151,0.22), transparent 42%),
+      radial-gradient(circle at 60% 50%, rgba(255,165,51,0.10), transparent 50%),
+      linear-gradient(180deg, #0a1538 0%, #050a1f 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    margin-bottom: 56px;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 12% 80%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(1.5px 1.5px at 88% 12%, rgba(255,255,255,0.4), transparent 60%),
+      radial-gradient(1px 1px at 62% 30%, rgba(255,255,255,0.55), transparent 60%),
+      radial-gradient(1px 1px at 28% 38%, rgba(255,255,255,0.4), transparent 60%),
+      radial-gradient(1px 1px at 70% 78%, rgba(255,255,255,0.35), transparent 60%),
+      radial-gradient(1px 1px at 18% 60%, rgba(255,255,255,0.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 78% 48%, rgba(255,255,255,0.4), transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 48px;
+    align-items: center;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    margin: 0 0 18px;
+    font-size: 56px;
+    line-height: 60px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    max-width: 720px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(180deg, #7BD3F6, #0FACED);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p {
+    margin: 0 0 28px;
+    font-size: 17px;
+    line-height: 26px;
+    color: var(--howl-ink-300);
+    max-width: 620px;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(15,172,237,0.92), rgba(15,140,200,0.85));
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.30);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    border: 1px solid rgba(255,255,255,0.20);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      0 10px 32px rgba(15,172,237,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    transition: transform 140ms ease;
+  }
+  .hero-cta:hover { transform: translateY(-1px); }
+  .hero-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--howl-ink-100);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+  .hero-cta-secondary:hover { background: rgba(255,255,255,0.10); }
+
+  .hero-mark {
+    position: relative;
+  }
+  .hero-mark .glow {
+    position: absolute; inset: -20%;
+    background: radial-gradient(circle at 50% 50%, rgba(15,172,237,0.5), transparent 60%);
+    filter: blur(6px);
+  }
+  .hero-mark img {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 16px 36px rgba(15,172,237,0.4));
+  }
+
+  /* ----------- META BAR ----------- */
+  .meta-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: -32px 0 56px;
+    position: relative;
+    z-index: 2;
+  }
+  .meta-card {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+  .meta-card .k {
+    font-size: 10px;
+    color: var(--howl-ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .meta-card .v {
+    font-size: 15px;
+    color: var(--howl-ink-100);
+    font-weight: 600;
+  }
+  .meta-card .sub {
+    font-size: 11px;
+    color: var(--howl-ink-300);
+    margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+
+  /* ----------- SECTION ----------- */
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .sec-head .n {
+    font-family: var(--font-mono);
+    color: var(--howl-cyan-300);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .sec-head h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .sec-head .lede {
+    margin-left: auto;
+    color: var(--howl-ink-300);
+    font-size: 14px;
+    max-width: 480px;
+    text-align: right;
+    line-height: 20px;
+  }
+  section { margin-bottom: 72px; }
+
+  /* ----------- ARTIFACT CARDS ----------- */
+  .art-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .art-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+  .art-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(15,172,237,0.35);
+    box-shadow: 0 16px 40px rgba(15,172,237,0.18);
+  }
+  .art-card .preview {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .art-card .body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .art-card .ix-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .art-card .ix {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .art-card .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .art-card .status.live {
+    background: rgba(61,220,151,0.14);
+    color: var(--howl-state-fresh);
+  }
+  .art-card .status.queued {
+    background: rgba(106,122,153,0.16);
+    color: var(--howl-ink-300);
+  }
+  .art-card .status .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .art-card .status.live .dot { box-shadow: 0 0 8px currentColor; }
+  .art-card h3 {
+    margin: 4px 0 0;
+    font-size: 18px;
+    line-height: 22px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .art-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--howl-ink-300);
+  }
+  .art-card .tags {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .art-card .tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    color: var(--howl-ink-300);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* card is locked / queued (sections B–H not yet built) */
+  .art-card.locked .preview { opacity: 0.55; }
+  .art-card.locked { cursor: default; }
+  .art-card.locked:hover { transform: none; border-color: var(--panel-border); box-shadow: none; }
+  .art-card.locked::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* ----------- PREVIEWS ----------- */
+  .pv {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  .pv-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 22% 26%, rgba(15,172,237,0.35), transparent 50%),
+      radial-gradient(circle at 78% 76%, rgba(61,220,151,0.25), transparent 50%),
+      linear-gradient(180deg, #0a1538, #050a1f);
+  }
+  .pv-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Preview · Design System */
+  .pv-ds {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+  }
+  .pv-ds-sw {
+    border-radius: 6px;
+    aspect-ratio: 1;
+  }
+
+  /* Preview · macOS popover */
+  .pv-mac {
+    width: 220px;
+    border-radius: 14px;
+    padding: 12px;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(15, 172, 237, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 32px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pv-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    overflow: hidden;
+    position: relative;
+  }
+  .pv-bar i {
+    display: block; height: 100%;
+    background: var(--howl-cyan-500);
+    border-radius: inherit;
+    box-shadow: 0 0 8px rgba(15,172,237,0.5);
+  }
+
+  /* Preview · iPhone */
+  .pv-iphone {
+    width: 96px;
+    height: 188px;
+    border-radius: 22px;
+    background: #000;
+    padding: 6px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .pv-iphone-scr {
+    border-radius: 18px;
+    height: 100%;
+    background: linear-gradient(180deg, #0E1B42, #091533);
+    padding: 14px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pv-island { width: 36px; height: 10px; background: #000; border-radius: 999px; margin: 0 auto 4px; }
+  .pv-big-pct { font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: var(--howl-cyan-500); text-align: center; line-height: 1; font-feature-settings: "tnum"; }
+  .pv-sub { font-size: 9px; color: var(--howl-ink-300); text-align: center; font-family: var(--font-mono); }
+
+  /* Preview · Watch */
+  .pv-watch {
+    width: 110px; height: 130px;
+    border-radius: 26px;
+    background: #1A1A1F;
+    border: 4px solid #2a2a30;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+  .pv-watch-pct {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-state-warn);
+  }
+
+  /* Preview · Dynamic Island */
+  .pv-island-host {
+    background: #000;
+    padding: 22px 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .pv-island-pill {
+    background: #000;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .pv-island-pill .b {
+    width: 40px; height: 5px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .pv-island-pill .b i {
+    display: block;
+    height: 100%;
+    width: 38%;
+    background: var(--howl-state-warn);
+  }
+  .pv-island-pill .pct {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: white;
+    font-feature-settings: "tnum";
+  }
+
+  /* Preview · Paywall */
+  .pv-paywall {
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+  }
+  .pv-paywall-card {
+    flex: 1;
+    background: var(--howl-navy-800);
+    border-radius: 10px;
+    padding: 10px 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+  }
+  .pv-paywall-card.selected {
+    border: 2px solid var(--howl-cyan-500);
+    box-shadow: 0 0 0 3px rgba(15,172,237,0.10);
+  }
+  .pv-paywall-card .t { font-size: 9px; color: var(--howl-ink-300); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pv-paywall-card .p { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: white; margin-top: 6px; font-feature-settings: "tnum"; }
+  .pv-paywall-card .sub { font-size: 8px; color: var(--howl-ink-500); margin-top: 3px; }
+  .pv-paywall-card .rib { position: absolute; top: -7px; left: -4px; font-size: 7px; padding: 2px 5px; border-radius: 3px; background: var(--howl-state-fresh); color: var(--howl-navy-900); font-weight: 800; letter-spacing: 0.06em; }
+
+  /* Preview · Icons family */
+  .pv-icons {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .pv-icon-tile {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1E90D4, #0A3E72);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+  }
+  .pv-icon-tile.circ { border-radius: 50%; width: 60px; height: 60px; }
+  .pv-icon-tile.sq { border-radius: 14px; }
+  .pv-icon-tile.template { background: #2a2a30; }
+
+  /* Preview · DMG */
+  .pv-dmg {
+    width: 280px;
+    aspect-ratio: 660/400;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #0E1B42 0%, #050a1f 70%);
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    overflow: hidden;
+  }
+  .pv-dmg .arrow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--howl-cyan-500);
+    font-family: var(--font-mono);
+    font-size: 28px;
+  }
+  .pv-dmg-app, .pv-dmg-folder {
+    width: 52px; height: 52px;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1E90D4, #0A3E72);
+  }
+  .pv-dmg-folder {
+    background: linear-gradient(135deg, #6A7A99, #3A4666);
+  }
+
+  /* ----------- COMPONENT PREVIEW STRIP ----------- */
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .strip-card {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .strip-card .nm {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+  }
+  .strip-card .demo {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 64px;
+  }
+
+  /* a few mini swatches for the strip */
+  .mini-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .mini-bar i {
+    display: block;
+    height: 100%;
+    background: var(--howl-cyan-500);
+    width: 40%;
+  }
+  .mini-chip {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 5px 10px;
+    background: rgba(255,165,51,0.14);
+    color: var(--howl-state-warn);
+    border: 1px solid rgba(255,165,51,0.30);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .mini-chip .d { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .mini-cd {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    font-feature-settings: "tnum";
+  }
+  .mini-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(15,172,237,0.92), rgba(15,172,237,0.78));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.20);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 4px 12px rgba(15,172,237,0.4);
+  }
+  .mini-toggle {
+    width: 32px; height: 19px;
+    background: var(--howl-cyan-500);
+    border-radius: 999px;
+    position: relative;
+  }
+  .mini-toggle::after {
+    content: ""; position: absolute;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: white;
+    top: 2px; left: 15px;
+  }
+
+  /* ----------- PROTOCOL ----------- */
+  .protocol {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+  .protocol h3 {
+    margin: 0 0 14px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .protocol-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .protocol-card {
+    border: 1px dashed var(--howl-ink-700);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .protocol-card code {
+    font-family: var(--font-mono);
+    color: var(--howl-cyan-300);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .protocol-card .ex {
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    line-height: 16px;
+  }
+
+  /* footer */
+  .doc-foot {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    color: var(--howl-ink-500);
+    font-size: 12px;
+  }
+  .doc-foot .v { font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- ========== TOP NAV ========== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab active" href="index.html">Index</a>
+      <a class="topnav-tab" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">HowlAlert · Design Index · v0.1</div>
+        <h1>Keep tabs on <em>Claude</em><br/>from anywhere.</h1>
+        <p>The full design pass for HowlAlert — a wolf-themed Claude Code usage monitor for macOS 26, iOS 26, and watchOS 26. One design system. Eight artifacts. Pixel-accurate, Liquid Glass-native, ready for build.</p>
+        <a class="hero-cta" href="design-system.html">
+          Open the design system
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a class="hero-cta-secondary" href="#artifacts">
+          See all 8 artifacts
+        </a>
+      </div>
+      <div class="hero-mark">
+        <div class="glow"></div>
+        <img src="assets/logo-dark.svg" alt="HowlAlert WolfMark" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== META BAR ========== -->
+  <div class="meta-bar">
+    <div class="meta-card">
+      <div class="k">Platforms</div>
+      <div class="v">macOS · iOS · watchOS</div>
+      <div class="sub">26.0 · Liquid Glass</div>
+    </div>
+    <div class="meta-card">
+      <div class="k">Persona</div>
+      <div class="v">MrDemonWolf</div>
+      <div class="sub">friendly blue wolf</div>
+    </div>
+    <div class="meta-card">
+      <div class="k">Audience</div>
+      <div class="v">Claude Code devs</div>
+      <div class="sub">$20–$200 / mo</div>
+    </div>
+    <div class="meta-card">
+      <div class="k">Status</div>
+      <div class="v">Design Pass</div>
+      <div class="sub">pre-build · awaiting approval</div>
+    </div>
+  </div>
+
+  <!-- ========== ARTIFACTS ========== -->
+  <section id="artifacts">
+    <div class="sec-head">
+      <span class="n">ARTIFACTS</span>
+      <h2>The eight design artifacts</h2>
+      <div class="lede">Each artifact is a single self-contained HTML file. Approve one to unlock the next.</div>
+    </div>
+
+    <div class="art-grid">
+
+      <!-- A · Design System Reference Sheet -->
+      <a class="art-card" href="design-system.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-ds">
+              <div class="pv-ds-sw" style="background:#091533"></div>
+              <div class="pv-ds-sw" style="background:#0E1B42"></div>
+              <div class="pv-ds-sw" style="background:#15275A"></div>
+              <div class="pv-ds-sw" style="background:#1E3475"></div>
+              <div class="pv-ds-sw" style="background:#3DDC97"></div>
+              <div class="pv-ds-sw" style="background:#0FACED"></div>
+              <div class="pv-ds-sw" style="background:#3DBEF1"></div>
+              <div class="pv-ds-sw" style="background:#7BD3F6"></div>
+              <div class="pv-ds-sw" style="background:#D5F0FB"></div>
+              <div class="pv-ds-sw" style="background:#FFA533"></div>
+              <div class="pv-ds-sw" style="background:#FF4D4D"></div>
+              <div class="pv-ds-sw" style="background:#F4F7FB"></div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION A</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>Design System Reference Sheet</h3>
+          <p>Tokens, type, motion, Liquid Glass rules, and all 15 components with states. The single source of truth.</p>
+          <div class="tags">
+            <span class="tag">tokens</span><span class="tag">type</span><span class="tag">color</span>
+            <span class="tag">motion</span><span class="tag">glass</span><span class="tag">components</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- B · macOS Menu Bar App -->
+      <a class="art-card" href="section-b-macos.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-mac">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <img src="assets/logo-dark.svg" style="width:18px;height:18px;" alt="" />
+                <span style="font-size:11px;font-weight:600;color:var(--howl-ink-100);">HowlAlert</span>
+                <span style="margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--howl-ink-300);">2h 47m</span>
+              </div>
+              <div>
+                <div style="font-size:9px;color:var(--howl-ink-300);margin-bottom:3px;">5-Hour</div>
+                <div class="pv-bar"><i style="width:62%;background:var(--howl-cyan-500);"></i></div>
+              </div>
+              <div>
+                <div style="font-size:9px;color:var(--howl-ink-300);margin-bottom:3px;">Weekly</div>
+                <div class="pv-bar"><i style="width:22%;background:var(--howl-state-warn);"></i></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;">
+                <span style="font-family:var(--font-mono);font-size:9px;padding:3px 8px;border-radius:999px;background:rgba(255,165,51,0.14);color:var(--howl-state-warn);border:1px solid rgba(255,165,51,0.3);">Runs out in 47m</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION B</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>macOS Menu Bar App</h3>
+          <p>Menu bar icons (3 states), 360×520 popover in 5 states, settings sheet. Always dark.</p>
+          <div class="tags">
+            <span class="tag">macOS 26</span><span class="tag">menu bar</span><span class="tag">popover</span><span class="tag">liquid glass</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- C · iOS App -->
+      <a class="art-card" href="section-c-ios.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-iphone">
+              <div class="pv-iphone-scr">
+                <div class="pv-island"></div>
+                <div class="pv-big-pct">67%</div>
+                <div class="pv-bar" style="margin: 4px 4px;"><i style="width:33%;"></i></div>
+                <div class="pv-sub">3h 14m</div>
+                <div style="display:flex;justify-content:center;margin-top:auto;">
+                  <span style="font-family:var(--font-mono);font-size:8px;padding:3px 6px;border-radius:999px;background:rgba(15,172,237,0.14);color:var(--howl-cyan-300);border:1px solid rgba(15,172,237,0.3);">On track</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION C</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>iOS App</h3>
+          <p>Welcome, pairing, dashboard, history, notification prefs, settings. Light + dark.</p>
+          <div class="tags">
+            <span class="tag">iOS 26</span><span class="tag">iPhone 17 Pro</span><span class="tag">8 screens</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- D · Apple Watch -->
+      <a class="art-card" href="section-d-watch.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content" style="gap: 12px; flex-direction: row;">
+            <div class="pv-watch">
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--howl-ink-300);">CLAUDE</div>
+              <div class="pv-watch-pct">84%</div>
+              <div class="pv-bar" style="width:80%;"><i style="width:16%; background: var(--howl-state-warn);"></i></div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:white;">47m</div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION D</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>Apple Watch</h3>
+          <p>Main view, Smart Stack widget, 4 complication styles, incoming alert.</p>
+          <div class="tags">
+            <span class="tag">watchOS 26</span><span class="tag">Series 10</span><span class="tag">complications</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- E · Dynamic Island + Live Activity -->
+      <a class="art-card" href="section-e-island.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-island-host">
+              <div class="pv-island-pill">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+                <div class="b"><i></i></div>
+                <span class="pct">67%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION E</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>Dynamic Island + Live Activity</h3>
+          <p>All 5 island states (compact, minimal, expanded) and lockscreen Live Activity card.</p>
+          <div class="tags">
+            <span class="tag">Dynamic Island</span><span class="tag">Live Activity</span><span class="tag">lockscreen</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- F · Paywall -->
+      <a class="art-card" href="section-f-paywall.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-paywall">
+              <div class="pv-paywall-card selected">
+                <span class="rib">BEST VALUE</span>
+                <div class="t">HowlAlert Max</div>
+                <div class="p">$29.99</div>
+                <div class="sub">/ year</div>
+              </div>
+              <div class="pv-paywall-card">
+                <div class="t">HowlAlert Pro</div>
+                <div class="p">$4.99</div>
+                <div class="sub">/ month</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION F</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>Paywall</h3>
+          <p>Pricing sheet (Max + Pro variants), post-purchase celebration, already-subscribed.</p>
+          <div class="tags">
+            <span class="tag">PricingToggle</span><span class="tag">7-day trial</span><span class="tag">no scarcity</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- G · App Icon Family -->
+      <a class="art-card" href="section-g-icons.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-icons">
+              <div class="pv-icon-tile sq">
+                <div style="width:32px;height:32px;color:#7BD3F6;" class="wolf-mono">
+                  <svg viewBox="0 0 512 512" style="width:100%;height:100%;fill:currentColor;">
+                    <path d="M 144,316 C 148,262 166,188 204,150 C 220,134 240,170 258,220 Z"/>
+                    <path d="M 368,316 C 364,262 346,188 308,150 C 292,134 272,170 254,220 Z"/>
+                    <ellipse cx="256" cy="338" rx="138" ry="132"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="pv-icon-tile circ">
+                <div style="width:30px;height:30px;color:#7BD3F6;" class="wolf-mono">
+                  <svg viewBox="0 0 512 512" style="width:100%;height:100%;fill:currentColor;">
+                    <path d="M 144,316 C 148,262 166,188 204,150 C 220,134 240,170 258,220 Z"/>
+                    <path d="M 368,316 C 364,262 346,188 308,150 C 292,134 272,170 254,220 Z"/>
+                    <ellipse cx="256" cy="338" rx="138" ry="132"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="pv-icon-tile template" style="background: #2a2a30;">
+                <div style="width:22px;height:22px;color:white;" class="wolf-mono">
+                  <svg viewBox="0 0 512 512" style="width:100%;height:100%;fill:currentColor;">
+                    <path d="M 144,316 C 148,262 166,188 204,150 C 220,134 240,170 258,220 Z"/>
+                    <path d="M 368,316 C 364,262 346,188 308,150 C 292,134 272,170 254,220 Z"/>
+                    <ellipse cx="256" cy="338" rx="138" ry="132"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION G</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>App Icon Family</h3>
+          <p>iOS layered, macOS rounded, watchOS circular, menu bar template, marketing.</p>
+          <div class="tags">
+            <span class="tag">5 variants</span><span class="tag">one silhouette</span><span class="tag">layered icons</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- H · DMG + Marketing -->
+      <a class="art-card" href="section-h-marketing.html">
+        <div class="preview">
+          <div class="pv-bg"></div>
+          <div class="pv-content">
+            <div class="pv-dmg">
+              <div class="pv-dmg-app">
+                <img src="assets/logo-dark.svg" style="width:36px;height:36px;" alt="" />
+              </div>
+              <div class="arrow">→</div>
+              <div class="pv-dmg-folder">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="ix-row">
+            <span class="ix">SECTION H</span>
+            <span class="status live"><span class="dot"></span>Live</span>
+          </div>
+          <h3>DMG Background + Marketing</h3>
+          <p>DMG installer art, three iPhone App Store shots, watch shot, hero composition.</p>
+          <div class="tags">
+            <span class="tag">DMG</span><span class="tag">App Store</span><span class="tag">marketing</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ========== SYSTEM AT A GLANCE ========== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">SYSTEM</span>
+      <h2>The system, at a glance</h2>
+      <div class="lede">Everything below is defined in detail in the Design System Reference Sheet.</div>
+    </div>
+
+    <div class="strip">
+      <div class="strip-card">
+        <span class="nm">CritBar</span>
+        <div class="demo"><div class="mini-bar"><i></i></div></div>
+      </div>
+      <div class="strip-card">
+        <span class="nm">PaceChip</span>
+        <div class="demo"><span class="mini-chip"><span class="d"></span>Runs out in 47m</span></div>
+      </div>
+      <div class="strip-card">
+        <span class="nm">ResetCountdown</span>
+        <div class="demo"><span class="mini-cd">3:14:22</span></div>
+      </div>
+      <div class="strip-card">
+        <span class="nm">PrimaryButton</span>
+        <div class="demo"><span class="mini-btn">Pair with iPhone</span></div>
+      </div>
+      <div class="strip-card">
+        <span class="nm">Toggle</span>
+        <div class="demo"><div class="mini-toggle"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PROTOCOL ========== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">PROTOCOL</span>
+      <h2>How to walk through this</h2>
+      <div class="lede">After each artifact, respond with one of these four commands.</div>
+    </div>
+
+    <div class="protocol">
+      <div class="protocol-grid">
+        <div class="protocol-card">
+          <code>next</code>
+          <div class="ex">Approve. Move to the next section.</div>
+        </div>
+        <div class="protocol-card">
+          <code>redo: &lt;note&gt;</code>
+          <div class="ex">Revise the current artifact with the noted change.</div>
+        </div>
+        <div class="protocol-card">
+          <code>deeper: &lt;component&gt;</code>
+          <div class="ex">Drill into a specific component with more variants.</div>
+        </div>
+        <div class="protocol-card">
+          <code>branch: &lt;idea&gt;</code>
+          <div class="ex">Fork off and explore an alternative direction.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Design Index</div>
+    <div class="v">build · ds-2026.05.27</div>
+  </footer>
+
+</div>
+</body>
+</html>

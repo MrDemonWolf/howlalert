@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · F · Paywall</title>
+<style>
+  :root {
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-navy-700: #15275A;
+    --howl-navy-600: #1E3475;
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-400: #3DBEF1;
+    --howl-cyan-300: #7BD3F6;
+    --howl-state-fresh: #3DDC97;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5;
+    --howl-ink-700: #3A4666;
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page-bg); color: var(--howl-ink-100); font-family: var(--font-sys); -webkit-font-smoothing: antialiased; }
+  body { padding: 56px 48px 96px; }
+  .doc { max-width: 1320px; margin: 0 auto; }
+  .num, .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+  /* Top nav */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex; align-items: center; gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-right: auto; }
+  .topnav-tab {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 11px; border-radius: 999px;
+    color: var(--howl-ink-300); text-decoration: none;
+    border: 1px solid transparent; transition: all 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover { color: var(--howl-cyan-300); background: rgba(15,172,237,0.06); }
+  .topnav-tab.active { color: var(--howl-cyan-300); background: rgba(15,172,237,0.10); border-color: rgba(15,172,237,0.30); }
+  .topnav-tab.disabled { color: var(--howl-ink-500); opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+  /* Page header */
+  .doc-head { display: flex; align-items: center; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--panel-border); margin-bottom: 56px; }
+  .doc-head .wm { width: 56px; height: 56px; flex: none; }
+  .doc-head h1 { margin: 0; font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; }
+  .doc-head h1 .sub { color: var(--howl-cyan-300); font-weight: 500; margin-left: 10px; font-size: 22px; }
+  .doc-head p { margin: 6px 0 0; color: var(--howl-ink-300); font-size: 15px; line-height: 22px; max-width: 720px; }
+  .doc-head .meta { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--howl-ink-500); font-size: 12px; }
+  .doc-head .meta .v { color: var(--howl-ink-300); font-family: var(--font-mono); }
+
+  section { margin-bottom: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+  .sec-head .n { font-family: var(--font-mono); color: var(--howl-cyan-300); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+  .sec-head h2 { margin: 0; font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.01em; }
+  .sec-head .lede { margin-left: auto; color: var(--howl-ink-300); font-size: 13px; max-width: 520px; text-align: right; line-height: 18px; }
+  .anno { font-size: 12px; line-height: 16px; color: var(--howl-cyan-300); font-family: var(--font-mono); margin-top: 12px; }
+
+  /* ============== Wallpaper stage ============== */
+  .stage {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background:
+      radial-gradient(ellipse at 18% 22%, rgba(15,172,237,0.45), transparent 42%),
+      radial-gradient(ellipse at 82% 70%, rgba(157,89,255,0.32), transparent 48%),
+      radial-gradient(ellipse at 60% 18%, rgba(255,165,51,0.22), transparent 38%),
+      linear-gradient(180deg, #163576 0%, #0a1a44 60%, #050a1f 100%);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    padding: 48px 24px;
+  }
+  .stage-row { display: flex; gap: 28px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+
+  /* ============== iPhone frame ============== */
+  .phone {
+    --phone-w: 320px;
+    --phone-h: 692px;
+    --bezel: 6px;
+    --island-w: 122px;
+    --island-h: 37px;
+    --island-top: 11px;
+    width: var(--phone-w);
+    height: var(--phone-h);
+    border-radius: 50px;
+    background: #050507;
+    padding: var(--bezel);
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.08),
+      inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+    flex: none;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    border-radius: 44px;
+    background: var(--howl-navy-900);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .ios-statusbar {
+    flex: none;
+    height: 54px;
+    padding: 18px 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    position: relative;
+    z-index: 3;
+  }
+  .ios-status-right { display: flex; gap: 5px; align-items: center; }
+  .ios-batt {
+    width: 22px; height: 11px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    padding: 1px;
+    position: relative;
+  }
+  .ios-batt::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 3.5px; background: currentColor; border-radius: 0 1px 1px 0; }
+  .ios-batt span { display: block; width: 80%; height: 100%; background: currentColor; border-radius: 1px; }
+  .island {
+    position: absolute;
+    top: var(--island-top);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--island-w);
+    height: var(--island-h);
+    background: #000;
+    border-radius: 999px;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .island::after {
+    content: "";
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #1a1a1f;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  .phone-body { flex: 1; background: var(--howl-navy-900); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+  .home-indicator {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 4px; background: white; border-radius: 2px; opacity: 0.85; z-index: 5;
+  }
+
+  .phone-with-cap { display: flex; flex-direction: column; align-items: center; }
+  .phone-cap { margin-top: 14px; text-align: center; max-width: 320px; min-height: 76px; }
+  .phone-cap .ix { font-family: var(--font-mono); font-size: 10px; color: var(--howl-cyan-300); letter-spacing: 0.08em; font-weight: 600; }
+  .phone-cap .nm { font-size: 14px; font-weight: 600; color: var(--howl-ink-100); margin-top: 4px; }
+  .phone-cap .ds { font-size: 12px; color: var(--howl-ink-300); margin-top: 4px; line-height: 16px; }
+
+  /* ============== Paywall sheet (presented modally) ============== */
+  /* Sheet drags up from bottom with rounded top corners + grabber */
+  .paywall-sheet {
+    flex: 1;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+    /* Ambient cyan glow at top from the wolf */
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(15,172,237,0.35), transparent 50%),
+      var(--howl-navy-900);
+  }
+  .pw-grabber {
+    flex: none;
+    width: 36px; height: 5px;
+    background: rgba(255,255,255,0.30);
+    border-radius: 999px;
+    margin: 8px auto 0;
+  }
+  .pw-close {
+    position: absolute;
+    top: 14px; right: 18px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.10);
+    color: var(--howl-ink-100);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .pw-close svg { width: 12px; height: 12px; }
+
+  /* Hero — compact */
+  .pw-hero {
+    flex: none;
+    padding: 22px 24px 12px;
+    text-align: center;
+  }
+  .pw-hero .wolf-hero {
+    width: 60px; height: 60px;
+    color: var(--howl-cyan-500);
+    filter: drop-shadow(0 8px 22px rgba(15,172,237,0.5));
+    margin: 0 auto 12px;
+  }
+  .pw-hero .wolf-hero svg { width: 100%; height: 100%; fill: currentColor; display: block; }
+  .pw-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.01em;
+    line-height: 26px;
+  }
+  .pw-title em {
+    font-style: normal;
+    background: linear-gradient(180deg, #7BD3F6, #0FACED);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .pw-sub {
+    margin: 6px auto 0;
+    font-size: 12px;
+    line-height: 17px;
+    color: var(--howl-ink-300);
+    max-width: 240px;
+  }
+  .pw-badge { display: none; }
+
+  .pw-features {
+    flex: none;
+    padding: 8px 22px 14px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+  }
+  .pw-feature {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+  .pw-feature .ico {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: rgba(15,172,237,0.14);
+    color: var(--howl-cyan-300);
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+  .pw-feature .ico.fresh { background: rgba(61,220,151,0.14); color: var(--howl-state-fresh); }
+  .pw-feature .ico.warn  { background: rgba(255,165,51,0.14);  color: var(--howl-state-warn); }
+  .pw-feature .ico svg { width: 13px; height: 13px; fill: currentColor; }
+  .pw-feature .nm { font-size: 13px; font-weight: 500; color: var(--howl-ink-100); }
+  .pw-feature .ds { display: none; }
+
+  /* Pricing toggle */
+  .pw-pricing {
+    flex: none;
+    padding: 0 20px 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .price-card {
+    position: relative;
+    padding: 14px 12px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: transform 140ms ease, border-color 140ms ease;
+  }
+  .price-card.selected {
+    border: 2px solid var(--howl-cyan-500);
+    background: rgba(15,172,237,0.06);
+    padding: 13.5px 11.5px;
+    box-shadow: 0 0 0 3px rgba(15,172,237,0.10);
+  }
+  .price-card .ribbon {
+    position: absolute;
+    top: -8px; left: 8px;
+    background: var(--howl-state-fresh);
+    color: var(--howl-navy-900);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .price-card .check {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--howl-cyan-500);
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(15,172,237,0.5);
+  }
+  .price-card.selected .check { display: flex; }
+  .price-card .check svg { width: 10px; height: 10px; }
+  .price-card .ttl { font-size: 12px; font-weight: 600; color: var(--howl-ink-100); }
+  .price-card .price {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    margin-top: 6px;
+    font-feature-settings: "tnum";
+    line-height: 1;
+  }
+  .price-card .price small { font-size: 11px; color: var(--howl-ink-500); font-weight: 500; }
+  .price-card .meta { font-size: 10px; color: var(--howl-ink-500); margin-top: 4px; font-family: var(--font-mono); }
+  .price-card .save-chip {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    background: rgba(61,220,151,0.18);
+    color: var(--howl-state-fresh);
+    padding: 3px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+
+  /* CTA */
+  .pw-cta {
+    flex: none;
+    padding: 4px 20px 16px;
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .pw-btn-primary {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    border: 0;
+    cursor: pointer;
+    background: var(--howl-cyan-500);
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.20);
+    box-shadow: 0 8px 22px rgba(15,172,237,0.4);
+  }
+  .pw-trial-line {
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    text-align: center;
+    line-height: 15px;
+  }
+  .pw-disclosure {
+    font-size: 9px;
+    color: var(--howl-ink-500);
+    text-align: center;
+    line-height: 13px;
+    padding: 0 4px;
+    opacity: 0.85;
+  }
+  .pw-legal-row {
+    flex: none;
+    padding: 0 20px 12px;
+    display: flex; justify-content: space-between;
+    font-size: 10px;
+    color: var(--howl-ink-500);
+  }
+  .pw-legal-row a {
+    color: var(--howl-cyan-400);
+    text-decoration: none;
+  }
+
+  /* ============== Celebration ============== */
+  .scr-celebration {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 0 24px 16px;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(61,220,151,0.35), transparent 60%),
+      radial-gradient(ellipse at 50% 80%, rgba(15,172,237,0.20), transparent 60%),
+      var(--howl-navy-900);
+  }
+  .celebration-confetti {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .scr-celebration .celeb-circle {
+    margin-top: 80px;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: rgba(61,220,151,0.14);
+    border: 2px solid rgba(61,220,151,0.40);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--howl-state-fresh);
+    animation: celeb-glow 1.8s ease-in-out infinite;
+  }
+  @keyframes celeb-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(61,220,151,0); transform: scale(1); }
+    50%      { box-shadow: 0 0 40px 6px rgba(61,220,151,0.5); transform: scale(1.03); }
+  }
+  .scr-celebration .celeb-circle svg { width: 52px; height: 52px; fill: currentColor; }
+  .scr-celebration h1 {
+    margin: 32px 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    text-align: center;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+  }
+  .scr-celebration .sub {
+    font-size: 13px;
+    line-height: 19px;
+    color: var(--howl-ink-300);
+    text-align: center;
+    max-width: 240px;
+  }
+  .scr-celebration .unlocked {
+    margin-top: 28px;
+    width: 100%;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--panel-border);
+    padding: 14px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+  }
+  .scr-celebration .unlocked-head {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--howl-state-fresh);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .scr-celebration .unlocked-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px;
+    color: var(--howl-ink-100);
+  }
+  .scr-celebration .unlocked-row svg {
+    width: 14px; height: 14px;
+    color: var(--howl-state-fresh);
+    flex: none;
+  }
+  .scr-celebration .cta {
+    margin-top: auto;
+    width: 100%;
+    padding-top: 8px;
+  }
+
+  /* ============== Already subscribed ============== */
+  .scr-already {
+    flex: 1;
+    display: flex; flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+  .scr-already .as-header {
+    padding: 16px 20px 8px;
+    display: flex; align-items: center;
+  }
+  .scr-already .as-back {
+    color: var(--howl-cyan-400);
+    font-size: 15px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .scr-already .as-back svg { width: 16px; height: 16px; }
+  .scr-already .as-title {
+    padding: 4px 20px 20px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.01em;
+  }
+  .scr-already .as-body {
+    flex: 1;
+    overflow: auto;
+    padding: 0 16px;
+    display: flex; flex-direction: column;
+    gap: 16px;
+  }
+  .as-card {
+    position: relative;
+    border-radius: 16px;
+    padding: 18px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--howl-navy-700), var(--howl-navy-800));
+    border: 1px solid rgba(15,172,237,0.30);
+    box-shadow: 0 12px 32px rgba(15,172,237,0.10);
+  }
+  .as-card::before {
+    content: "";
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(255,165,51,0.30), transparent 70%);
+    pointer-events: none;
+  }
+  .as-card-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .as-card-head .ico {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(255,165,51,0.20);
+    color: var(--howl-state-warn);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .as-card-head .ico svg { width: 18px; height: 18px; fill: currentColor; }
+  .as-card-head .nm { font-size: 14px; font-weight: 700; color: var(--howl-ink-100); }
+  .as-card-head .nm small {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-state-warn);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .as-card .price-line {
+    font-family: var(--font-mono);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.01em;
+    font-feature-settings: "tnum";
+  }
+  .as-card .price-line small {
+    font-size: 14px;
+    color: var(--howl-ink-300);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .as-card .renew {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+  .as-actions {
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid var(--panel-border);
+    overflow: hidden;
+  }
+  .as-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px;
+    color: var(--howl-ink-100);
+    font-size: 14px;
+    border-top: 1px solid var(--panel-border);
+  }
+  .as-row:first-child { border-top: 0; }
+  .as-row .ico {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--howl-cyan-500);
+    color: white;
+    flex: none;
+  }
+  .as-row .ico.gray { background: var(--howl-ink-500); }
+  .as-row .ico svg { width: 14px; height: 14px; fill: currentColor; }
+  .as-row .label { flex: 1; }
+  .as-row .chev { color: var(--howl-ink-500); font-size: 18px; }
+  .as-row .val { color: var(--howl-ink-300); font-family: var(--font-mono); font-size: 12px; font-feature-settings: "tnum"; }
+
+  /* ============== Annotation row ============== */
+  .annot-row {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: 28px;
+    align-items: center;
+  }
+  .annot { display: flex; flex-direction: column; gap: 12px; }
+  .annot.right { text-align: right; }
+  .annot .a-card {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(15,172,237,0.06);
+    border: 1px solid rgba(15,172,237,0.18);
+  }
+  .annot .a-card .a-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .annot .a-card p { margin: 0; color: var(--howl-ink-100); font-size: 13px; line-height: 18px; }
+
+  /* footer */
+  .doc-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between;
+    color: var(--howl-ink-500); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ic-wolf-filled" viewBox="0 0 24 24">
+      <path d="M 4 11 L 7 3 L 10 9 L 14 9 L 17 3 L 20 11 C 20 18, 16 22, 12 22 C 8 22, 4 18, 4 11 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9z M13.7 21a2 2 0 0 1-3.4 0z" fill="currentColor"/></symbol>
+    <symbol id="ic-bolt" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10" fill="currentColor"/></symbol>
+    <symbol id="ic-watch" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="3" fill="currentColor"/><path d="M9 1h6v3M9 23h6v-3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="ic-island" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="5" fill="currentColor"/></symbol>
+    <symbol id="ic-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="12 7 12 12 15 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" fill="currentColor"/></symbol>
+    <symbol id="ic-cell" viewBox="0 0 18 11"><rect x="0" y="7" width="2.5" height="4" fill="currentColor"/><rect x="4" y="5" width="2.5" height="6" fill="currentColor"/><rect x="8" y="3" width="2.5" height="8" fill="currentColor"/><rect x="12" y="1" width="2.5" height="10" fill="currentColor"/></symbol>
+    <symbol id="ic-wifi" viewBox="0 0 16 11"><path d="M1 4 c2-2.5 5-3.5 7-3.5 s5 1 7 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M3 6.5 c1.5-1.5 3-2 5-2 s3.5 .5 5 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 9 c.8-.8 1.6-1 2.5-1 s1.7 .2 2.5 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="10.4" r="0.8" fill="currentColor"/></symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="ic-chev-left" viewBox="0 0 24 24"><polyline points="15 6 9 12 15 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-card" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="2" fill="currentColor"/><rect x="2" y="9" width="20" height="3" fill="#091533"/></symbol>
+    <symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M5 2v20l3-2 2 2 2-2 2 2 2-2 3 2V2L17 4 15 2 13 4 11 2 9 4z" fill="currentColor"/></symbol>
+    <symbol id="ic-external" viewBox="0 0 24 24"><path d="M14 3h7v7M21 3l-9 9M19 12v7H5V5h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-sync" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="1 20 1 14 7 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-help-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-cancel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <!-- ============== TOP NAV ============== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab" href="index.html">Index</a>
+      <a class="topnav-tab" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab active" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+  </nav>
+
+  <!-- ============== HEADER ============== -->
+  <header class="doc-head">
+    <img src="assets/logo-dark.svg" class="wm" alt="HowlAlert" />
+    <div>
+      <h1>Paywall <span class="sub">Section F</span></h1>
+      <p>iOS 26 paywall sheet (StoreKit 2). Pricing toggle (Max yearly + Pro monthly), post-purchase celebration, already-subscribed management. No scarcity. No dark patterns. Required Apple disclosures included.</p>
+    </div>
+    <div class="meta">
+      <div>Modal sheet · drag-to-dismiss</div>
+      <div class="v">StoreKit 2 · auto-renew</div>
+      <div>7-day free trial</div>
+    </div>
+  </header>
+
+  <!-- ============== F.1 · PRICING SHEET ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">F.1</span>
+      <h2>Pricing sheet · Max selected (default)</h2>
+      <div class="lede">Presented as a half-sheet from the iOS app or push. Wolf hero, 4-feature value prop, two prices side-by-side, primary CTA. Trial copy + Apple-required disclosure under the button.</div>
+    </div>
+
+    <div class="stage">
+      <div class="annot-row">
+        <div class="annot right">
+          <div class="a-card">
+            <div class="a-tag">VALUE PROP</div>
+            <p>Wolf as hero, four concrete features. No marketing fluff — each line is a real capability with an icon.</p>
+          </div>
+          <div class="a-card">
+            <div class="a-tag">DEFAULT · MAX</div>
+            <p>Annual is pre-selected with a "Best Value" ribbon + savings chip. Following Apple's guidance, not the dark pattern of hiding the cheaper option.</p>
+          </div>
+        </div>
+
+        <div class="phone-with-cap" style="margin: 0 auto;">
+          <div class="phone">
+            <div class="phone-screen">
+              <!-- Dimmed dashboard visible above the sheet for context (sheet covers most of it) -->
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="island"></div>
+              <div class="phone-body">
+                <div class="paywall-sheet">
+                  <div class="pw-grabber"></div>
+                  <div class="pw-close"><svg><use href="#ic-x"/></svg></div>
+                  <div class="pw-scroll">
+                    <div class="pw-hero">
+                    <div class="wolf-hero"><svg><use href="#ic-wolf-filled"/></svg></div>
+                    <span class="pw-badge">Unlock HowlAlert Max</span>
+                    <h1 class="pw-title">Never get caught<br/><em>off-pace</em>.</h1>
+                    <p class="pw-sub">Live activities, complications, the full alert toolkit. Cancel anytime.</p>
+                  </div>
+
+                  <div class="pw-features">
+                    <div class="pw-feature">
+                      <span class="ico"><svg><use href="#ic-island"/></svg></span>
+                      <div>
+                        <div class="nm">Dynamic Island + Live Activities</div>
+                        <div class="ds">Glanceable % on the pill. Lockscreen card with countdown.</div>
+                      </div>
+                    </div>
+                    <div class="pw-feature">
+                      <span class="ico warn"><svg><use href="#ic-watch"/></svg></span>
+                      <div>
+                        <div class="nm">Apple Watch complications</div>
+                        <div class="ds">Rectangular, circular, inline, X-Large — four families.</div>
+                      </div>
+                    </div>
+                    <div class="pw-feature">
+                      <span class="ico fresh"><svg><use href="#ic-bell"/></svg></span>
+                      <div>
+                        <div class="nm">Custom alert thresholds</div>
+                        <div class="ds">Trigger at 70 / 80 / 90 / your own %. Quiet hours.</div>
+                      </div>
+                    </div>
+                    <div class="pw-feature">
+                      <span class="ico"><svg><use href="#ic-history"/></svg></span>
+                      <div>
+                        <div class="nm">Unlimited history &amp; insights</div>
+                        <div class="ds">90-day timeline, cost breakdowns, model usage.</div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                  <div class="pw-pinned">
+                    <div class="pw-pricing">
+                    <div class="price-card selected">
+                      <span class="ribbon">Best Value</span>
+                      <span class="check"><svg><use href="#ic-check"/></svg></span>
+                      <div class="ttl">Yearly</div>
+                      <div class="price">$29.99 <small>/yr</small></div>
+                      <div class="meta">$2.50/mo billed annually</div>
+                      <span class="save-chip">Save 50%</span>
+                    </div>
+                    <div class="price-card">
+                      <div class="ttl">Monthly</div>
+                      <div class="price">$4.99 <small>/mo</small></div>
+                      <div class="meta">Billed monthly</div>
+                    </div>
+                  </div>
+
+                  <div class="pw-cta">
+                    <button class="pw-btn-primary" type="button">Start 7-day free trial</button>
+                    <div class="pw-trial-line">Then $29.99/year. Cancel anytime.</div>
+                    <div class="pw-disclosure">Payment charged to your Apple Account at purchase confirmation. Subscription auto-renews unless canceled at least 24 hours before period end. Manage or cancel in Settings › Apple Account › Subscriptions. Any unused free trial portion is forfeited.</div>
+                  </div>
+
+                  <div class="pw-legal-row">
+                    <a href="#">Restore Purchases</a>
+                    <span>
+                      <a href="#">Terms</a> · <a href="#">Privacy</a>
+                    </span>
+                  </div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">F.1 · PRICING</div>
+            <div class="nm">Sheet · Max selected</div>
+            <div class="ds">Drag handle, close button top-right, 7-day trial, restore + legal at bottom.</div>
+          </div>
+        </div>
+
+        <div class="annot">
+          <div class="a-card">
+            <div class="a-tag">TWO TIERS</div>
+            <p>Yearly (Max) + monthly (Pro). Tap to swap selection — the highlighted card snaps with a 2pt cyan border.</p>
+          </div>
+          <div class="a-card">
+            <div class="a-tag">REQUIRED DISCLOSURES</div>
+            <p>"Cancel anytime in Settings" + Terms/Privacy links + Restore Purchases. All Apple-required for auto-renew subs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== F.2 · MONTHLY SELECTED ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">F.2</span>
+      <h2>Pricing sheet · Monthly selected</h2>
+      <div class="lede">Same sheet, alternate selection. CTA copy + trial-line update to reflect the new price; the ribbon stays on Yearly since it really is the better deal.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="island"></div>
+              <div class="phone-body">
+                <div class="paywall-sheet">
+                  <div class="pw-grabber"></div>
+                  <div class="pw-close"><svg><use href="#ic-x"/></svg></div>
+                  <div class="pw-scroll">
+                    <div class="pw-hero">
+                    <div class="wolf-hero"><svg><use href="#ic-wolf-filled"/></svg></div>
+                    <span class="pw-badge">Unlock HowlAlert Max</span>
+                    <h1 class="pw-title">Never get caught<br/><em>off-pace</em>.</h1>
+                    <p class="pw-sub">Live activities, complications, the full alert toolkit.</p>
+                  </div>
+                  <div class="pw-features">
+                    <div class="pw-feature">
+                      <span class="ico"><svg><use href="#ic-island"/></svg></span>
+                      <div>
+                        <div class="nm">Dynamic Island + Live Activities</div>
+                        <div class="ds">Glanceable % on the pill. Lockscreen card with countdown.</div>
+                      </div>
+                    </div>
+                    <div class="pw-feature">
+                      <span class="ico warn"><svg><use href="#ic-watch"/></svg></span>
+                      <div>
+                        <div class="nm">Apple Watch complications</div>
+                        <div class="ds">Four complication families, custom watchOS app.</div>
+                      </div>
+                    </div>
+                    <div class="pw-feature">
+                      <span class="ico fresh"><svg><use href="#ic-bell"/></svg></span>
+                      <div>
+                        <div class="nm">Custom alert thresholds</div>
+                        <div class="ds">Trigger at your own %. Quiet hours. Per-model alerts.</div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                  <div class="pw-pinned">
+                    <div class="pw-pricing">
+                    <div class="price-card">
+                      <span class="ribbon">Best Value</span>
+                      <div class="ttl">Yearly</div>
+                      <div class="price">$29.99 <small>/yr</small></div>
+                      <div class="meta">$2.50/mo billed annually</div>
+                      <span class="save-chip">Save 50%</span>
+                    </div>
+                    <div class="price-card selected">
+                      <span class="check"><svg><use href="#ic-check"/></svg></span>
+                      <div class="ttl">Monthly</div>
+                      <div class="price">$4.99 <small>/mo</small></div>
+                      <div class="meta">Billed monthly</div>
+                    </div>
+                  </div>
+                  <div class="pw-cta">
+                    <button class="pw-btn-primary" type="button">Start 7-day free trial</button>
+                    <div class="pw-trial-line">Then $4.99/month. Cancel anytime.</div>
+                    <div class="pw-disclosure">Payment charged to your Apple Account at purchase confirmation. Subscription auto-renews unless canceled at least 24 hours before period end. Manage or cancel in Settings › Apple Account › Subscriptions. Any unused free trial portion is forfeited.</div>
+                  </div>
+                  <div class="pw-legal-row">
+                    <a href="#">Restore Purchases</a>
+                    <span><a href="#">Terms</a> · <a href="#">Privacy</a></span>
+                  </div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">F.2 · MONTHLY</div>
+            <div class="nm">Alternate selection</div>
+            <div class="ds">CTA + trial line reflect the new price. Ribbon stays honest on Yearly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== F.3 · POST-PURCHASE CELEBRATION ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">F.3</span>
+      <h2>Post-purchase · celebration</h2>
+      <div class="lede">Immediately after StoreKit success. Green pulse, what just unlocked, "Get started" CTA. Quiet confidence, not a confetti explosion.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="island"></div>
+              <div class="phone-body">
+                <div class="scr-celebration">
+                  <!-- subtle confetti -->
+                  <svg class="celebration-confetti" viewBox="0 0 320 600" preserveAspectRatio="none">
+                    <g>
+                      <rect x="40"  y="80"  width="6" height="14" fill="#3DDC97" transform="rotate(20 43 87)"/>
+                      <rect x="80"  y="140" width="5" height="12" fill="#0FACED" transform="rotate(-30 82 146)"/>
+                      <rect x="240" y="60"  width="6" height="14" fill="#FFA533" transform="rotate(45 243 67)"/>
+                      <rect x="280" y="180" width="5" height="12" fill="#3DDC97" transform="rotate(-10 282 186)"/>
+                      <rect x="50"  y="220" width="5" height="12" fill="#0FACED" transform="rotate(60 52 226)"/>
+                      <rect x="220" y="240" width="6" height="14" fill="#7BD3F6" transform="rotate(-25 223 247)"/>
+                      <rect x="130" y="60"  width="5" height="12" fill="#3DDC97" transform="rotate(15 132 66)"/>
+                      <rect x="180" y="120" width="5" height="12" fill="#FFA533" transform="rotate(-40 182 126)"/>
+                      <circle cx="100" cy="350" r="3" fill="#7BD3F6"/>
+                      <circle cx="260" cy="320" r="3" fill="#3DDC97"/>
+                      <circle cx="55"  cy="400" r="2.5" fill="#FFA533"/>
+                      <circle cx="200" cy="420" r="3" fill="#0FACED"/>
+                    </g>
+                  </svg>
+                  <div class="celeb-circle">
+                    <svg><use href="#ic-check"/></svg>
+                  </div>
+                  <h1>You're in.</h1>
+                  <p class="sub">7 days free, then $29.99/year. Cancel any time.</p>
+                  <div class="unlocked">
+                    <div class="unlocked-head">Unlocked just now</div>
+                    <div class="unlocked-row">
+                      <svg><use href="#ic-check"/></svg>
+                      <span>Dynamic Island Live Activities</span>
+                    </div>
+                    <div class="unlocked-row">
+                      <svg><use href="#ic-check"/></svg>
+                      <span>All four Watch complications</span>
+                    </div>
+                    <div class="unlocked-row">
+                      <svg><use href="#ic-check"/></svg>
+                      <span>Custom thresholds + quiet hours</span>
+                    </div>
+                    <div class="unlocked-row">
+                      <svg><use href="#ic-check"/></svg>
+                      <span>Unlimited alert history</span>
+                    </div>
+                  </div>
+                  <div class="cta">
+                    <button class="pw-btn-primary" type="button">Get started</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">F.3 · CELEBRATION</div>
+            <div class="nm">"You're in."</div>
+            <div class="ds">Green pulse + unlock checklist + single CTA. No fireworks, just confidence.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== F.4 · ALREADY SUBSCRIBED ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">F.4</span>
+      <h2>Already subscribed · manage</h2>
+      <div class="lede">For returning Max members. Subscription management routes to <strong>Apple's native sheet</strong> via <code style="color:var(--howl-cyan-300);font-family:var(--font-mono);background:rgba(15,172,237,0.10);padding:1px 4px;border-radius:3px;">SKShowManageSubscriptionScreen</code> — we don't own the cancel flow.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-status-right">
+                  <svg width="18" height="11"><use href="#ic-cell"/></svg>
+                  <svg width="16" height="11"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="island"></div>
+              <div class="phone-body">
+                <div class="scr-already">
+                  <div class="as-header">
+                    <span class="as-back"><svg><use href="#ic-chev-left"/></svg>Settings</span>
+                  </div>
+                  <div class="as-title">Subscription</div>
+                  <div class="as-body">
+
+                    <div class="as-card">
+                      <div class="as-card-head">
+                        <span class="ico"><svg><use href="#ic-star"/></svg></span>
+                        <div class="nm">HowlAlert Max<small>Active member</small></div>
+                      </div>
+                      <div class="price-line">$29.99 <small>/ year</small></div>
+                      <div class="renew">Renews May 27, 2027 · synced across devices</div>
+                    </div>
+
+                    <div class="as-actions">
+                      <div class="as-row">
+                        <span class="ico"><svg><use href="#ic-external"/></svg></span>
+                        <span class="label">Manage subscription</span>
+                        <span class="val">Opens in App Store</span>
+                        <span class="chev">›</span>
+                      </div>
+                      <div class="as-row">
+                        <span class="ico"><svg><use href="#ic-sync"/></svg></span>
+                        <span class="label">Restore purchases</span>
+                        <span class="chev">›</span>
+                      </div>
+                      <div class="as-row">
+                        <span class="ico gray"><svg><use href="#ic-help-circle"/></svg></span>
+                        <span class="label">Contact support</span>
+                        <span class="chev">›</span>
+                      </div>
+                    </div>
+
+                    <div style="padding: 4px 4px; font-size: 11px; line-height: 16px; color: var(--howl-ink-500);">
+                      Cancel or change your plan in <strong style="color: var(--howl-ink-300);">Settings → Apple Account → Subscriptions</strong>. Your subscription auto-renews unless canceled at least 24 hours before the renewal date.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">F.4 · ALREADY SUBSCRIBED</div>
+            <div class="nm">Manage</div>
+            <div class="ds">Status card, payment, history, cancel. Apple-required auto-renew disclosure at the bottom.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="anno">All four screens conform to App Store Review Guideline 3.1.2: auto-renew terms, restore purchases, terms/privacy. No scarcity language. No "limited time" countdown. Cancel route opens Apple's native sheet — third-party apps can't process subscription cancellations directly.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Section F · Paywall</div>
+    <div>4 screens · StoreKit 2 · App Store compliant</div>
+  </footer>
+
+</div>
+</body>
+</html>

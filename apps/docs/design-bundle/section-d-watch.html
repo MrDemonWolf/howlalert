@@ -1,0 +1,1350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · D · Apple Watch</title>
+<style>
+  :root {
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-navy-700: #15275A;
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-400: #3DBEF1;
+    --howl-cyan-300: #7BD3F6;
+    --howl-state-fresh: #3DDC97;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5;
+    --howl-ink-700: #3A4666;
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; background: var(--page-bg); color: var(--howl-ink-100);
+    font-family: var(--font-sys);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  body { padding: 56px 48px 96px; }
+  .doc { max-width: 1320px; margin: 0 auto; }
+  .num, .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+  /* Top nav */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex; align-items: center; gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit; font-size: 13px;
+    padding: 4px 8px; border-radius: var(--radius-sm);
+  }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-right: auto; }
+  .topnav-tab {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 11px; border-radius: 999px;
+    color: var(--howl-ink-300); text-decoration: none;
+    border: 1px solid transparent; transition: all 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover { color: var(--howl-cyan-300); background: rgba(15,172,237,0.06); }
+  .topnav-tab.active { color: var(--howl-cyan-300); background: rgba(15,172,237,0.10); border-color: rgba(15,172,237,0.30); }
+  .topnav-tab.disabled { color: var(--howl-ink-500); opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+  /* Preview mode toggle */
+  .preview-toggle {
+    display: inline-flex;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .pt-opt {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: transparent;
+    border: 0;
+    color: var(--howl-ink-300);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 140ms, background 140ms;
+  }
+  .pt-opt:hover { color: var(--howl-cyan-300); }
+  .pt-opt.active {
+    background: linear-gradient(180deg, rgba(15,172,237,0.92), rgba(15,140,200,0.85));
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.30);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 2px 6px rgba(15,172,237,0.30);
+  }
+  .pt-opt svg { width: 12px; height: 12px; }
+
+  /* Always-On Display dim preview — watchOS goes dark + low-saturation when wrist is down */
+  body.always-on .watch-screen {
+    filter: brightness(0.35) saturate(0.55) contrast(0.95);
+  }
+  body.always-on .watch-screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.18);
+    pointer-events: none;
+    z-index: 4;
+  }
+  body.always-on .watch-screen::after {
+    /* Disable the screen-reflection sheen to feel dimmer */
+    opacity: 0.3;
+  }
+  body.always-on .stage {
+    /* Cool the wallpaper down slightly */
+    background:
+      radial-gradient(ellipse at 18% 22%, rgba(15,172,237,0.30), transparent 42%),
+      radial-gradient(ellipse at 82% 70%, rgba(157,89,255,0.20), transparent 48%),
+      linear-gradient(180deg, #0d1f44 0%, #060f2a 60%, #030612 100%);
+  }
+
+  /* Page header */
+  .doc-head {
+    display: flex; align-items: center; gap: 24px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--panel-border);
+    margin-bottom: 56px;
+  }
+  .doc-head .wm { width: 56px; height: 56px; flex: none; }
+  .doc-head h1 { margin: 0; font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; }
+  .doc-head h1 .sub { color: var(--howl-cyan-300); font-weight: 500; margin-left: 10px; font-size: 22px; }
+  .doc-head p { margin: 6px 0 0; color: var(--howl-ink-300); font-size: 15px; line-height: 22px; max-width: 720px; }
+  .doc-head .meta { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--howl-ink-500); font-size: 12px; }
+  .doc-head .meta .v { color: var(--howl-ink-300); font-family: var(--font-mono); }
+
+  section { margin-bottom: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+  .sec-head .n { font-family: var(--font-mono); color: var(--howl-cyan-300); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+  .sec-head h2 { margin: 0; font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.01em; }
+  .sec-head .lede { margin-left: auto; color: var(--howl-ink-300); font-size: 13px; max-width: 480px; text-align: right; line-height: 18px; }
+  .anno { font-size: 12px; line-height: 16px; color: var(--howl-cyan-300); font-family: var(--font-mono); margin-top: 12px; }
+
+  /* Stage wallpaper */
+  .stage {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background:
+      radial-gradient(ellipse at 18% 22%, rgba(15,172,237,0.45), transparent 42%),
+      radial-gradient(ellipse at 82% 70%, rgba(157,89,255,0.30), transparent 48%),
+      radial-gradient(ellipse at 60% 18%, rgba(255,165,51,0.22), transparent 38%),
+      linear-gradient(180deg, #163576 0%, #0a1a44 60%, #050a1f 100%);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    padding: 48px 24px;
+  }
+  .stage-row { display: flex; gap: 28px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+
+  /* ============== Apple Watch frame ============== */
+  .watch {
+    --w: 224px;
+    --h: 274px;
+    width: var(--w);
+    height: var(--h);
+    background: linear-gradient(180deg, #38383e, #1a1a1f);
+    border-radius: 56px;
+    padding: 12px;
+    position: relative;
+    flex: none;
+    box-shadow:
+      0 28px 56px rgba(0,0,0,0.55),
+      inset 0 0 0 1px rgba(255,255,255,0.06),
+      inset 0 2px 0 rgba(255,255,255,0.08);
+  }
+  /* Digital crown */
+  .watch::before {
+    content: "";
+    position: absolute;
+    right: -6px;
+    top: 70px;
+    width: 10px; height: 28px;
+    background: linear-gradient(90deg, #2a2a30, #1a1a1f);
+    border-radius: 2px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      0 1px 2px rgba(0,0,0,0.4);
+  }
+  /* Side button */
+  .watch::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    top: 130px;
+    width: 6px; height: 38px;
+    background: linear-gradient(90deg, #2a2a30, #1a1a1f);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .watch-screen {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Subtle screen reflection */
+  .watch-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% -10%, rgba(255,255,255,0.04), transparent 60%);
+    pointer-events: none;
+  }
+  /* Watch face time chip (always top-right) */
+  .watch-time {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    z-index: 2;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--howl-cyan-300);
+    font-feature-settings: "tnum";
+  }
+  .watch-time.warn { color: var(--howl-state-warn); }
+  .watch-time.crit { color: var(--howl-state-crit); }
+  .watch-time.fresh { color: var(--howl-state-fresh); }
+  .watch-time.white { color: white; }
+
+  /* Caption */
+  .watch-with-cap { display: flex; flex-direction: column; align-items: center; }
+  .watch-cap {
+    margin-top: 14px;
+    text-align: center;
+    max-width: 240px;
+  }
+  .watch-cap .ix {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .watch-cap .nm {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    margin-top: 4px;
+  }
+  .watch-cap .ds {
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    margin-top: 4px;
+    line-height: 16px;
+  }
+
+  /* ============== D.1 · Live app view ============== */
+  .scr-live {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 36px 16px 22px;
+    color: white;
+  }
+  .scr-live .lbl {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+    color: var(--howl-ink-500);
+    margin-bottom: 2px;
+  }
+  .scr-live .pct {
+    font-family: var(--font-mono);
+    font-size: 56px;
+    line-height: 1;
+    font-weight: 700;
+    color: var(--howl-cyan-400);
+    letter-spacing: -0.02em;
+    font-feature-settings: "tnum";
+  }
+  .scr-live.state-warn .pct { color: var(--howl-state-warn); }
+  .scr-live.state-crit .pct { color: var(--howl-state-crit); }
+  .scr-live.state-fresh .pct { color: var(--howl-state-fresh); }
+  .scr-live .pct small {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--howl-ink-500);
+    margin-left: 2px;
+  }
+  .scr-live .reset {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+  .scr-live .reset .v { color: white; font-weight: 600; }
+  .scr-live .bars {
+    margin-top: auto;
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .scr-live .bar {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .scr-live .bar .label-row {
+    display: flex; justify-content: space-between;
+    font-size: 10px;
+    color: var(--howl-ink-300);
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+  .scr-live .bar .label-row .name { color: var(--howl-ink-100); font-weight: 500; }
+  .scr-live .bar .track {
+    height: 5px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .scr-live .bar .fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--howl-cyan-500);
+  }
+  .scr-live.state-warn .bar .fill { background: var(--howl-state-warn); }
+  .scr-live.state-crit .bar .fill { background: var(--howl-state-crit); }
+  .scr-live.state-fresh .bar .fill { background: var(--howl-state-fresh); }
+
+  /* ============== D.2 · Smart Stack widget ============== */
+  .smartstack-grid {
+    display: flex; flex-direction: column;
+    gap: 7px;
+    padding: 24px 10px 14px;
+  }
+  .sscard {
+    border-radius: 14px;
+    padding: 9px 11px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sscard .head {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.92;
+  }
+  .sscard .head .ico {
+    width: 11px; height: 11px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .sscard .head .ico svg { width: 100%; height: 100%; fill: currentColor; }
+  .sscard .big {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-feature-settings: "tnum";
+  }
+  .sscard .meta { font-size: 9px; opacity: 0.88; font-family: var(--font-mono); }
+  .sscard.howl {
+    background: linear-gradient(135deg, var(--howl-state-warn), #F58A1F);
+    padding: 11px 12px;
+  }
+  .sscard.howl .head .ico { width: 13px; height: 13px; }
+  .sscard.howl .big { font-size: 22px; margin-top: 2px; }
+  .sscard.howl .meta { font-size: 10px; }
+  .sscard.activity {
+    background: linear-gradient(135deg, #2a1a1f, #1a1a1f);
+    color: #FF4E4E;
+  }
+  .sscard.weather {
+    background: linear-gradient(135deg, #2c4a7a, #1a2e52);
+    color: white;
+  }
+
+  /* ============== D.3 · Watch faces with complications ============== */
+
+  /* Watch faces in D.3 already paint their own time — hide the chip overlay there */
+  .watch.face-host .watch-time { display: none; }
+
+  /* Modular face — tightened so corners don't collide with the chip */
+  .face-modular {
+    flex: 1;
+    display: grid;
+    grid-template-rows: 24px 1fr 24px;
+    padding: 10px 12px;
+    gap: 6px;
+    color: white;
+  }
+  .face-modular .row { display: grid; gap: 8px; align-items: center; }
+  .face-modular .row-top { grid-template-columns: 1fr 1fr; }
+  .face-modular .row-bot { grid-template-columns: 1fr 1fr 1fr; }
+  .face-modular .corner {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    display: flex; align-items: center; gap: 3px;
+    line-height: 1;
+    font-feature-settings: "tnum";
+  }
+  .face-modular .corner .ic { width: 9px; height: 9px; opacity: 0.85; }
+  .face-modular .corner .ic svg { width: 100%; height: 100%; fill: currentColor; }
+  .face-modular .corner.activity { color: #FF4E4E; }
+  .face-modular .corner.weather { color: white; }
+  .face-modular .corner.calendar { color: white; }
+  .face-modular .corner.battery { color: var(--howl-state-fresh); }
+  .face-modular .corner.right { justify-content: flex-end; }
+  /* The HUGE center rectangular module — this is our spot */
+  .face-modular .center-mod {
+    background: rgba(255,165,51,0.18);
+    border: 1px solid rgba(255,165,51,0.40);
+    border-radius: 8px;
+    padding: 7px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    justify-content: center;
+    color: var(--howl-state-warn);
+  }
+  .face-modular .center-mod.howl-active .label-r {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .face-modular .center-mod .name {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .face-modular .center-mod .name .ic { width: 10px; height: 10px; display: inline-flex; }
+  .face-modular .center-mod .name .ic svg { width: 100%; height: 100%; fill: currentColor; }
+  .face-modular .center-mod .big {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    margin-top: 2px;
+  }
+  .face-modular .center-mod .track {
+    height: 4px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 5px;
+  }
+  .face-modular .center-mod .track .fill {
+    height: 100%;
+    background: var(--howl-state-warn);
+    border-radius: inherit;
+  }
+
+  /* Infograph face — circular dial with 4 corner complications */
+  .face-infograph {
+    flex: 1; position: relative; padding: 8px;
+  }
+  .face-infograph .dial {
+    position: absolute; inset: 30px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .face-infograph .dial::before {
+    content: "";
+    position: absolute; inset: 6px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.08);
+  }
+  .face-infograph .dial .time {
+    font-family: var(--font-sys);
+    font-size: 38px;
+    font-weight: 200;
+    color: white;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.02em;
+  }
+  .face-infograph .dial .am { font-size: 10px; color: var(--howl-ink-300); margin-left: 2px; }
+  /* 4 corners */
+  .corner-c {
+    position: absolute;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 1px;
+    color: white;
+    border: 1.5px solid;
+  }
+  .corner-c .v {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    font-feature-settings: "tnum";
+  }
+  .corner-c .l {
+    font-size: 7px;
+    font-weight: 600;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .corner-c.howl {
+    top: 8px; left: 8px;
+    border-color: var(--howl-state-warn);
+    color: var(--howl-state-warn);
+    background: radial-gradient(circle at 50% 50%, rgba(255,165,51,0.22), transparent 70%);
+  }
+  .corner-c.activity { top: 8px; right: 8px; border-color: #FF4E4E; color: #FF4E4E; }
+  .corner-c.battery { bottom: 8px; left: 8px; border-color: var(--howl-state-fresh); color: var(--howl-state-fresh); }
+  .corner-c.weather { bottom: 8px; right: 8px; border-color: rgba(255,255,255,0.40); color: white; }
+
+  /* Utility face — text only at top, inline complication */
+  .face-utility {
+    flex: 1;
+    padding: 14px 14px 14px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+  }
+  .face-utility .inline-c {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    color: var(--howl-state-warn);
+    text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .face-utility .inline-c .ic { width: 10px; height: 10px; display: inline-flex; }
+  .face-utility .inline-c .ic svg { width: 100%; height: 100%; fill: currentColor; }
+  .face-utility .time {
+    font-family: var(--font-sys);
+    font-size: 58px;
+    font-weight: 200;
+    color: white;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.02em;
+    text-align: center;
+    margin: auto 0;
+  }
+  .face-utility .bottom-row {
+    display: flex; justify-content: space-around;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--howl-ink-300);
+    font-feature-settings: "tnum";
+    margin-top: auto;
+  }
+  .face-utility .bottom-row .ck { color: var(--howl-state-fresh); }
+
+  /* X-Large face — single huge complication */
+  .face-xlarge {
+    flex: 1;
+    padding: 20px 16px 18px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .face-xlarge .ring {
+    width: 132px; height: 132px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .face-xlarge .ring svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .face-xlarge .ring .pct {
+    font-family: var(--font-mono);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--howl-state-warn);
+    letter-spacing: -0.02em;
+    font-feature-settings: "tnum";
+  }
+  .face-xlarge .ring .pct small { font-size: 16px; color: var(--howl-ink-500); margin-left: 2px; }
+  .face-xlarge .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+    color: var(--howl-ink-300);
+    margin-top: 4px;
+  }
+  .face-xlarge .reset {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: white;
+    font-feature-settings: "tnum";
+  }
+
+  /* ============== D.4 · Notification screens ============== */
+  .scr-notif {
+    flex: 1;
+    display: flex; flex-direction: column;
+    padding: 26px 14px 14px;
+    color: white;
+    position: relative;
+    background: radial-gradient(circle at 50% 18%, rgba(255,165,51,0.20), transparent 55%);
+  }
+  .scr-notif.crit { background: radial-gradient(circle at 50% 18%, rgba(255,77,77,0.24), transparent 55%); }
+  .scr-notif.fresh { background: radial-gradient(circle at 50% 18%, rgba(61,220,151,0.20), transparent 55%); }
+  .scr-notif .iconwrap {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: rgba(255,165,51,0.18);
+    border: 1.5px solid var(--howl-state-warn);
+    color: var(--howl-state-warn);
+    display: flex; align-items: center; justify-content: center;
+    align-self: center;
+    margin-bottom: 8px;
+  }
+  .scr-notif.crit .iconwrap {
+    background: rgba(255,77,77,0.18);
+    border-color: var(--howl-state-crit);
+    color: var(--howl-state-crit);
+    animation: notif-pulse 1.2s ease-in-out infinite;
+  }
+  .scr-notif.fresh .iconwrap {
+    background: rgba(61,220,151,0.18);
+    border-color: var(--howl-state-fresh);
+    color: var(--howl-state-fresh);
+  }
+  @keyframes notif-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); }
+    50%      { box-shadow: 0 0 0 8px rgba(255,77,77,0.20); }
+  }
+  .scr-notif .iconwrap svg { width: 22px; height: 22px; fill: currentColor; }
+  .scr-notif .app-name {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--howl-ink-300);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .scr-notif h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    line-height: 21px;
+  }
+  .scr-notif .sub {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--howl-ink-300);
+    text-align: center;
+    line-height: 15px;
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+  .scr-notif .actions {
+    margin-top: auto;
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .scr-notif .btn {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    background: rgba(255,255,255,0.10);
+    border: 0;
+    text-align: center;
+  }
+  .scr-notif .btn.primary { background: var(--howl-cyan-500); }
+  .scr-notif .btn.dismiss { background: rgba(255,255,255,0.06); color: var(--howl-ink-300); }
+
+  /* ============== D.5 · Quick action sheet (force-touch / long-press) ============== */
+  .scr-action {
+    flex: 1;
+    display: flex; flex-direction: column;
+    padding: 28px 16px 14px;
+    color: white;
+    gap: 8px;
+  }
+  .scr-action h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .scr-action .sub {
+    font-size: 10px;
+    color: var(--howl-ink-300);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+  .scr-action .actions {
+    margin-top: auto;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .scr-action .act {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .scr-action .act .ic { width: 18px; height: 18px; display: inline-flex; }
+  .scr-action .act .ic svg { width: 100%; height: 100%; fill: currentColor; }
+  .scr-action .act.snooze .ic { color: var(--howl-state-warn); }
+  .scr-action .act.refresh .ic { color: var(--howl-cyan-300); }
+  .scr-action .act.mute .ic { color: var(--howl-ink-300); }
+
+  /* States grid */
+  .states-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    justify-content: center;
+  }
+  /* Watches inside the 4-up grid shrink to fit */
+  .states-grid .watch {
+    --w: 180px;
+    --h: 220px;
+  }
+  .states-grid .watch::before { top: 56px; height: 22px; }
+  .states-grid .watch::after { top: 104px; height: 30px; }
+  /* Scale interior numerics so they still read at the smaller frame */
+  .states-grid .scr-live { padding: 30px 14px 18px; }
+  .states-grid .scr-live .pct { font-size: 42px; }
+  .states-grid .scr-live .pct small { font-size: 16px; }
+  .states-grid .scr-live .reset { font-size: 11px; margin-top: 8px; }
+  .states-grid .face-xlarge { padding: 24px 14px 18px; }
+  .states-grid .face-xlarge .ring { width: 104px; height: 104px; }
+  .states-grid .face-xlarge .ring .pct { font-size: 30px; }
+  .states-grid .face-xlarge .ring .pct small { font-size: 13px; }
+  .states-grid .face-utility .time { font-size: 46px; }
+  .states-grid .face-modular { padding: 6px 10px; gap: 3px; }
+  .states-grid .face-modular .corner { font-size: 9px; }
+  .states-grid .face-modular .center-mod .big { font-size: 18px; }
+  .states-grid .face-infograph .dial .time { font-size: 32px; }
+  .states-grid .corner-c { width: 30px; height: 30px; }
+  .states-grid .corner-c .v { font-size: 9px; }
+  .states-grid .corner-c .l { font-size: 6px; }
+  .states-grid .scr-notif { padding: 22px 12px 12px; }
+  .states-grid .scr-notif .iconwrap { width: 36px; height: 36px; }
+  .states-grid .scr-notif h2 { font-size: 15px; line-height: 19px; }
+  .states-grid .scr-action { padding: 24px 14px 12px; }
+
+  /* Consistent caption heights so all rows align */
+  .watch-cap { min-height: 76px; display: flex; flex-direction: column; }
+  .watch-cap .ds { margin-top: auto; }
+
+  /* footer */
+  .doc-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between;
+    color: var(--howl-ink-500); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Brand wolf silhouette (matches macOS + iOS) -->
+    <symbol id="ic-wolf-filled" viewBox="0 0 24 24">
+      <path d="M 4 11 L 7 3 L 10 9 L 14 9 L 17 3 L 20 11 C 20 18, 16 22, 12 22 C 8 22, 4 18, 4 11 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="ic-bolt" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10" fill="currentColor"/></symbol>
+    <symbol id="ic-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor"/></symbol>
+    <symbol id="ic-droplet" viewBox="0 0 24 24"><path d="M12 2c-2 4-7 9-7 13a7 7 0 0 0 14 0c0-4-5-9-7-13z" fill="currentColor"/></symbol>
+    <symbol id="ic-batt" viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="9" width="11" height="6" fill="currentColor"/><rect x="20" y="10" width="2" height="4" fill="currentColor" rx="0.5"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="12 7 12 12 15 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="ic-snooze" viewBox="0 0 24 24"><path d="M2 12h6l-3 4h3M14 8h6l-3 4h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.78 1 6.45 2.55" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><polyline points="21 3 21 12 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-mute" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4z" fill="currentColor"/><line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="ic-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="20" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <!-- ============== TOP NAV ============== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab" href="index.html">Index</a>
+      <a class="topnav-tab" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab active" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+    <div class="preview-toggle" role="radiogroup" aria-label="Preview mode">
+      <button class="pt-opt active" data-mode="on" aria-checked="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <span>Active</span>
+      </button>
+      <button class="pt-opt" data-mode="always-on" aria-checked="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor" stroke="none"/></svg>
+        <span>Always-On</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============== HEADER ============== -->
+  <header class="doc-head">
+    <img src="assets/logo-dark.svg" class="wm" alt="HowlAlert" />
+    <div>
+      <h1>Apple Watch <span class="sub">Section D</span></h1>
+      <p>Series 10 · 49mm · watchOS 26. App view in four states, Smart Stack widget, four complication families on real watch faces, and incoming alert with quick actions.</p>
+    </div>
+    <div class="meta">
+      <div>396 × 484 pt</div>
+      <div class="v">watchOS 26 · Series 10</div>
+      <div>Smart Stack · 4 complications</div>
+    </div>
+  </header>
+
+  <!-- ============== D.1 · APP VIEW (4 states) ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">D.1</span>
+      <h2>App view · four states</h2>
+      <div class="lede">Glanceable. One number, one countdown, two slim bars. State-tinted % matches iOS hero.</div>
+    </div>
+
+    <div class="stage">
+      <div class="states-grid">
+        <!-- Fresh -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time fresh">9:41</div>
+              <div class="scr-live state-fresh">
+                <div class="lbl">5-Hour Window</div>
+                <div class="pct">96<small>%</small></div>
+                <div class="reset"><span class="v">4:48:00</span> until full reset</div>
+                <div class="bars">
+                  <div class="bar">
+                    <div class="label-row"><span class="name">5h</span><span>96%</span></div>
+                    <div class="track"><div class="fill" style="width: 4%;"></div></div>
+                  </div>
+                  <div class="bar">
+                    <div class="label-row"><span class="name">Week</span><span>88%</span></div>
+                    <div class="track"><div class="fill" style="width: 12%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.1.a · FRESH</div><div class="nm">Reset just hit</div><div class="ds">Green tint. Heavy reserve.</div></div>
+        </div>
+
+        <!-- On pace -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time">9:41</div>
+              <div class="scr-live">
+                <div class="lbl">5-Hour Window</div>
+                <div class="pct">62<small>%</small></div>
+                <div class="reset"><span class="v">3:14:22</span> until reset</div>
+                <div class="bars">
+                  <div class="bar">
+                    <div class="label-row"><span class="name">5h</span><span>62%</span></div>
+                    <div class="track"><div class="fill" style="width: 38%;"></div></div>
+                  </div>
+                  <div class="bar">
+                    <div class="label-row"><span class="name">Week</span><span>78%</span></div>
+                    <div class="track"><div class="fill" style="width: 22%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.1.b · ON PACE</div><div class="nm">On track</div><div class="ds">Cyan default.</div></div>
+        </div>
+
+        <!-- Approaching -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time warn">9:41</div>
+              <div class="scr-live state-warn">
+                <div class="lbl">5-Hour Window</div>
+                <div class="pct">16<small>%</small></div>
+                <div class="reset"><span class="v">0:47:12</span> · runs out at this pace</div>
+                <div class="bars">
+                  <div class="bar">
+                    <div class="label-row"><span class="name">5h</span><span>16%</span></div>
+                    <div class="track"><div class="fill" style="width: 84%;"></div></div>
+                  </div>
+                  <div class="bar">
+                    <div class="label-row"><span class="name">Week</span><span>35%</span></div>
+                    <div class="track"><div class="fill" style="width: 65%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.1.c · APPROACHING</div><div class="nm">Runs out in 47m</div><div class="ds">Amber tint. Time chip also flips.</div></div>
+        </div>
+
+        <!-- Critical -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time crit">9:41</div>
+              <div class="scr-live state-crit">
+                <div class="lbl">5-Hour Window</div>
+                <div class="pct">3<small>%</small></div>
+                <div class="reset"><span class="v">0:08:44</span> until reset</div>
+                <div class="bars">
+                  <div class="bar">
+                    <div class="label-row"><span class="name">5h</span><span>3%</span></div>
+                    <div class="track"><div class="fill" style="width: 97%;"></div></div>
+                  </div>
+                  <div class="bar">
+                    <div class="label-row"><span class="name">Week</span><span>7%</span></div>
+                    <div class="track"><div class="fill" style="width: 93%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.1.d · CRITICAL</div><div class="nm">9 minutes left</div><div class="ds">Red tint everywhere.</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="anno">Pure glance UX: never more than two seconds to read. No icons inside the app view — the watch face complication is the brand surface.</p>
+  </section>
+
+  <!-- ============== D.2 · SMART STACK ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">D.2</span>
+      <h2>Smart Stack widget</h2>
+      <div class="lede">Surfaces relevantly — appears in the stack when you're approaching a limit, dismisses when you're not. Three state tints.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+
+        <!-- Fresh -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time fresh">9:41</div>
+              <div class="smartstack-grid">
+                <div class="sscard howl" style="background: linear-gradient(135deg, var(--howl-state-fresh), #2ABA7C);">
+                  <div class="head">
+                    <span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                    <span>HowlAlert</span>
+                  </div>
+                  <div class="big">96% left</div>
+                  <div class="meta">Reset just hit · 5h fresh</div>
+                </div>
+                <div class="sscard weather">
+                  <div class="head"><span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-sun"/></svg></span><span>Weather</span></div>
+                  <div class="big">68°</div>
+                  <div class="meta">Clear</div>
+                </div>
+                <div class="sscard activity">
+                  <div class="head"><span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></span><span>Activity</span></div>
+                  <div class="big">412</div>
+                  <div class="meta">/ 530 cal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.2.a · FRESH</div>
+            <div class="nm">Reset just hit</div>
+            <div class="ds">Green background. Auto-pinned just after reset.</div>
+          </div>
+        </div>
+
+        <!-- Approaching (default surfacing) -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time warn">9:41</div>
+              <div class="smartstack-grid">
+                <div class="sscard howl">
+                  <div class="head">
+                    <span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                    <span>HowlAlert</span>
+                  </div>
+                  <div class="big">84% used</div>
+                  <div class="meta">47m to reset</div>
+                </div>
+                <div class="sscard weather">
+                  <div class="head"><span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-sun"/></svg></span><span>Weather</span></div>
+                  <div class="big">68°</div>
+                  <div class="meta">Clear</div>
+                </div>
+                <div class="sscard activity">
+                  <div class="head"><span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></span><span>Activity</span></div>
+                  <div class="big">412</div>
+                  <div class="meta">/ 530 cal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.2.b · APPROACHING</div>
+            <div class="nm">Default surfacing</div>
+            <div class="ds">Amber. Surfaces when crossing 70% used.</div>
+          </div>
+        </div>
+
+        <!-- Critical -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time crit">9:41</div>
+              <div class="smartstack-grid">
+                <div class="sscard howl" style="background: linear-gradient(135deg, var(--howl-state-crit), #C53030);">
+                  <div class="head">
+                    <span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                    <span>HowlAlert</span>
+                  </div>
+                  <div class="big">9m left</div>
+                  <div class="meta">5h window at 97%</div>
+                </div>
+                <div class="sscard weather">
+                  <div class="head"><span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-sun"/></svg></span><span>Weather</span></div>
+                  <div class="big">68°</div>
+                  <div class="meta">Clear</div>
+                </div>
+                <div class="sscard activity">
+                  <div class="head"><span class="ico"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></span><span>Activity</span></div>
+                  <div class="big">412</div>
+                  <div class="meta">/ 530 cal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.2.c · CRITICAL</div>
+            <div class="nm">Auto-pinned top</div>
+            <div class="ds">Red. Card jumps to top of stack at 90%+.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="anno">Smart Stack relevance: <code style="background:rgba(15,172,237,0.10);padding:1px 4px;border-radius:3px;color:var(--howl-cyan-300);">RelevantContext</code> surfaces our card within 90 minutes of a likely limit, or right after a reset.</p>
+  </section>
+
+  <!-- ============== D.3 · COMPLICATIONS ON FACES ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">D.3</span>
+      <h2>Complications · four families</h2>
+      <div class="lede">Rectangular (Modular face), Circular (Infograph corner), Inline (Utility), X-Large (single complication).</div>
+    </div>
+
+    <div class="stage">
+      <div class="states-grid">
+
+        <!-- Modular face with rectangular complication center -->
+        <div class="watch-with-cap">
+          <div class="watch face-host">
+            <div class="watch-screen">
+              <div class="watch-time fresh">9:41</div>
+              <div class="face-modular">
+                <div class="row row-top">
+                  <span class="corner calendar"><span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-cal"/></svg></span>Mon 27</span>
+                  <span class="corner battery right"><span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-batt"/></svg></span>82%</span>
+                </div>
+                <div class="center-mod">
+                  <div class="name">
+                    <span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                    HowlAlert · 5h
+                  </div>
+                  <div class="big">84% <small style="font-size:14px;color:rgba(255,255,255,0.5);">· 47m</small></div>
+                  <div class="track"><div class="fill" style="width: 84%;"></div></div>
+                </div>
+                <div class="row row-bot">
+                  <span class="corner activity"><span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></span>412</span>
+                  <span class="corner weather"><span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-sun"/></svg></span>68°</span>
+                  <span class="corner"><span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg></span>3h 14m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.3.a · RECTANGULAR</div>
+            <div class="nm">Modular center</div>
+            <div class="ds">Wide center module: name + % + countdown + slim bar.</div>
+          </div>
+        </div>
+
+        <!-- Infograph with circular corner -->
+        <div class="watch-with-cap">
+          <div class="watch face-host">
+            <div class="watch-screen">
+              <div class="watch-time white">9:41</div>
+              <div class="face-infograph">
+                <span class="corner-c howl">
+                  <span class="v">84%</span>
+                  <span class="l">Howl</span>
+                </span>
+                <span class="corner-c activity">
+                  <span class="v">412</span>
+                  <span class="l">cal</span>
+                </span>
+                <span class="corner-c battery">
+                  <span class="v">82%</span>
+                  <span class="l">batt</span>
+                </span>
+                <span class="corner-c weather">
+                  <span class="v">68°</span>
+                  <span class="l">sun</span>
+                </span>
+                <div class="dial">
+                  <span class="time">9:41<span class="am">AM</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.3.b · CIRCULAR</div>
+            <div class="nm">Infograph corner</div>
+            <div class="ds">36pt round complication. Brand ring color = state.</div>
+          </div>
+        </div>
+
+        <!-- Utility face with inline complication -->
+        <div class="watch-with-cap">
+          <div class="watch face-host">
+            <div class="watch-screen">
+              <div class="watch-time white">9:41</div>
+              <div class="face-utility">
+                <div class="inline-c">
+                  <span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></span>
+                  <span>HOWL · 84% · 47M</span>
+                </div>
+                <div class="time">9:41</div>
+                <div class="bottom-row">
+                  <span class="ck">412</span>
+                  <span>Mon 27</span>
+                  <span>68°</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.3.c · INLINE</div>
+            <div class="nm">Utility face top</div>
+            <div class="ds">Single horizontal text line. State-tinted. Compact for high-density.</div>
+          </div>
+        </div>
+
+        <!-- X-Large face -->
+        <div class="watch-with-cap">
+          <div class="watch face-host">
+            <div class="watch-screen">
+              <div class="watch-time warn">9:41</div>
+              <div class="face-xlarge">
+                <div class="ring">
+                  <svg class="bg" viewBox="0 0 132 132">
+                    <circle cx="66" cy="66" r="58" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="6"/>
+                    <circle cx="66" cy="66" r="58" fill="none" stroke="#FFA533" stroke-width="6"
+                            stroke-dasharray="364.4" stroke-dashoffset="58.3"
+                            stroke-linecap="round"
+                            transform="rotate(-90 66 66)"/>
+                  </svg>
+                  <span class="pct">84<small>%</small></span>
+                </div>
+                <div class="label">5-hour used</div>
+                <div class="reset">47m to reset</div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap">
+            <div class="ix">D.3.d · X-LARGE</div>
+            <div class="nm">Single-complication face</div>
+            <div class="ds">Full-canvas ring + huge %. No clock — HowlAlert IS the face.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="anno">Each complication renders from the same data model. Tint follows usage state automatically via <code style="background:rgba(15,172,237,0.10);padding:1px 4px;border-radius:3px;color:var(--howl-cyan-300);">tintColor(for: usage)</code>.</p>
+  </section>
+
+  <!-- ============== D.4 · NOTIFICATIONS ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">D.4</span>
+      <h2>Incoming alert</h2>
+      <div class="lede">Push from the Mac → wrist haptic → full-screen alert with two-tap quick actions.</div>
+    </div>
+
+    <div class="stage">
+      <div class="states-grid">
+        <!-- Approaching alert -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time warn">now</div>
+              <div class="scr-notif">
+                <div class="iconwrap"><svg viewBox="0 0 24 24"><use href="#ic-bolt"/></svg></div>
+                <div class="app-name">HowlAlert</div>
+                <h2>Approaching limit</h2>
+                <div class="sub">5-hour at 80%<br/>Runs out in 47m at this pace</div>
+                <div class="actions">
+                  <button class="btn primary" type="button">View on iPhone</button>
+                  <button class="btn dismiss" type="button">Dismiss</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.4.a · WARN</div><div class="nm">Approaching limit</div><div class="ds">Amber. Standard alert + handoff CTA.</div></div>
+        </div>
+
+        <!-- Critical alert -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time crit">now</div>
+              <div class="scr-notif crit">
+                <div class="iconwrap"><svg viewBox="0 0 24 24"><use href="#ic-bolt"/></svg></div>
+                <div class="app-name">HowlAlert</div>
+                <h2>9 minutes left</h2>
+                <div class="sub">5-hour at 97%<br/>Resets at 9:50 AM</div>
+                <div class="actions">
+                  <button class="btn primary" type="button">View on iPhone</button>
+                  <button class="btn dismiss" type="button">Dismiss</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.4.b · CRIT</div><div class="nm">Critical alert</div><div class="ds">Red + pulse ring. Double-haptic on Series 10.</div></div>
+        </div>
+
+        <!-- Reset celebration -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time fresh">now</div>
+              <div class="scr-notif fresh">
+                <div class="iconwrap">
+                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="app-name">HowlAlert</div>
+                <h2>Reset just hit</h2>
+                <div class="sub">Fresh 5-hour window<br/>Heavy reserve available</div>
+                <div class="actions">
+                  <button class="btn primary" type="button">Open app</button>
+                  <button class="btn dismiss" type="button">Dismiss</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.4.c · FRESH</div><div class="nm">Reset just hit</div><div class="ds">Green. Optional — toggled off by default.</div></div>
+        </div>
+
+        <!-- Quick action sheet -->
+        <div class="watch-with-cap">
+          <div class="watch">
+            <div class="watch-screen">
+              <div class="watch-time">9:41</div>
+              <div class="scr-action">
+                <h3>HowlAlert</h3>
+                <div class="sub">84% · 47m to reset</div>
+                <div class="actions">
+                  <div class="act snooze">
+                    <span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-snooze"/></svg></span>
+                    Snooze alerts 1h
+                  </div>
+                  <div class="act refresh">
+                    <span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg></span>
+                    Refresh now
+                  </div>
+                  <div class="act mute">
+                    <span class="ic"><svg viewBox="0 0 24 24"><use href="#ic-mute"/></svg></span>
+                    Mute until reset
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="watch-cap"><div class="ix">D.4.d · QUICK ACTIONS</div><div class="nm">Long-press sheet</div><div class="ds">From the complication or app: snooze / refresh / mute.</div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Section D · Apple Watch</div>
+    <div>4 states · 4 complications · 4 alerts</div>
+  </footer>
+
+</div>
+
+<script>
+  // Preview toggle: simulates watchOS Always-On Display (wrist down)
+  document.querySelectorAll('.pt-opt').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.pt-opt').forEach(function (b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      document.body.classList.toggle('always-on', btn.dataset.mode === 'always-on');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · G · Icons</title>
+<style>
+  :root {
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-navy-700: #15275A;
+    --howl-navy-600: #1E3475;
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-400: #3DBEF1;
+    --howl-cyan-300: #7BD3F6;
+    --howl-cyan-100: #D5F0FB;
+    --howl-state-fresh: #3DDC97;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5;
+    --howl-ink-700: #3A4666;
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page-bg); color: var(--howl-ink-100); font-family: var(--font-sys); -webkit-font-smoothing: antialiased; }
+  body { padding: 56px 48px 96px; }
+  .doc { max-width: 1320px; margin: 0 auto; }
+  .num, .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+  /* Top nav */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex; align-items: center; gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-right: auto; }
+  .topnav-tab {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 11px; border-radius: 999px;
+    color: var(--howl-ink-300); text-decoration: none;
+    border: 1px solid transparent; transition: all 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover { color: var(--howl-cyan-300); background: rgba(15,172,237,0.06); }
+  .topnav-tab.active { color: var(--howl-cyan-300); background: rgba(15,172,237,0.10); border-color: rgba(15,172,237,0.30); }
+  .topnav-tab.disabled { color: var(--howl-ink-500); opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+  /* Page header */
+  .doc-head { display: flex; align-items: center; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--panel-border); margin-bottom: 56px; }
+  .doc-head .wm { width: 56px; height: 56px; flex: none; }
+  .doc-head h1 { margin: 0; font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; }
+  .doc-head h1 .sub { color: var(--howl-cyan-300); font-weight: 500; margin-left: 10px; font-size: 22px; }
+  .doc-head p { margin: 6px 0 0; color: var(--howl-ink-300); font-size: 15px; line-height: 22px; max-width: 720px; }
+  .doc-head .meta { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--howl-ink-500); font-size: 12px; }
+  .doc-head .meta .v { color: var(--howl-ink-300); font-family: var(--font-mono); }
+
+  section { margin-bottom: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+  .sec-head .n { font-family: var(--font-mono); color: var(--howl-cyan-300); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+  .sec-head h2 { margin: 0; font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.01em; }
+  .sec-head .lede { margin-left: auto; color: var(--howl-ink-300); font-size: 13px; max-width: 520px; text-align: right; line-height: 18px; }
+  .anno { font-size: 12px; line-height: 16px; color: var(--howl-cyan-300); font-family: var(--font-mono); margin-top: 12px; }
+
+  /* ============== Hero icon ============== */
+  .icon-hero-stage {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(15,172,237,0.45), transparent 50%),
+      radial-gradient(ellipse at 70% 70%, rgba(157,89,255,0.32), transparent 50%),
+      linear-gradient(180deg, #163576 0%, #050a1f 100%);
+    padding: 72px 24px;
+    display: flex; align-items: center; justify-content: center; gap: 60px;
+    flex-wrap: wrap;
+  }
+  /* iOS-style hero icon — gradient bg + wolf + glow */
+  .ic-hero {
+    width: 220px; height: 220px;
+    border-radius: 52px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.20), transparent 50%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow:
+      0 30px 60px rgba(15,172,237,0.45),
+      inset 0 2px 0 rgba(255,255,255,0.25),
+      inset 0 -2px 0 rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .ic-hero::before {
+    /* subtle radial highlight */
+    content: "";
+    position: absolute;
+    top: -20%; left: -20%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
+    pointer-events: none;
+  }
+  .ic-hero .wolf {
+    width: 140px; height: 140px;
+    color: white;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+  }
+  .ic-hero .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  .hero-meta {
+    display: flex; flex-direction: column;
+    gap: 16px;
+    max-width: 380px;
+  }
+  .hero-meta h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--howl-ink-100);
+  }
+  .hero-meta p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--howl-ink-300);
+  }
+  .hero-spec {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .hero-spec .chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(15,172,237,0.10);
+    color: var(--howl-cyan-300);
+    border: 1px solid rgba(15,172,237,0.25);
+  }
+
+  /* ============== Icon family grid ============== */
+  .family-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+  }
+  .family-cell {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 24px 18px 18px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 14px;
+  }
+  .family-tile {
+    width: 132px; height: 132px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  /* iOS squircle */
+  .tile-ios {
+    width: 132px; height: 132px;
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 55%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    box-shadow:
+      0 12px 28px rgba(15,172,237,0.40),
+      inset 0 1.5px 0 rgba(255,255,255,0.25),
+      inset 0 -1.5px 0 rgba(0,0,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .tile-ios .wolf { width: 80px; height: 80px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25)); }
+  .tile-ios .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  /* macOS squircle (rounder) */
+  .tile-macos {
+    width: 132px; height: 132px;
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 55%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.45),
+      inset 0 1.5px 0 rgba(255,255,255,0.25),
+      inset 0 -1.5px 0 rgba(0,0,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    position: relative;
+  }
+  /* macOS subtle base shadow plate */
+  .tile-macos::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.10);
+    pointer-events: none;
+  }
+  .tile-macos .wolf { width: 78px; height: 78px; color: white; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25)); }
+  .tile-macos .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  /* watchOS circular */
+  .tile-watchos {
+    width: 132px; height: 132px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 55%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    box-shadow:
+      0 12px 28px rgba(15,172,237,0.40),
+      inset 0 2px 0 rgba(255,255,255,0.25),
+      inset 0 -2px 0 rgba(0,0,0,0.20);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .tile-watchos .wolf { width: 70px; height: 70px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25)); }
+  .tile-watchos .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  /* Menu bar template */
+  .tile-template {
+    width: 132px; height: 132px;
+    border-radius: 16px;
+    background:
+      repeating-linear-gradient(45deg,
+        rgba(255,255,255,0.02) 0,
+        rgba(255,255,255,0.02) 6px,
+        rgba(255,255,255,0.04) 6px,
+        rgba(255,255,255,0.04) 12px);
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .tile-template .wolf { width: 56px; height: 56px; }
+  .tile-template .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  /* Marketing dark variant */
+  .tile-marketing {
+    width: 132px; height: 132px;
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(15,172,237,0.40), transparent 60%),
+      linear-gradient(180deg, #091533 0%, #050a1f 100%);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.55),
+                inset 0 1.5px 0 rgba(15,172,237,0.40);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--howl-cyan-300);
+    position: relative;
+    overflow: hidden;
+  }
+  .tile-marketing::after {
+    /* starfield */
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 22% 30%, rgba(255,255,255,0.7), transparent 60%),
+      radial-gradient(1px 1px at 72% 18%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(1px 1px at 48% 68%, rgba(255,255,255,0.6), transparent 60%),
+      radial-gradient(1px 1px at 88% 78%, rgba(255,255,255,0.4), transparent 60%);
+    pointer-events: none;
+  }
+  .tile-marketing .wolf { width: 76px; height: 76px; filter: drop-shadow(0 0 12px rgba(15,172,237,0.6)); position: relative; z-index: 1; }
+  .tile-marketing .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  .family-cell .nm {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    text-align: center;
+  }
+  .family-cell .ds {
+    font-size: 11px;
+    color: var(--howl-ink-300);
+    text-align: center;
+    line-height: 15px;
+  }
+  .family-cell .spec {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  /* ============== Size ladder ============== */
+  .ladder-stage {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 36px 24px;
+  }
+  .ladder-row {
+    display: flex; gap: 20px;
+    align-items: flex-end;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .ladder-cell {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+  }
+  .ladder-tile {
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 55%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    box-shadow:
+      0 6px 16px rgba(15,172,237,0.30),
+      inset 0 1px 0 rgba(255,255,255,0.20);
+  }
+  .ladder-tile .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+  .ladder-cell .spec {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-ink-500);
+    text-align: center;
+  }
+  .ladder-cell .spec .px { color: var(--howl-cyan-300); }
+
+  /* ============== Layered icon (iOS 26 / tvOS style) ============== */
+  .layers-stage {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 48px 32px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .layered-stack {
+    position: relative;
+    width: 200px; height: 200px;
+    margin: 0 auto;
+    perspective: 800px;
+  }
+  .layer {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 44px;
+    transform-style: preserve-3d;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .layer-bg {
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 55%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    transform: rotate(-8deg) translate(-22px, 14px);
+    box-shadow:
+      0 22px 50px rgba(15,172,237,0.30),
+      inset 0 1.5px 0 rgba(255,255,255,0.20);
+  }
+  .layer-mid {
+    background: transparent;
+    border: 1.5px dashed rgba(255,255,255,0.20);
+    transform: rotate(-3deg) translate(-10px, 6px);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.30);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .layer-fore {
+    background: transparent;
+    transform: rotate(2deg);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .layer-fore .wolf {
+    width: 120px; height: 120px;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.45));
+  }
+  .layer-fore .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  .layers-info { display: flex; flex-direction: column; gap: 14px; }
+  .layers-info h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.005em;
+  }
+  .layers-info p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 19px;
+    color: var(--howl-ink-300);
+  }
+  .layers-info ul {
+    margin: 0; padding: 0; list-style: none;
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .layers-info li {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 17px;
+    color: var(--howl-ink-100);
+  }
+  .layers-info li::before {
+    content: "";
+    width: 6px; height: 6px;
+    margin-top: 6px;
+    background: var(--howl-cyan-500);
+    border-radius: 50%;
+  }
+
+  /* ============== Real-world placement ============== */
+  .placement-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .placement-card {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .placement-card .stage {
+    height: 220px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(15,172,237,0.30), transparent 50%),
+      linear-gradient(180deg, #163576 0%, #050a1f 100%);
+  }
+  .placement-card .stage.light {
+    background: linear-gradient(180deg, #d8e0ef 0%, #a0b0c8 100%);
+  }
+  .placement-card .meta { padding: 14px 16px 16px; }
+  .placement-card .nm { font-size: 13px; font-weight: 600; color: var(--howl-ink-100); }
+  .placement-card .ds { font-size: 12px; color: var(--howl-ink-300); margin-top: 4px; line-height: 16px; }
+
+  /* Springboard mock — iPhone home screen */
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 12px;
+    width: 80%;
+    max-width: 280px;
+  }
+  .home-icon {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .home-icon.ours {
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 55%),
+      linear-gradient(135deg, #1E90D4 0%, #0A3E72 100%);
+    box-shadow: 0 4px 14px rgba(15,172,237,0.40);
+  }
+  .home-icon.ours .wolf { width: 60%; height: 60%; }
+  .home-icon.ours .wolf svg { width: 100%; height: 100%; fill: white; }
+  .home-icon.a { background: linear-gradient(135deg, #34c759, #28a745); }
+  .home-icon.b { background: linear-gradient(135deg, #ff9500, #ff6b35); }
+  .home-icon.c { background: linear-gradient(135deg, #af52de, #6f3ec2); }
+  .home-icon.d { background: linear-gradient(135deg, #ff3b30, #c5251e); }
+  .home-icon.e { background: linear-gradient(135deg, #5ac8fa, #007aff); }
+  .home-icon.f { background: linear-gradient(135deg, #ffcc00, #ff9500); }
+  .home-icon.g { background: linear-gradient(135deg, #4cd964, #2c8c3c); }
+  .home-icon-label {
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    margin-top: 4px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .home-cell { display: flex; flex-direction: column; align-items: center; }
+
+  /* Dock mock */
+  .dock-row {
+    display: flex; gap: 14px;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .dock-row .home-icon { width: 48px; height: 48px; }
+
+  /* App Switcher mock */
+  .switcher-stack {
+    display: flex; gap: 8px;
+    width: 80%;
+  }
+  .switcher-card {
+    flex: 1;
+    aspect-ratio: 9/16;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #1a1a1f, #0a0a0e);
+    border: 1px solid rgba(255,255,255,0.10);
+    position: relative;
+    overflow: hidden;
+  }
+  .switcher-card.ours {
+    background: linear-gradient(180deg, var(--howl-navy-900), #050a1f);
+  }
+  .switcher-card.ours::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(15,172,237,0.25), transparent 60%);
+  }
+  .switcher-card .tab-icon {
+    position: absolute;
+    bottom: -22px;
+    left: 50%; transform: translateX(-50%);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1E90D4, #0A3E72);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .switcher-card .tab-icon .wolf { width: 22px; height: 22px; color: white; }
+  .switcher-card .tab-icon .wolf svg { width: 100%; height: 100%; fill: currentColor; }
+
+  /* footer */
+  .doc-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between;
+    color: var(--howl-ink-500); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ic-wolf-filled" viewBox="0 0 24 24">
+      <path d="M 4 11 L 7 3 L 10 9 L 14 9 L 17 3 L 20 11 C 20 18, 16 22, 12 22 C 8 22, 4 18, 4 11 Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <!-- ============== TOP NAV ============== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab" href="index.html">Index</a>
+      <a class="topnav-tab" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab active" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+  </nav>
+
+  <!-- ============== HEADER ============== -->
+  <header class="doc-head">
+    <img src="assets/logo-dark.svg" class="wm" alt="HowlAlert" />
+    <div>
+      <h1>App Icon Family <span class="sub">Section G</span></h1>
+      <p>One wolf silhouette, five surfaces: iOS squircle, macOS rounded, watchOS circle, menu bar template, marketing dark. Same path, same proportions — only the container shape and tint change.</p>
+    </div>
+    <div class="meta">
+      <div>1024 × 1024 master · all rendered live SVG</div>
+      <div class="v">iOS 26 · macOS 26 · watchOS 26</div>
+      <div>squircle · circle · template</div>
+    </div>
+  </header>
+
+  <!-- ============== G.1 · HERO ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">G.1</span>
+      <h2>Master icon · 1024 squircle</h2>
+      <div class="lede">The starting point. Cyan-to-navy gradient with a soft top-light highlight, brand wolf at ~64% of canvas, drop shadow for depth.</div>
+    </div>
+
+    <div class="icon-hero-stage">
+      <div class="ic-hero">
+        <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+      </div>
+      <div class="hero-meta">
+        <h2>One asset, every platform.</h2>
+        <p>The wolf is always centered on a 12% safe area. Background gradient runs from <span class="num" style="color:var(--howl-cyan-300);">#1E90D4</span> at 30% 25% down to <span class="num" style="color:var(--howl-cyan-300);">#0A3E72</span> at 100%. Wolf inherits <span class="num" style="color:var(--howl-cyan-100);">white</span> with a 4pt cast shadow below.</p>
+        <div class="hero-spec">
+          <span class="chip">1024 × 1024</span>
+          <span class="chip">52pt corner</span>
+          <span class="chip">12% safe area</span>
+          <span class="chip">Wolf: 64% canvas</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== G.2 · FAMILY ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">G.2</span>
+      <h2>Five-platform family</h2>
+      <div class="lede">Same wolf, container adapts. Squircle radius matches platform conventions; menu bar template strips fill to monochrome; marketing dark inverts.</div>
+    </div>
+
+    <div class="family-grid">
+
+      <div class="family-cell">
+        <div class="family-tile">
+          <div class="tile-ios">
+            <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+        </div>
+        <div class="nm">iOS</div>
+        <div class="spec">1024 · r:225</div>
+        <div class="ds">Squircle. Renders at 1024 → 60pt home screen.</div>
+      </div>
+
+      <div class="family-cell">
+        <div class="family-tile">
+          <div class="tile-macos">
+            <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+        </div>
+        <div class="nm">macOS</div>
+        <div class="spec">1024 · r:185</div>
+        <div class="ds">Tighter squircle for Tahoe. Dock + Finder.</div>
+      </div>
+
+      <div class="family-cell">
+        <div class="family-tile">
+          <div class="tile-watchos">
+            <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+        </div>
+        <div class="nm">watchOS</div>
+        <div class="spec">1024 · r:512</div>
+        <div class="ds">Circle. Wolf scaled to 54% — circle eats corner.</div>
+      </div>
+
+      <div class="family-cell">
+        <div class="family-tile">
+          <div class="tile-template">
+            <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+        </div>
+        <div class="nm">Menu bar template</div>
+        <div class="spec">22 × 22 · template</div>
+        <div class="ds">Filled monochrome. Inherits text color.</div>
+      </div>
+
+      <div class="family-cell">
+        <div class="family-tile">
+          <div class="tile-marketing">
+            <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+        </div>
+        <div class="nm">Marketing dark</div>
+        <div class="spec">variable</div>
+        <div class="ds">Navy + cyan glow. Hero shots, App Store.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============== G.3 · SIZE LADDER ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">G.3</span>
+      <h2>Size ladder · 16 → 1024</h2>
+      <div class="lede">All sizes generated from the master path. Stroke + shadow scale proportionally; nothing pixel-baked.</div>
+    </div>
+
+    <div class="ladder-stage">
+      <div class="ladder-row">
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 16px; height: 16px; border-radius: 4px;">
+            <div class="wolf" style="width: 10px; height: 10px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">16</span> notification</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 22px; height: 22px; border-radius: 5px;">
+            <div class="wolf" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">22</span> menu bar</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 32px; height: 32px; border-radius: 8px;">
+            <div class="wolf" style="width: 20px; height: 20px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">32</span> finder</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 48px; height: 48px; border-radius: 11px;">
+            <div class="wolf" style="width: 30px; height: 30px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">48</span> spotlight</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 64px; height: 64px; border-radius: 14px;">
+            <div class="wolf" style="width: 40px; height: 40px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">64</span> finder list</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 96px; height: 96px; border-radius: 22px;">
+            <div class="wolf" style="width: 60px; height: 60px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">96</span> launchpad</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 132px; height: 132px; border-radius: 30px;">
+            <div class="wolf" style="width: 84px; height: 84px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">256</span> dock @ 2×</div>
+        </div>
+
+        <div class="ladder-cell">
+          <div class="ladder-tile" style="width: 180px; height: 180px; border-radius: 42px;">
+            <div class="wolf" style="width: 116px; height: 116px;"><svg viewBox="0 0 24 24" style="fill: currentColor;"><use href="#ic-wolf-filled"/></svg></div>
+          </div>
+          <div class="spec"><span class="px">1024</span> master</div>
+        </div>
+
+      </div>
+    </div>
+    <p class="anno">Wolf hand-tuned at 16pt + 22pt for legibility (slightly chunkier ears, smaller jaw curve). Above 32pt, single canonical path.</p>
+  </section>
+
+  <!-- ============== G.4 · LAYERED ICON (iOS 26) ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">G.4</span>
+      <h2>Layered icon · iOS 26 / tvOS</h2>
+      <div class="lede">Three layers with parallax. Background tilts independently of the wolf when the phone is rotated. Subtle, never busy.</div>
+    </div>
+
+    <div class="layers-stage">
+      <div class="layered-stack">
+        <div class="layer layer-bg"></div>
+        <div class="layer layer-mid"><span>SAFE AREA</span></div>
+        <div class="layer layer-fore">
+          <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+        </div>
+      </div>
+      <div class="layers-info">
+        <h3>Three-layer composition</h3>
+        <p>iOS 26 layered icons need explicit layers so the OS can apply parallax + dynamic lighting. Our composition keeps the wolf as the only animated layer.</p>
+        <ul>
+          <li><strong style="color:var(--howl-cyan-300);">Background</strong> — cyan-to-navy gradient + top highlight. Static.</li>
+          <li><strong style="color:var(--howl-ink-100);">Safe area guide</strong> — 12% inset, never visible. Just for export tooling.</li>
+          <li><strong style="color:var(--howl-cyan-300);">Foreground</strong> — wolf silhouette in white. Catches the parallax — wolf "floats" slightly above the gradient when tilted.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== G.5 · IN THE WILD ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">G.5</span>
+      <h2>In the wild</h2>
+      <div class="lede">How the icon reads next to its actual neighbors — home screen grid, macOS Dock, App Switcher.</div>
+    </div>
+
+    <div class="placement-grid">
+
+      <!-- Home screen -->
+      <div class="placement-card">
+        <div class="stage">
+          <div class="home-grid">
+            <div class="home-cell"><div class="home-icon ours"><div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div></div><div class="home-icon-label">HowlAlert</div></div>
+            <div class="home-cell"><div class="home-icon a"></div><div class="home-icon-label">Notes</div></div>
+            <div class="home-cell"><div class="home-icon b"></div><div class="home-icon-label">Reminders</div></div>
+            <div class="home-cell"><div class="home-icon c"></div><div class="home-icon-label">Calendar</div></div>
+            <div class="home-cell"><div class="home-icon d"></div><div class="home-icon-label">Music</div></div>
+            <div class="home-cell"><div class="home-icon e"></div><div class="home-icon-label">Messages</div></div>
+            <div class="home-cell"><div class="home-icon f"></div><div class="home-icon-label">Mail</div></div>
+            <div class="home-cell"><div class="home-icon g"></div><div class="home-icon-label">Maps</div></div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="nm">iPhone home screen</div>
+          <div class="ds">Cyan registers loudly next to Apple's greens, oranges, and purples — distinct without being garish.</div>
+        </div>
+      </div>
+
+      <!-- Dock -->
+      <div class="placement-card">
+        <div class="stage light">
+          <div class="dock-row">
+            <div class="home-icon ours"><div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div></div>
+            <div class="home-icon a"></div>
+            <div class="home-icon b"></div>
+            <div class="home-icon c"></div>
+            <div class="home-icon d"></div>
+            <div class="home-icon e"></div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="nm">macOS Dock · light wallpaper</div>
+          <div class="ds">Cast shadow under each icon. The cyan stays vibrant against light backgrounds without becoming washed-out.</div>
+        </div>
+      </div>
+
+      <!-- App Switcher -->
+      <div class="placement-card">
+        <div class="stage">
+          <div class="switcher-stack" style="padding-bottom: 28px;">
+            <div class="switcher-card"></div>
+            <div class="switcher-card ours">
+              <div class="tab-icon">
+                <div class="wolf"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div>
+              </div>
+            </div>
+            <div class="switcher-card"></div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="nm">iOS App Switcher</div>
+          <div class="ds">Small icon below each card. Squircle survives at 36pt — wolf still readable.</div>
+        </div>
+      </div>
+
+      <!-- Notification -->
+      <div class="placement-card">
+        <div class="stage">
+          <div style="background: rgba(28,28,32,0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 18px; padding: 12px 14px; display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; align-items: center; width: 80%; max-width: 260px; border: 1px solid rgba(255,255,255,0.08);">
+            <div class="home-icon ours" style="width: 32px; height: 32px; border-radius: 7px;"><div class="wolf" style="width: 60%; height: 60%;"><svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg></div></div>
+            <div>
+              <div style="font-size: 11px; font-weight: 600; color: white;">HowlAlert</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 1px;">Runs out in 47m</div>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.55);">now</div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="nm">Lock screen notification</div>
+          <div class="ds">Smallest icon size in regular use. Wolf still recognizable; brand reads at-a-glance.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Section G · App Icon Family</div>
+    <div>5 variants · 1 silhouette · all-SVG · ready for export</div>
+  </footer>
+
+</div>
+</body>
+</html>

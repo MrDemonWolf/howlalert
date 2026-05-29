@@ -1,0 +1,3494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · Design System</title>
+<style>
+  /* =========================================================
+     HOWLALERT DESIGN SYSTEM — root tokens
+     Every other artifact inherits from this file.
+     ========================================================= */
+  :root {
+    /* Brand core — navy */
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-navy-700: #15275A;
+    --howl-navy-600: #1E3475;
+
+    /* Brand core — cyan */
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-400: #3DBEF1;
+    --howl-cyan-300: #7BD3F6;
+    --howl-cyan-100: #D5F0FB;
+
+    /* Crit states */
+    --howl-state-fresh: #3DDC97;
+    --howl-state-ok:    #0FACED;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+
+    /* Neutrals on navy */
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5; /* bumped from #6A7A99 — was 4.0:1 (failed AA), now 7.5:1 (AAA) on Navy-900 */
+    --howl-ink-700: #3A4666;
+
+    /* Light mode mirror (iOS only) */
+    --howl-light-surface:   #F8FAFE;
+    --howl-light-surface-2: #ECF1F8;
+    --howl-light-ink-900:   #091533;
+    --howl-light-ink-700:   #3A4666;
+    --howl-light-ink-500:   #6A7A99;
+    --howl-light-divider:   #D6DEEB;
+
+    /* Spacing — 4pt grid */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 28px;
+    --space-8: 32px;
+    --space-9: 36px;
+    --space-10: 40px;
+
+    /* Radii */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-pill: 9999px;
+
+    /* Page chrome (presentation frame) */
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+
+    /* Type */
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", "Roboto Mono", monospace;
+  }
+
+  /* =========================================================
+     Page chrome
+     ========================================================= */
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--page-bg);
+    font-family: var(--font-sys);
+    color: var(--howl-ink-100);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    padding: 56px 48px 96px;
+  }
+
+  /* Numeric → tabular figures everywhere */
+  .num, code, .mono, .stack-num, .swatch-hex, .token, .duration {
+    font-feature-settings: "tnum", "ss01";
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+  }
+
+  .doc {
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+
+  /* Sticky top nav — shared across all artifact pages */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; flex: none; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs {
+    display: flex; gap: 4px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .topnav-tab {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    color: var(--howl-ink-300);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: color 140ms, background 140ms, border-color 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover {
+    color: var(--howl-cyan-300);
+    background: rgba(15,172,237,0.06);
+  }
+  .topnav-tab.active {
+    color: var(--howl-cyan-300);
+    background: rgba(15,172,237,0.10);
+    border-color: rgba(15,172,237,0.30);
+  }
+  .topnav-tab.disabled {
+    color: var(--howl-ink-500);
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Page header */
+  .doc-head {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--panel-border);
+    margin-bottom: 56px;
+  }
+  .doc-head .wolfmark { width: 72px; height: 72px; flex: none; }
+  .doc-head .titles { display: flex; flex-direction: column; gap: 6px; }
+  .doc-head h1 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 40px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .doc-head h1 .sub {
+    color: var(--howl-cyan-300);
+    font-weight: 500;
+    margin-left: 10px;
+    font-size: 22px;
+  }
+  .doc-head p {
+    margin: 0;
+    color: var(--howl-ink-300);
+    font-size: 15px;
+    line-height: 22px;
+    max-width: 720px;
+  }
+  .doc-head .meta {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    color: var(--howl-ink-500);
+    font-size: 12px;
+  }
+  .doc-head .meta .v { color: var(--howl-ink-300); font-family: var(--font-mono); }
+
+  /* Section */
+  section {
+    margin-bottom: 72px;
+  }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .sec-head .n {
+    font-family: var(--font-mono);
+    color: var(--howl-cyan-300);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .sec-head h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .sec-head .lede {
+    margin-left: auto;
+    color: var(--howl-ink-300);
+    font-size: 14px;
+    max-width: 540px;
+    text-align: right;
+    line-height: 20px;
+  }
+
+  /* Panel card */
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+  .panel + .panel { margin-top: 16px; }
+
+  /* Generic grid utilities */
+  .grid { display: grid; gap: 16px; }
+  .g-2 { grid-template-columns: repeat(2, 1fr); }
+  .g-3 { grid-template-columns: repeat(3, 1fr); }
+  .g-4 { grid-template-columns: repeat(4, 1fr); }
+  .g-5 { grid-template-columns: repeat(5, 1fr); }
+  .g-6 { grid-template-columns: repeat(6, 1fr); }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+
+  /* Labels */
+  .label {
+    font-size: 11px;
+    line-height: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--howl-ink-500);
+  }
+  .caption {
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--howl-ink-300);
+    font-weight: 500;
+  }
+  .anno {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--howl-cyan-300);
+    font-family: var(--font-mono);
+    margin-top: 8px;
+  }
+
+  /* =========================================================
+     SECTION: VOICE
+     ========================================================= */
+  .voice-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; }
+  .voice-card {
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    background: rgba(255,255,255,0.02);
+  }
+  .voice-card h4 {
+    margin: 0 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .voice-pair {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    column-gap: 10px;
+    row-gap: 8px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-top: 1px solid var(--panel-border);
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .voice-pair:first-of-type { border-top: 0; padding-top: 0; }
+  .voice-pair .yn { font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+  .voice-pair .yn.no  { color: var(--howl-state-crit); }
+  .voice-pair .yn.yes { color: var(--howl-state-fresh); }
+  .voice-pair .txt { color: var(--howl-ink-100); }
+  .voice-pair.no .txt { color: var(--howl-ink-300); text-decoration: line-through; text-decoration-color: rgba(255,77,77,.4); }
+
+  .voice-rules { list-style: none; padding: 0; margin: 0; }
+  .voice-rules li {
+    padding: 12px 0;
+    border-top: 1px solid var(--panel-border);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--howl-ink-100);
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+  .voice-rules li:first-child { border-top: 0; padding-top: 0; }
+  .voice-rules li::before {
+    content: "";
+    width: 6px; height: 6px;
+    margin-top: 7px;
+    background: var(--howl-cyan-500);
+    border-radius: 50%;
+  }
+
+  /* =========================================================
+     SECTION: COLOR
+     ========================================================= */
+  .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .swatch {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--panel-border);
+    background: var(--howl-navy-800);
+  }
+  .swatch .chip {
+    height: 86px;
+    display: flex;
+    align-items: flex-end;
+    padding: 10px 12px;
+    color: var(--howl-ink-100);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+  .swatch .chip .on-dark { color: rgba(255,255,255,0.7); }
+  .swatch .chip .on-light { color: rgba(9,21,51,0.7); }
+  .swatch .meta {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .swatch .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+  }
+  .swatch .token {
+    font-size: 11px;
+    color: var(--howl-cyan-300);
+  }
+  .swatch .hex {
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    font-family: var(--font-mono);
+  }
+
+  /* Pair: dark + light mirror */
+  .mode-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .mode-card {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--panel-border);
+    padding: 16px;
+  }
+  .mode-card.dark { background: var(--howl-navy-900); }
+  .mode-card.light { background: var(--howl-light-surface); color: var(--howl-light-ink-900); }
+  .mode-card .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .mode-card .label-row .label { color: inherit; opacity: .55; }
+  .mode-card .demo-stack { display: grid; gap: 10px; }
+  .mode-card .demo-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+  }
+  .mode-card.dark .demo-row.s1 { background: var(--howl-navy-800); }
+  .mode-card.dark .demo-row.s2 { background: var(--howl-navy-700); }
+  .mode-card.light .demo-row.s1 { background: #fff; border: 1px solid var(--howl-light-divider); }
+  .mode-card.light .demo-row.s2 { background: var(--howl-light-surface-2); }
+  .mode-card .pri { color: var(--howl-cyan-500); font-weight: 600; }
+  .mode-card.light .body-txt { color: var(--howl-light-ink-700); }
+  .mode-card.dark .body-txt { color: var(--howl-ink-300); }
+
+  /* =========================================================
+     SECTION: TYPE
+     ========================================================= */
+  .type-table { width: 100%; border-collapse: collapse; }
+  .type-table th, .type-table td {
+    text-align: left;
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--panel-border);
+    vertical-align: baseline;
+  }
+  .type-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--howl-ink-500);
+    font-weight: 600;
+    border-bottom-color: var(--howl-ink-700);
+  }
+  .type-table .specs { color: var(--howl-ink-300); font-family: var(--font-mono); font-size: 12px; }
+  .type-table .tname { color: var(--howl-cyan-300); font-family: var(--font-mono); font-size: 12px; }
+  .type-table .sample { color: var(--howl-ink-100); }
+
+  .t-crit-display { font-size: 56px; line-height: 60px; font-weight: 700; letter-spacing: -0.02em; }
+  .t-display     { font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; }
+  .t-title-1     { font-size: 22px; line-height: 28px; font-weight: 600; }
+  .t-title-2     { font-size: 17px; line-height: 22px; font-weight: 600; }
+  .t-body        { font-size: 15px; line-height: 22px; font-weight: 400; }
+  .t-caption     { font-size: 13px; line-height: 18px; font-weight: 500; }
+  .t-micro       { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06em; }
+
+  .tnum-demo {
+    display: flex;
+    gap: 20px;
+    align-items: baseline;
+    margin-top: 12px;
+    padding: 14px 16px;
+    border: 1px dashed var(--howl-ink-700);
+    border-radius: var(--radius-md);
+  }
+  .tnum-demo .num { font-size: 32px; line-height: 1; font-weight: 700; color: var(--howl-cyan-500); }
+  .tnum-demo .num small { font-size: 14px; color: var(--howl-ink-500); font-weight: 500; }
+
+  /* =========================================================
+     SECTION: SPACING / RADII / MOTION
+     ========================================================= */
+  .space-list { display: flex; flex-direction: column; gap: 10px; }
+  .space-row {
+    display: grid;
+    grid-template-columns: 100px 80px 1fr;
+    align-items: center;
+    gap: 16px;
+  }
+  .space-row .tname { color: var(--howl-cyan-300); font-family: var(--font-mono); font-size: 12px; }
+  .space-row .val { color: var(--howl-ink-300); font-family: var(--font-mono); font-size: 12px; }
+  .space-row .bar { height: 12px; background: var(--howl-cyan-500); border-radius: 2px; opacity: 0.85; }
+
+  .radii-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .radii-card {
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    align-items: center;
+    background: rgba(255,255,255,0.02);
+  }
+  .radii-card .demo {
+    width: 96px; height: 64px;
+    background: linear-gradient(180deg, var(--howl-cyan-500), var(--howl-navy-600));
+    box-shadow: 0 8px 24px rgba(15,172,237,0.25);
+  }
+  .radii-card .name { font-size: 12px; font-weight: 600; color: var(--howl-ink-100); }
+  .radii-card .tname { font-size: 11px; color: var(--howl-cyan-300); font-family: var(--font-mono); }
+  .radii-card .px { font-size: 11px; color: var(--howl-ink-500); font-family: var(--font-mono); }
+
+  .motion-list { display: flex; flex-direction: column; gap: 8px; }
+  .motion-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 220px;
+    gap: 14px;
+    padding: 12px 0;
+    border-top: 1px solid var(--panel-border);
+    align-items: center;
+  }
+  .motion-row:first-child { border-top: 0; }
+  .motion-row .kind { color: var(--howl-cyan-300); font-family: var(--font-mono); font-size: 12px; }
+  .motion-row .desc { color: var(--howl-ink-100); font-size: 14px; }
+  .motion-row .spec { color: var(--howl-ink-500); font-family: var(--font-mono); font-size: 12px; text-align: right; }
+
+  /* Pulse demo (used in motion and in crit states) */
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(255,77,77,0.55); }
+    70%  { box-shadow: 0 0 0 14px rgba(255,77,77,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); }
+  }
+  @keyframes pulse-fresh {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(61,220,151,0); }
+    50%      { box-shadow: 0 0 26px 2px rgba(61,220,151,0.55); }
+  }
+
+  /* =========================================================
+     SECTION: LIQUID GLASS
+     ========================================================= */
+  .glass-stage {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    min-height: 380px;
+    background:
+      radial-gradient(circle at 18% 24%, rgba(15,172,237,0.45), transparent 38%),
+      radial-gradient(circle at 78% 70%, rgba(61,220,151,0.30), transparent 42%),
+      radial-gradient(circle at 50% 50%, rgba(255,165,51,0.22), transparent 60%),
+      linear-gradient(180deg, #0a1538 0%, #050a1f 100%);
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .glass-stage::after {
+    /* subtle starfield */
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 12% 80%, rgba(255,255,255,0.6), transparent 60%),
+      radial-gradient(1.5px 1.5px at 88% 12%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(1px 1px at 62% 30%, rgba(255,255,255,0.7), transparent 60%),
+      radial-gradient(1px 1px at 28% 38%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(1px 1px at 70% 78%, rgba(255,255,255,0.4), transparent 60%);
+    pointer-events: none;
+  }
+  .glass {
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(15, 172, 237, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 8px 32px rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+  .glass-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    margin: 0 0 4px;
+  }
+  .glass-sub {
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    margin: 0 0 16px;
+  }
+  .glass-rules {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .glass-rules li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    align-items: start;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--howl-ink-100);
+  }
+  .glass-rules li .tk {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    background: var(--howl-cyan-500);
+    margin-top: 2px;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .glass-rules li .tk::after {
+    content: "";
+    position: absolute;
+    left: 3px; top: 6px;
+    width: 7px; height: 3px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg);
+  }
+
+  /* =========================================================
+     COMPONENTS — building blocks reused across all artifacts
+     ========================================================= */
+
+  /* CritBar */
+  .critbar {
+    --bar-pct: 60;
+    --bar-color: var(--howl-cyan-500);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .critbar .track {
+    position: relative;
+    flex: 1;
+    height: var(--bar-h, 10px);
+    border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .critbar .fill {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: calc((100 - var(--bar-pct)) * 1%); /* DEPLETES as usage grows */
+    background: linear-gradient(180deg, var(--bar-color), color-mix(in oklab, var(--bar-color), #000 18%));
+    border-radius: inherit;
+    box-shadow: 0 0 12px color-mix(in oklab, var(--bar-color), transparent 60%);
+    transition: width 250ms linear, background-color 250ms linear;
+  }
+  .critbar .pct {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--howl-ink-100);
+    min-width: 38px;
+    text-align: right;
+    font-feature-settings: "tnum";
+  }
+  .critbar.size-compact { --bar-h: 6px; }
+  .critbar.size-compact .pct { font-size: 11px; min-width: 30px; }
+  .critbar.size-default { --bar-h: 10px; }
+  .critbar.size-large   { --bar-h: 18px; }
+  .critbar.size-large .pct { font-size: 16px; min-width: 48px; font-weight: 600; }
+  .critbar.state-fresh { --bar-color: var(--howl-state-fresh); }
+  .critbar.state-ok    { --bar-color: var(--howl-state-ok); }
+  .critbar.state-warn  { --bar-color: var(--howl-state-warn); }
+  .critbar.state-crit  { --bar-color: var(--howl-state-crit); }
+
+  /* TwoBarMeter */
+  .twobar { display: flex; flex-direction: column; gap: 14px; }
+  .twobar .meter {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .twobar .meter .head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px;
+  }
+  .twobar .meter .head .lbl { color: var(--howl-ink-300); font-weight: 500; }
+  .twobar .meter .head .cd { font-family: var(--font-mono); color: var(--howl-ink-100); font-feature-settings: "tnum"; }
+
+  /* PaceChip */
+  .pacechip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(15,172,237,0.12);
+    color: var(--howl-cyan-300);
+    border: 1px solid rgba(15,172,237,0.25);
+    line-height: 1;
+    font-feature-settings: "tnum";
+  }
+  .pacechip.warn { background: rgba(255,165,51,0.12); color: var(--howl-state-warn); border-color: rgba(255,165,51,0.3); }
+  .pacechip.fresh { background: rgba(61,220,151,0.12); color: var(--howl-state-fresh); border-color: rgba(61,220,151,0.3); }
+  .pacechip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ResetCountdown */
+  .reset-cd {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: var(--font-mono);
+    color: var(--howl-ink-100);
+    font-feature-settings: "tnum";
+  }
+  .reset-cd .num { font-size: 22px; font-weight: 600; }
+  .reset-cd .lbl { font-size: 11px; color: var(--howl-ink-500); text-transform: uppercase; letter-spacing: 0.08em; }
+  .reset-cd.last-min .num { color: var(--howl-state-warn); animation: cd-pulse 1s ease-in-out infinite; }
+  @keyframes cd-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .reset-cd.fresh .num {
+    color: var(--howl-state-fresh);
+    text-shadow: 0 0 18px rgba(61,220,151,0.7);
+    animation: pulse-fresh 1.8s ease-in-out infinite;
+  }
+
+  /* ModelRow */
+  .modelrow {
+    display: grid;
+    grid-template-columns: 1fr auto 80px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--panel-border);
+  }
+  .modelrow .m-name { font-size: 13px; color: var(--howl-ink-100); font-weight: 500; }
+  .modelrow .m-name .alias { color: var(--howl-ink-500); margin-left: 6px; font-family: var(--font-mono); font-size: 11px; }
+  .modelrow .m-tokens { font-family: var(--font-mono); font-size: 12px; color: var(--howl-cyan-300); font-feature-settings: "tnum"; }
+  .modelrow svg.spark { display: block; width: 80px; height: 24px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    border: 1px solid transparent;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    user-select: none;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: linear-gradient(180deg, rgba(15,172,237,0.92), rgba(15,140,200,0.85));
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.30); /* lifts white-on-cyan above AA */
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      0 6px 20px rgba(15,172,237,0.45),
+      0 1px 2px rgba(0,0,0,0.3);
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, rgba(61,190,241,0.95), rgba(15,172,237,0.85)); }
+  .btn-secondary {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255,255,255,0.06);
+    color: var(--howl-ink-100);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.18),
+      0 6px 20px rgba(0,0,0,0.35);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.10); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--howl-cyan-300);
+    border: 0;
+    padding: 10px 4px;
+  }
+  .btn-ghost:hover { color: var(--howl-cyan-400); }
+  .btn-ghost .uline { background-image: linear-gradient(currentColor, currentColor); background-size: 0 1px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size 180ms ease; }
+  .btn-ghost:hover .uline { background-size: 100% 1px; }
+  .btn[disabled], .btn.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .btn.pressed {
+    transform: translateY(1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      0 2px 8px rgba(0,0,0,0.4) !important;
+  }
+
+  /* PairingCard */
+  .pairing-card {
+    border-radius: var(--radius-lg);
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 260px;
+  }
+  .qr {
+    width: 168px; height: 168px;
+    border-radius: var(--radius-md);
+    background: white;
+    padding: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .qr svg { display: block; width: 100%; height: 100%; }
+  .six-code {
+    display: flex; gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    letter-spacing: 0.18em;
+  }
+  .six-code .grp {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--panel-border);
+  }
+
+  /* EmptyState */
+  .empty-state {
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+  .empty-state .em-head { font-size: 17px; font-weight: 600; margin: 0; }
+  .empty-state .em-sub { font-size: 13px; color: var(--howl-ink-300); margin: 0; line-height: 18px; }
+
+  /* NotificationCard */
+  .notif {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--panel-border);
+  }
+  .notif .ico {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15,172,237,0.12);
+    color: var(--howl-cyan-300);
+  }
+  .notif.warn .ico { background: rgba(255,165,51,0.14); color: var(--howl-state-warn); }
+  .notif.crit .ico { background: rgba(255,77,77,0.14); color: var(--howl-state-crit); }
+  .notif.fresh .ico { background: rgba(61,220,151,0.14); color: var(--howl-state-fresh); }
+  .notif .ttl { font-size: 13px; font-weight: 600; color: var(--howl-ink-100); }
+  .notif .bd { font-size: 12px; color: var(--howl-ink-300); margin-top: 2px; line-height: 16px; }
+  .notif .ts { font-size: 11px; color: var(--howl-ink-500); font-family: var(--font-mono); }
+
+  /* SettingsRow */
+  .setrow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--panel-border);
+  }
+  .setrow + .setrow { margin-top: 8px; }
+  .setrow .lbl { font-size: 14px; color: var(--howl-ink-100); }
+  .setrow .cap { font-size: 12px; color: var(--howl-ink-500); margin-top: 2px; }
+
+  /* Toggle */
+  .toggle {
+    --w: 44px; --h: 26px;
+    width: var(--w); height: var(--h);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    position: relative;
+    transition: background 180ms ease;
+    flex: none;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: transform 180ms ease;
+  }
+  .toggle.on { background: var(--howl-cyan-500); }
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* Stepper / select (used in SettingsRow) */
+  .pillselect {
+    display: inline-flex;
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .pillselect .opt {
+    padding: 6px 12px;
+    color: var(--howl-ink-300);
+    cursor: pointer;
+  }
+  .pillselect .opt.active {
+    background: var(--howl-cyan-500);
+    color: white;
+  }
+
+  /* StateIcon */
+  .stateicon {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm);
+    background: rgba(15,172,237,0.14);
+    color: var(--howl-cyan-300);
+  }
+  .stateicon.fresh { background: rgba(61,220,151,0.14); color: var(--howl-state-fresh); }
+  .stateicon.warn  { background: rgba(255,165,51,0.14); color: var(--howl-state-warn); }
+  .stateicon.crit  { background: rgba(255,77,77,0.14); color: var(--howl-state-crit); }
+
+  /* WolfMark sizes */
+  .wm-32 { width: 32px; height: 32px; }
+  .wm-48 { width: 48px; height: 48px; }
+  .wm-72 { width: 72px; height: 72px; }
+  .wm-96 { width: 96px; height: 96px; }
+
+  /* PricingToggle */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 520px;
+  }
+  .price-card {
+    position: relative;
+    padding: 18px 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--howl-navy-700);
+    background: var(--howl-navy-800);
+    cursor: pointer;
+    transition: transform 140ms ease, border-color 140ms ease;
+  }
+  .price-card.selected {
+    border-color: var(--howl-cyan-500);
+    border-width: 2px;
+    padding: 17px 15px; /* compensate for 2px border */
+    box-shadow: 0 0 0 4px rgba(15,172,237,0.10);
+  }
+  .price-card .ribbon {
+    position: absolute;
+    top: 0; left: 0;
+    transform: translate(-6px, -10px);
+    background: var(--howl-state-fresh);
+    color: var(--howl-navy-900);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+  }
+  .price-card .check {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--howl-cyan-500);
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(15,172,237,0.5);
+  }
+  .price-card.selected .check { display: flex; }
+  .price-card .ttl { font-size: 15px; font-weight: 600; color: var(--howl-ink-100); }
+  .price-card .price {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    margin-top: 8px;
+    font-feature-settings: "tnum";
+  }
+  .price-card .price small { font-size: 12px; color: var(--howl-ink-500); font-weight: 500; }
+  .price-card .meta { font-size: 11px; color: var(--howl-ink-500); margin-top: 4px; }
+  .price-card .save-chip {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(61,220,151,0.16);
+    color: var(--howl-state-fresh);
+    padding: 4px 8px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.04em;
+  }
+
+  /* States demo wrapper */
+  .states-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .state-cell {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border: 1px dashed var(--howl-ink-700);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.015);
+  }
+  .state-cell .label { color: var(--howl-ink-500); }
+
+  /* Component "frame" — for headers in the component library */
+  .comp {
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    background: var(--howl-navy-900);
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+  .comp-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .comp-head .ix { font-family: var(--font-mono); font-size: 11px; color: var(--howl-cyan-300); }
+  .comp-head .nm { font-size: 17px; font-weight: 600; color: var(--howl-ink-100); }
+  .comp-head .ds { font-size: 12px; color: var(--howl-ink-500); max-width: 460px; text-align: right; }
+
+  /* Side label */
+  .side-label {
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* SwiftUI api hint chip */
+  .swift-api {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(15,172,237,0.08);
+    color: var(--howl-cyan-300);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(15,172,237,0.18);
+    margin-left: 6px;
+    line-height: 1.4;
+  }
+
+  /* =========================================================
+     LIQUID GLASS — three-layer architecture diagram
+     ========================================================= */
+  .layers-diagram {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .layer-stack {
+    position: relative;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(circle at 25% 30%, rgba(15,172,237,0.35), transparent 40%),
+      radial-gradient(circle at 80% 75%, rgba(61,220,151,0.22), transparent 45%),
+      linear-gradient(180deg, #0a1538 0%, #050a1f 100%);
+    overflow: hidden;
+  }
+  .layer {
+    position: relative;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .layer-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .layer-desc { font-size: 12px; line-height: 18px; }
+  .layer-desc em { font-style: normal; color: var(--howl-cyan-300); }
+  .layer-content {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--howl-ink-300);
+  }
+  .layer-content .layer-tag { color: var(--howl-ink-500); }
+  .layer-nav {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(15,172,237,0.10);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.20),
+      0 12px 36px rgba(0,0,0,0.45);
+    color: var(--howl-ink-100);
+    transform: translateY(-4px);
+  }
+  .layer-nav .layer-tag { color: var(--howl-cyan-300); }
+  .layer-overlay {
+    background: rgba(15,172,237,0.16);
+    border: 1px dashed rgba(15,172,237,0.30);
+    color: var(--howl-cyan-300);
+  }
+  .layer-side { display: flex; flex-direction: column; }
+  .hig-callout {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(15,172,237,0.06);
+    border-left: 3px solid var(--howl-cyan-500);
+  }
+  .hig-callout-label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--howl-cyan-300);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .hig-callout p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--howl-ink-100);
+    font-style: italic;
+  }
+
+  /* Materials variants */
+  .materials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .mat-card {
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--howl-navy-800);
+  }
+  .mat-preview {
+    height: 120px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .mat-regular {
+    background:
+      radial-gradient(circle at 30% 40%, rgba(15,172,237,0.5), transparent 50%),
+      radial-gradient(circle at 75% 70%, rgba(61,220,151,0.35), transparent 55%),
+      linear-gradient(180deg, #0a1538, #050a1f);
+  }
+  .mat-clear {
+    background:
+      radial-gradient(circle at 40% 50%, rgba(255,165,51,0.65), transparent 55%),
+      radial-gradient(circle at 80% 30%, rgba(255,77,77,0.5), transparent 50%),
+      linear-gradient(180deg, #2a1230, #1a0820);
+  }
+  .mat-interactive {
+    background:
+      radial-gradient(circle at 30% 40%, rgba(15,172,237,0.5), transparent 50%),
+      radial-gradient(circle at 75% 70%, rgba(123,211,246,0.35), transparent 55%),
+      linear-gradient(180deg, #0a1538, #050a1f);
+  }
+  .mat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    background: rgba(255,255,255,0.10);
+    color: var(--howl-ink-100);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.22),
+      0 6px 18px rgba(0,0,0,0.35);
+  }
+  .mat-card[data-mat="clear"] .mat-pill {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.10);
+  }
+  .mat-pill-prom {
+    background: linear-gradient(180deg, rgba(15,172,237,0.85), rgba(15,172,237,0.7));
+    color: white;
+    border-color: rgba(255,255,255,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      0 6px 20px rgba(15,172,237,0.45);
+  }
+  .mat-meta { padding: 14px 16px; }
+  .mat-name { font-size: 14px; font-weight: 600; color: var(--howl-ink-100); margin-bottom: 4px; }
+  .mat-api { margin-bottom: 8px; }
+  .mat-api .swift-api { margin-left: 0; }
+  .mat-use { font-size: 12px; color: var(--howl-ink-300); line-height: 16px; }
+
+  /* =========================================================
+     NATIVE PATTERNS — macOS window
+     ========================================================= */
+  .mac-window {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 24px 56px rgba(0,0,0,0.5);
+    background: var(--howl-navy-900);
+  }
+  .mac-tb {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 38px;
+    padding: 0 12px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.0)),
+      var(--howl-navy-800);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+  .tl-row { display: flex; gap: 8px; align-items: center; }
+  .tl { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.2); }
+  .tl-r { background: #FF5F57; }
+  .tl-y { background: #FEBC2E; }
+  .tl-g { background: #28C840; }
+  .mac-tb-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.005em;
+  }
+  .mac-tb-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .mac-tb-btn {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    color: var(--howl-ink-300);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+  }
+  .mac-tb-btn:hover { color: var(--howl-cyan-300); background: rgba(15,172,237,0.10); }
+  .mac-split { display: grid; grid-template-columns: 200px 1fr; min-height: 320px; }
+  .mac-side {
+    background: rgba(0,0,0,0.18);
+    border-right: 1px solid rgba(255,255,255,0.04);
+    padding: 12px 8px;
+  }
+  .side-section {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--howl-ink-500);
+    font-weight: 700;
+    padding: 12px 10px 6px;
+  }
+  .side-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--howl-ink-300);
+    cursor: pointer;
+    position: relative;
+  }
+  .side-item:hover { background: rgba(255,255,255,0.03); }
+  .side-item.active { background: var(--howl-cyan-500); color: white; }
+  .side-item.active .side-ico { color: white; }
+  .side-ico { color: var(--howl-ink-500); display: inline-flex; }
+  .side-pulse {
+    width: 6px; height: 6px;
+    background: var(--howl-state-fresh);
+    border-radius: 50%;
+    margin-left: auto;
+    box-shadow: 0 0 8px var(--howl-state-fresh);
+  }
+  .mac-main {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: var(--howl-navy-900);
+  }
+  .mac-grouped-head {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--howl-ink-500);
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .mac-grouped-card {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mac-grouped-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--howl-ink-300);
+  }
+  .mac-grouped-meta .num { color: var(--howl-ink-100); }
+  .mac-grouped-list {
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .mac-list-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--howl-ink-100);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .mac-list-row:last-child { border-bottom: 0; }
+  .mac-list-row .num { color: var(--howl-cyan-300); font-family: var(--font-mono); font-size: 12px; }
+
+  /* =========================================================
+     NATIVE PATTERNS — iOS frame
+     ========================================================= */
+  .ios-frame {
+    width: 100%;
+    max-width: 380px;
+    border-radius: 36px;
+    overflow: hidden;
+    background: var(--howl-navy-900);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    margin: 0 auto;
+  }
+  .ios-statusbar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 44px;
+    padding: 0 22px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .ios-island {
+    width: 100px;
+    height: 28px;
+    background: black;
+    border-radius: 999px;
+    justify-self: center;
+  }
+  .ios-status-right { display: flex; gap: 5px; justify-content: flex-end; align-items: center; color: white; }
+  .ios-batt {
+    width: 22px; height: 11px;
+    border: 1px solid white;
+    border-radius: 3px;
+    padding: 1px;
+    position: relative;
+  }
+  .ios-batt::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 3px; background: white; border-radius: 0 1px 1px 0; }
+  .ios-batt span {
+    display: block;
+    width: 80%; height: 100%;
+    background: white;
+    border-radius: 1px;
+  }
+  .ios-nav {
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    align-items: center;
+    padding: 6px 16px 14px;
+    color: white;
+  }
+  .ios-nav-back, .ios-nav-action {
+    color: var(--howl-cyan-300);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .ios-nav-action { justify-self: end; font-weight: 600; }
+  .ios-nav-title { text-align: center; font-size: 17px; font-weight: 600; }
+  .ios-content {
+    padding: 8px 0 24px;
+    background: #000;
+  }
+  .ios-group-head {
+    font-size: 13px;
+    color: var(--howl-ink-300);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 16px 32px 8px;
+    font-weight: 400;
+  }
+  .ios-group-foot {
+    font-size: 12px;
+    color: var(--howl-ink-500);
+    padding: 8px 32px 0;
+    line-height: 16px;
+  }
+  .ios-group {
+    background: #1C1C1E;
+    margin: 0 16px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .ios-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+    color: white;
+    min-height: 44px;
+  }
+  .ios-row:first-child { border-top: 0; }
+  .ios-row-main { flex: 1; }
+  .ios-row-title { font-size: 16px; color: white; }
+  .ios-row-value { color: var(--howl-ink-300); font-size: 16px; display: flex; align-items: center; gap: 4px; }
+  .ios-chev { color: var(--howl-ink-500); font-size: 18px; margin-left: 4px; }
+
+  /* =========================================================
+     NATIVE PATTERNS — watchOS Smart Stack
+     ========================================================= */
+  .watch-widget {
+    position: relative;
+    width: 200px;
+    height: 92px;
+    border-radius: 16px;
+    overflow: hidden;
+    flex: none;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  }
+  .watch-widget-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #FFA533, #F58A1F);
+  }
+  .watch-widget-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding: 10px 14px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .watch-widget-head { display: flex; align-items: center; gap: 6px; }
+  .watch-widget-lbl { font-size: 13px; font-weight: 600; }
+  .watch-widget-pct { font-size: 30px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+  .watch-widget-cd { font-size: 11px; opacity: 0.85; font-weight: 500; }
+
+  /* =========================================================
+     COMPONENTS 16–20 — Detailed popover vocabulary
+     ========================================================= */
+
+  /* UsageRow */
+  .usage-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--panel-border);
+  }
+  .usage-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .usage-row-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.005em;
+  }
+  .usage-row-title .alias {
+    color: var(--howl-ink-500);
+    margin-left: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .usage-row-bar {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.35);
+  }
+  .usage-row-bar .fill {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    background: var(--howl-cyan-500);
+    border-radius: inherit;
+    box-shadow: 0 0 10px color-mix(in oklab, var(--howl-cyan-500), transparent 60%);
+  }
+  .usage-row-bar.state-fresh .fill { background: var(--howl-state-fresh); box-shadow: 0 0 10px color-mix(in oklab, var(--howl-state-fresh), transparent 60%); }
+  .usage-row-bar.state-warn  .fill { background: var(--howl-state-warn);  box-shadow: 0 0 10px color-mix(in oklab, var(--howl-state-warn),  transparent 60%); }
+  .usage-row-bar.state-crit  .fill { background: var(--howl-state-crit);  box-shadow: 0 0 10px color-mix(in oklab, var(--howl-state-crit),  transparent 60%); }
+  /* Pace marker — vertical line at "where you should be by now" */
+  .usage-row-bar .pace-mark {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 1px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5), 0 0 6px rgba(255,255,255,0.4);
+  }
+  /* Deficit overlay — shows gap between pace and actual */
+  .usage-row-bar .deficit {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      135deg,
+      rgba(255,77,77,0.4) 0,
+      rgba(255,77,77,0.4) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+  .usage-row-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+  .usage-row-meta .left { color: var(--howl-ink-100); font-weight: 500; }
+  .usage-row-meta .right { color: var(--howl-ink-300); }
+  .usage-row-sub {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--howl-state-warn);
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+    margin-top: -2px;
+  }
+  .usage-row-sub.crit { color: var(--howl-state-crit); }
+
+  /* PopoverTabBar */
+  .popover-tabbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    padding: 4px;
+    background: rgba(0,0,0,0.20);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .popover-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: var(--radius-sm);
+    color: var(--howl-ink-300);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+  }
+  .popover-tab svg { width: 14px; height: 14px; }
+  .popover-tab.active {
+    background: var(--howl-cyan-500);
+    color: white;
+    box-shadow: 0 2px 8px rgba(15,172,237,0.4), inset 0 1px 0 rgba(255,255,255,0.30);
+  }
+  .popover-tab:hover:not(.active) {
+    background: rgba(255,255,255,0.05);
+    color: var(--howl-ink-100);
+  }
+
+  /* MenuActionRow */
+  .menu-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--howl-ink-100);
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .menu-action:hover { background: rgba(255,255,255,0.05); }
+  .menu-action .ico {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    color: var(--howl-ink-300);
+  }
+  .menu-action .lbl { flex: 1; }
+  .menu-action .kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    font-feature-settings: "tnum";
+  }
+  .menu-action.danger { color: var(--howl-state-crit); }
+  .menu-action.danger .ico { color: var(--howl-state-crit); }
+
+  /* CostSummary */
+  .cost-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    padding: 14px;
+  }
+  .cost-stat { display: flex; flex-direction: column; gap: 2px; }
+  .cost-stat .lbl {
+    font-size: 11px;
+    color: var(--howl-ink-300);
+    font-weight: 500;
+  }
+  .cost-stat .val {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
+  }
+  .cost-stat .delta {
+    font-size: 11px;
+    color: var(--howl-state-fresh);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+  .cost-stat .delta.up { color: var(--howl-state-warn); }
+  .cost-stat .delta.down { color: var(--howl-state-fresh); }
+
+  /* MiniBarChart */
+  .mini-chart {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 48px;
+    padding: 0 14px 10px;
+  }
+  .mini-chart .b {
+    flex: 1;
+    background: var(--howl-cyan-500);
+    border-radius: 1px;
+    opacity: 0.55;
+    min-height: 2px;
+    transition: opacity 0.2s ease;
+  }
+  .mini-chart .b.tall { opacity: 0.95; }
+  .mini-chart .b.warn { background: var(--howl-state-warn); opacity: 0.9; }
+
+  /* Full assembled detailed popover */
+  .popover-frame {
+    width: 320px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background:
+      linear-gradient(180deg, rgba(15,172,237,0.05), rgba(15,172,237,0.02)),
+      rgba(9,21,51,0.92);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.14),
+      0 24px 60px rgba(0,0,0,0.6);
+  }
+  .pf-section {
+    border-top: 1px solid var(--panel-border);
+  }
+  .pf-section:first-child { border-top: 0; }
+  .pf-header {
+    padding: 12px 14px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+  }
+  .pf-header-l { display: flex; gap: 10px; align-items: center; }
+  .pf-title { font-size: 14px; font-weight: 600; color: var(--howl-ink-100); }
+  .pf-sub { font-size: 11px; color: var(--howl-ink-500); margin-top: 1px; font-family: var(--font-mono); }
+  .pf-badge {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--howl-cyan-300);
+    background: rgba(15,172,237,0.14);
+    padding: 3px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(15,172,237,0.28);
+  }
+  .pf-tabwrap { padding: 0 12px 10px; }
+  .pf-rows {
+    display: flex; flex-direction: column;
+    padding: 8px 12px 12px;
+    gap: 8px;
+  }
+  .pf-link {
+    padding: 10px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px;
+    color: var(--howl-ink-100);
+    cursor: pointer;
+  }
+  .pf-link:hover { background: rgba(255,255,255,0.04); }
+  .pf-link .pf-link-r {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--howl-ink-300);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .pf-link .chev { color: var(--howl-ink-500); }
+  .pf-menu {
+    padding: 6px 6px 8px;
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .pf-note {
+    padding: 6px 16px 12px;
+    font-size: 10px;
+    color: var(--howl-ink-500);
+    font-family: var(--font-mono);
+    line-height: 14px;
+  }
+
+  /* Footer */
+  .doc-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between;
+    color: var(--howl-ink-500);
+    font-size: 12px;
+  }
+
+  /* TOC */
+  .toc {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 24px;
+  }
+  .toc a {
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--howl-ink-300);
+    padding: 4px 10px;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-pill);
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .toc a:hover {
+    color: var(--howl-cyan-300);
+    border-color: rgba(15,172,237,0.4);
+    background: rgba(15,172,237,0.06);
+  }
+
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- ============== TOP NAV ============== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab" href="index.html">Index</a>
+      <a class="topnav-tab active" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+  </nav>
+
+  <!-- ============== HEADER ============== -->
+  <header class="doc-head">
+    <!-- Wolf mark from brand asset -->
+    <svg class="wolfmark" viewBox="0 0 512 512" aria-label="HowlAlert wolf mark">
+      <defs>
+        <radialGradient id="wm-hd" cx="44%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#1E90D4"/>
+          <stop offset="100%" stop-color="#0A3E72"/>
+        </radialGradient>
+        <radialGradient id="wm-mz" cx="50%" cy="30%" r="65%">
+          <stop offset="0%" stop-color="#1AABEE"/>
+          <stop offset="100%" stop-color="#0C6AAD"/>
+        </radialGradient>
+        <radialGradient id="wm-er" cx="35%" cy="15%" r="75%">
+          <stop offset="0%" stop-color="#1478B8"/>
+          <stop offset="100%" stop-color="#082E58"/>
+        </radialGradient>
+      </defs>
+      <!-- signal -->
+      <circle cx="256" cy="152" r="11" fill="#0FACED"/>
+      <path d="M 224,124 A 38,38 0 0,1 288,124" fill="none" stroke="#0FACED" stroke-width="13" stroke-linecap="round"/>
+      <path d="M 194,96 A 68,68 0 0,1 318,96" fill="none" stroke="#0FACED" stroke-width="11" stroke-linecap="round" opacity="0.75"/>
+      <path d="M 164,70 A 98,98 0 0,1 348,70" fill="none" stroke="#0FACED" stroke-width="9" stroke-linecap="round" opacity="0.45"/>
+      <!-- ears -->
+      <path d="M 144,316 C 148,262 166,188 204,150 C 220,134 240,170 258,220 Z" fill="url(#wm-er)"/>
+      <path d="M 368,316 C 364,262 346,188 308,150 C 292,134 272,170 254,220 Z" fill="url(#wm-er)"/>
+      <!-- head -->
+      <ellipse cx="256" cy="338" rx="138" ry="132" fill="url(#wm-hd)"/>
+      <!-- muzzle -->
+      <ellipse cx="256" cy="384" rx="80" ry="62" fill="url(#wm-mz)"/>
+      <!-- eyes -->
+      <ellipse cx="212" cy="330" rx="15" ry="18" fill="#0a1224"/>
+      <ellipse cx="300" cy="330" rx="15" ry="18" fill="#0a1224"/>
+      <circle cx="216" cy="324" r="5" fill="#cdeefe"/>
+      <circle cx="304" cy="324" r="5" fill="#cdeefe"/>
+      <!-- brows -->
+      <path d="M 192,300 Q 212,290 232,300" fill="none" stroke="#cdeefe" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+      <path d="M 280,300 Q 300,290 320,300" fill="none" stroke="#cdeefe" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+      <!-- nose -->
+      <ellipse cx="256" cy="372" rx="14" ry="10" fill="#0a1224"/>
+      <!-- smile -->
+      <path d="M 232,398 Q 256,420 280,398" fill="none" stroke="#0a1224" stroke-width="4" stroke-linecap="round"/>
+      <!-- chest tuft -->
+      <path d="M 220,460 Q 256,486 292,460 L 280,470 Q 256,478 232,470 Z" fill="url(#wm-mz)"/>
+    </svg>
+
+    <div class="titles">
+      <h1>HowlAlert <span class="sub">Design System</span></h1>
+      <p>The single source of truth. Tokens, type, motion, Liquid Glass rules, and the full component library. Every macOS / iOS / watchOS artifact in this project pulls from this file.</p>
+      <div class="toc">
+        <a href="#voice">01 · Voice</a>
+        <a href="#color">02 · Color</a>
+        <a href="#type">03 · Type</a>
+        <a href="#spacing">04 · Spacing</a>
+        <a href="#radii">05 · Radii</a>
+        <a href="#motion">06 · Motion</a>
+        <a href="#glass">07 · Liquid Glass</a>
+        <a href="#patterns">08 · Native Patterns</a>
+        <a href="#components">09 · Components</a>
+      </div>
+    </div>
+    <div class="meta">
+      <div>v0.1 · draft</div>
+      <div class="v">build · ds-2026.05.27</div>
+      <div>macOS 26 · iOS 26 · watchOS 26</div>
+    </div>
+  </header>
+
+  <!-- ============== VOICE ============== -->
+  <section id="voice">
+    <div class="sec-head">
+      <span class="n">01</span>
+      <h2>Product &amp; Voice</h2>
+      <div class="lede">A friendly blue wolf who keeps tabs on your Claude usage. Playful but technical. Reassuring, never panicked.</div>
+    </div>
+
+    <div class="panel">
+      <div class="voice-grid">
+        <div class="voice-card">
+          <h4>Voice Rules</h4>
+          <ul class="voice-rules">
+            <li>Plain language first, technical terms after.</li>
+            <li>Never "monitoring" — use "watching" or "keeping tabs".</li>
+            <li>Status uses natural time: "Runs out in 47m" not "47 minutes until limit".</li>
+            <li>Errors stay calm: "Couldn't reach Claude. Trying again in 30s."</li>
+            <li>Exclamation points are reserved for clear wins ("Reset just hit").</li>
+            <li>No emoji. The wolf mark is the only visual personality.</li>
+          </ul>
+        </div>
+        <div class="voice-card">
+          <h4>Say · Don&rsquo;t Say</h4>
+          <div class="voice-pair">
+            <span class="yn yes">DO</span><span class="txt">Runs out in 47m</span>
+          </div>
+          <div class="voice-pair no">
+            <span class="yn no">NO</span><span class="txt">47 minutes until limit reached</span>
+          </div>
+          <div class="voice-pair">
+            <span class="yn yes">DO</span><span class="txt">Keeping tabs on Claude</span>
+          </div>
+          <div class="voice-pair no">
+            <span class="yn no">NO</span><span class="txt">Monitoring your Claude usage</span>
+          </div>
+          <div class="voice-pair">
+            <span class="yn yes">DO</span><span class="txt">Couldn't reach Claude. Trying again in 30s.</span>
+          </div>
+          <div class="voice-pair no">
+            <span class="yn no">NO</span><span class="txt">Error: connection failed (ECONNREFUSED)</span>
+          </div>
+          <div class="voice-pair">
+            <span class="yn yes">DO</span><span class="txt">Reset just hit!</span>
+          </div>
+          <div class="voice-pair no">
+            <span class="yn no">NO</span><span class="txt">Quota limit refresh successful 🎉</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== COLOR ============== -->
+  <section id="color">
+    <div class="sec-head">
+      <span class="n">02</span>
+      <h2>Color System</h2>
+      <div class="lede">Navy + cyan + four state colors. Used as CSS custom properties everywhere — never hard-code hex inside components. Light mode mirrors for iOS only.</div>
+    </div>
+
+    <div class="panel">
+      <div class="label" style="margin-bottom:12px;">Brand Core · Navy</div>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="chip" style="background:#091533;"><span class="on-dark">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Navy 900</span>
+            <span class="token">--howl-navy-900</span>
+            <span class="hex">#091533</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#0E1B42;"><span class="on-dark">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Navy 800</span>
+            <span class="token">--howl-navy-800</span>
+            <span class="hex">#0E1B42</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#15275A;"><span class="on-dark">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Navy 700</span>
+            <span class="token">--howl-navy-700</span>
+            <span class="hex">#15275A</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#1E3475;"><span class="on-dark">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Navy 600</span>
+            <span class="token">--howl-navy-600</span>
+            <span class="hex">#1E3475</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="label" style="margin:24px 0 12px;">Brand Core · Cyan</div>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="chip" style="background:#0FACED;"><span class="on-dark">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Cyan 500 · primary CTA</span>
+            <span class="token">--howl-cyan-500</span>
+            <span class="hex">#0FACED</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#3DBEF1;"><span class="on-dark">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Cyan 400 · hover</span>
+            <span class="token">--howl-cyan-400</span>
+            <span class="hex">#3DBEF1</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#7BD3F6;"><span class="on-light">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Cyan 300 · text on navy</span>
+            <span class="token">--howl-cyan-300</span>
+            <span class="hex">#7BD3F6</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#D5F0FB;"><span class="on-light">Aa Bb 1234</span></div>
+          <div class="meta">
+            <span class="name">Cyan 100 · tint bg</span>
+            <span class="token">--howl-cyan-100</span>
+            <span class="hex">#D5F0FB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="label" style="margin:24px 0 12px;">Crit States · meter colors</div>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="chip" style="background:#3DDC97;"><span class="on-light">Reset just hit</span></div>
+          <div class="meta">
+            <span class="name">Fresh · heavy reserve</span>
+            <span class="token">--howl-state-fresh</span>
+            <span class="hex">#3DDC97</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#0FACED;"><span class="on-dark">Normal pace</span></div>
+          <div class="meta">
+            <span class="name">OK · on-brand cyan</span>
+            <span class="token">--howl-state-ok</span>
+            <span class="hex">#0FACED</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#FFA533;"><span class="on-light">70–89% used</span></div>
+          <div class="meta">
+            <span class="name">Warn · pace deficit</span>
+            <span class="token">--howl-state-warn</span>
+            <span class="hex">#FFA533</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#FF4D4D;"><span class="on-dark">90%+ used</span></div>
+          <div class="meta">
+            <span class="name">Crit · runs out soon</span>
+            <span class="token">--howl-state-crit</span>
+            <span class="hex">#FF4D4D</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="label" style="margin:24px 0 12px;">Neutrals · text + dividers on navy <span style="font-family:var(--font-mono);font-weight:500;text-transform:none;letter-spacing:0;color:var(--howl-state-fresh);margin-left:8px;">· all text tokens ≥ AA on Navy-900</span></div>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="chip" style="background:#F4F7FB;"><span class="on-light">Primary text</span></div>
+          <div class="meta">
+            <span class="name">Ink 100</span>
+            <span class="token">--howl-ink-100</span>
+            <span class="hex">#F4F7FB</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#A8B5CF;"><span class="on-light">Secondary text</span></div>
+          <div class="meta">
+            <span class="name">Ink 300</span>
+            <span class="token">--howl-ink-300</span>
+            <span class="hex">#A8B5CF</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#9AA9C5;"><span class="on-light">Tertiary / metadata</span></div>
+          <div class="meta">
+            <span class="name">Ink 500</span>
+            <span class="token">--howl-ink-500</span>
+            <span class="hex">#9AA9C5 · 7.5:1 AAA</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#3A4666;"><span class="on-dark">Dividers</span></div>
+          <div class="meta">
+            <span class="name">Ink 700</span>
+            <span class="token">--howl-ink-700</span>
+            <span class="hex">#3A4666</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="label" style="margin:24px 0 12px;">Light Mode Mirror · iOS only · macOS app stays dark</div>
+      <div class="mode-pair">
+        <div class="mode-card dark">
+          <div class="label-row">
+            <span class="label">Dark · Navy surface</span>
+            <span class="caption" style="font-family:var(--font-mono);color:var(--howl-ink-500)">#091533</span>
+          </div>
+          <div class="demo-stack">
+            <div class="demo-row s1"><span style="flex:1">Card on Navy 800</span><span class="pri">Cyan 500</span></div>
+            <div class="demo-row s2"><span style="flex:1">Elevated · Navy 700</span><span class="body-txt">Ink 300</span></div>
+          </div>
+        </div>
+        <div class="mode-card light">
+          <div class="label-row">
+            <span class="label">Light · iOS only</span>
+            <span class="caption" style="font-family:var(--font-mono);color:var(--howl-light-ink-500)">#F8FAFE</span>
+          </div>
+          <div class="demo-stack">
+            <div class="demo-row s1"><span style="flex:1">Card on Surface</span><span class="pri">Cyan 500</span></div>
+            <div class="demo-row s2"><span style="flex:1">Elevated · Surface 2</span><span class="body-txt">Ink 700</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== TYPE ============== -->
+  <section id="type">
+    <div class="sec-head">
+      <span class="n">03</span>
+      <h2>Typography</h2>
+      <div class="lede">System font everywhere (SF Pro on Apple). Weights 400 / 500 / 600 / 700. Tabular figures for every numeric value.</div>
+    </div>
+
+    <div class="panel">
+      <table class="type-table">
+        <thead>
+          <tr><th>Token</th><th>Sample</th><th>Spec</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tname">crit-display</td>
+            <td><span class="sample t-crit-display num">67<span style="font-size:24px;font-weight:600;color:var(--howl-ink-500);margin-left:4px;">%</span></span></td>
+            <td class="specs">56 / 60 · 700</td>
+            <td class="caption">Big % on iOS dashboard</td>
+          </tr>
+          <tr>
+            <td class="tname">display</td>
+            <td><span class="sample t-display">Keep tabs on Claude</span></td>
+            <td class="specs">34 / 40 · 700</td>
+            <td class="caption">Screen titles</td>
+          </tr>
+          <tr>
+            <td class="tname">title-1</td>
+            <td><span class="sample t-title-1">Recent activity</span></td>
+            <td class="specs">22 / 28 · 600</td>
+            <td class="caption">Section headers</td>
+          </tr>
+          <tr>
+            <td class="tname">title-2</td>
+            <td><span class="sample t-title-2">5-hour window</span></td>
+            <td class="specs">17 / 22 · 600</td>
+            <td class="caption">Card titles</td>
+          </tr>
+          <tr>
+            <td class="tname">body</td>
+            <td><span class="sample t-body">Approaching your weekly limit. Lasts until reset at this pace.</span></td>
+            <td class="specs">15 / 22 · 400</td>
+            <td class="caption">Default body</td>
+          </tr>
+          <tr>
+            <td class="tname">caption</td>
+            <td><span class="sample t-caption">claude-opus-4-5-20251101</span></td>
+            <td class="specs">13 / 18 · 500</td>
+            <td class="caption">Metadata, labels</td>
+          </tr>
+          <tr>
+            <td class="tname">micro</td>
+            <td><span class="sample t-micro">CLAUDE · 67% · 47M</span></td>
+            <td class="specs">11 / 14 · 600</td>
+            <td class="caption">Watch complications, badges</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tnum-demo">
+        <span class="label">Tabular numerals →</span>
+        <span class="num">3:14:22</span>
+        <span class="num">67,432 / 88,000</span>
+        <span class="num">$29.99 <small>/ yr</small></span>
+        <span class="num">47<small>m</small></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== SPACING ============== -->
+  <section id="spacing">
+    <div class="sec-head">
+      <span class="n">04</span>
+      <h2>Spacing</h2>
+      <div class="lede">A strict 4-pt grid. Use tokens, not pixel values. <code style="color:var(--howl-cyan-300);">--space-1</code> through <code style="color:var(--howl-cyan-300);">--space-10</code>.</div>
+    </div>
+
+    <div class="panel">
+      <div class="space-list">
+        <div class="space-row"><span class="tname">--space-1</span><span class="val">4px</span><div class="bar" style="width:4px"></div></div>
+        <div class="space-row"><span class="tname">--space-2</span><span class="val">8px</span><div class="bar" style="width:8px"></div></div>
+        <div class="space-row"><span class="tname">--space-3</span><span class="val">12px</span><div class="bar" style="width:12px"></div></div>
+        <div class="space-row"><span class="tname">--space-4</span><span class="val">16px</span><div class="bar" style="width:16px"></div></div>
+        <div class="space-row"><span class="tname">--space-5</span><span class="val">20px</span><div class="bar" style="width:20px"></div></div>
+        <div class="space-row"><span class="tname">--space-6</span><span class="val">24px</span><div class="bar" style="width:24px"></div></div>
+        <div class="space-row"><span class="tname">--space-7</span><span class="val">28px</span><div class="bar" style="width:28px"></div></div>
+        <div class="space-row"><span class="tname">--space-8</span><span class="val">32px</span><div class="bar" style="width:32px"></div></div>
+        <div class="space-row"><span class="tname">--space-9</span><span class="val">36px</span><div class="bar" style="width:36px"></div></div>
+        <div class="space-row"><span class="tname">--space-10</span><span class="val">40px</span><div class="bar" style="width:40px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== RADII ============== -->
+  <section id="radii">
+    <div class="sec-head">
+      <span class="n">05</span>
+      <h2>Radii</h2>
+      <div class="lede">Five radius tokens. Use <code style="color:var(--howl-cyan-300);">--radius-pill</code> for buttons + chips. Cards prefer <code style="color:var(--howl-cyan-300);">--radius-lg</code>.</div>
+    </div>
+
+    <div class="panel">
+      <div class="radii-grid">
+        <div class="radii-card">
+          <div class="demo" style="border-radius:var(--radius-sm)"></div>
+          <span class="name">Small</span>
+          <span class="tname">--radius-sm</span>
+          <span class="px">6px</span>
+        </div>
+        <div class="radii-card">
+          <div class="demo" style="border-radius:var(--radius-md)"></div>
+          <span class="name">Medium</span>
+          <span class="tname">--radius-md</span>
+          <span class="px">10px</span>
+        </div>
+        <div class="radii-card">
+          <div class="demo" style="border-radius:var(--radius-lg)"></div>
+          <span class="name">Large</span>
+          <span class="tname">--radius-lg</span>
+          <span class="px">16px</span>
+        </div>
+        <div class="radii-card">
+          <div class="demo" style="border-radius:var(--radius-xl)"></div>
+          <span class="name">XL</span>
+          <span class="tname">--radius-xl</span>
+          <span class="px">24px</span>
+        </div>
+        <div class="radii-card">
+          <div class="demo" style="border-radius:var(--radius-pill)"></div>
+          <span class="name">Pill</span>
+          <span class="tname">--radius-pill</span>
+          <span class="px">9999px</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== MOTION ============== -->
+  <section id="motion">
+    <div class="sec-head">
+      <span class="n">06</span>
+      <h2>Motion</h2>
+      <div class="lede">Springs for state changes. Linear for progress fills. Easing must feel like the wolf is exhaling, not jumping.</div>
+    </div>
+
+    <div class="panel">
+      <div class="motion-list">
+        <div class="motion-row">
+          <span class="kind">state-change</span>
+          <span class="desc">CritBar color transitions, chip swaps, sheet presents</span>
+          <span class="spec">spring(response: 0.4, damping: 0.8)</span>
+        </div>
+        <div class="motion-row">
+          <span class="kind">bar-fill</span>
+          <span class="desc">Progress bar width updates</span>
+          <span class="spec">linear · 250ms</span>
+        </div>
+        <div class="motion-row">
+          <span class="kind">cd-pulse</span>
+          <span class="desc">ResetCountdown — last 60s subtle pulse</span>
+          <span class="spec">opacity 1.0 → 0.55 · 1s</span>
+        </div>
+        <div class="motion-row">
+          <span class="kind">fresh-glow</span>
+          <span class="desc">Reset just hit — celebratory cyan/green glow</span>
+          <span class="spec">box-shadow pulse · 1.8s</span>
+        </div>
+        <div class="motion-row">
+          <span class="kind">crit-pulse-ring</span>
+          <span class="desc">Menu bar icon — critical state ring</span>
+          <span class="spec">radial pulse · 1.4s</span>
+        </div>
+        <div class="motion-row">
+          <span class="kind">glass-press</span>
+          <span class="desc">Liquid Glass press — highlight shifts ~3px</span>
+          <span class="spec">120ms ease-out</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== LIQUID GLASS ============== -->
+  <section id="glass">
+    <div class="sec-head">
+      <span class="n">07</span>
+      <h2>Liquid Glass</h2>
+      <div class="lede">Apple&rsquo;s dynamic meta-material — translucency, lensing, specular highlights. Reserve it for the <strong>navigation layer</strong> that floats above your content.</div>
+    </div>
+
+    <!-- Three-layer architecture diagram -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="label" style="margin-bottom:14px;">Three-Layer Architecture · governing principle</div>
+      <div class="layers-diagram">
+        <div class="layer-stack">
+          <div class="layer layer-overlay">
+            <div class="layer-tag">Overlay</div>
+            <div class="layer-desc">Vibrancy &amp; fills on glass — labels, icons, accents <em>inside</em> floating controls. <code class="swift-api">.foregroundStyle(.tint)</code></div>
+          </div>
+          <div class="layer layer-nav">
+            <div class="layer-tag">Navigation · Liquid Glass</div>
+            <div class="layer-desc">Toolbars, popovers, floating CTAs, tab bars, sheets. <strong>One layer only.</strong> Glass cannot sample other glass. <code class="swift-api">.glassEffect()</code></div>
+          </div>
+          <div class="layer layer-content">
+            <div class="layer-tag">Content</div>
+            <div class="layer-desc">Cards, list rows, body text, charts, imagery. Solid surfaces. <strong>Never glass.</strong></div>
+          </div>
+        </div>
+        <div class="layer-side">
+          <div class="hig-callout">
+            <span class="hig-callout-label">Apple HIG</span>
+            <p>&ldquo;Liquid Glass is best reserved for the navigation layer that floats above the content of your app.&rdquo;</p>
+          </div>
+          <ul class="glass-rules" style="margin-top:14px;">
+            <li><span class="tk"></span><span><strong>One glass layer.</strong> Header glass <em>or</em> footer glass — not both stacked.</span></li>
+            <li><span class="tk"></span><span><strong>Lensing, not blur.</strong> Light bends and concentrates; it does not scatter.</span></li>
+            <li><span class="tk"></span><span><strong>Concentric corners.</strong> Inner glass matches outer container radius. <code class="swift-api">.containerConcentric</code></span></li>
+            <li><span class="tk"></span><span><strong>Cyan tint = primary action.</strong> Tint conveys meaning, not decoration. <code class="swift-api">.tint(.cyan)</code></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Materials variants -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="label" style="margin-bottom:14px;">Material Variants · pick by context</div>
+      <div class="materials-grid">
+        <div class="mat-card" data-mat="regular">
+          <div class="mat-preview mat-regular">
+            <div class="mat-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+              <span>67% · 47m</span>
+            </div>
+          </div>
+          <div class="mat-meta">
+            <div class="mat-name">Regular</div>
+            <div class="mat-api"><code class="swift-api">.glassEffect(.regular)</code></div>
+            <div class="mat-use">Default. Toolbars, popovers, sheets. Adapts to bg.</div>
+          </div>
+        </div>
+        <div class="mat-card" data-mat="clear">
+          <div class="mat-preview mat-clear">
+            <div class="mat-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+              <span>67% · 47m</span>
+            </div>
+          </div>
+          <div class="mat-meta">
+            <div class="mat-name">Clear</div>
+            <div class="mat-api"><code class="swift-api">.glassEffect(.clear)</code></div>
+            <div class="mat-use">Over imagery or rich color. Lightest treatment.</div>
+          </div>
+        </div>
+        <div class="mat-card" data-mat="interactive">
+          <div class="mat-preview mat-interactive">
+            <div class="mat-pill mat-pill-prom">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+              <span>Pair iPhone</span>
+            </div>
+          </div>
+          <div class="mat-meta">
+            <div class="mat-name">Interactive · Prominent</div>
+            <div class="mat-api"><code class="swift-api">.buttonStyle(.glassProminent)</code></div>
+            <div class="mat-use">Primary CTAs. Cyan tint, responds to press with highlight shift.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-stage">
+      <!-- Left: the live glass demo -->
+      <div class="glass">
+        <h3 class="glass-title">Live demo · cyan-tinted glass</h3>
+        <p class="glass-sub">Sat over the bokeh bg behind. 6% cyan overlay, 1px inner highlight, soft bottom shadow.</p>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="twobar">
+            <div class="meter">
+              <div class="head"><span class="lbl">5-hour window</span><span class="cd">2h 47m</span></div>
+              <div class="critbar size-default state-ok" style="--bar-pct:62"><div class="track"><div class="fill"></div></div><span class="pct num">62%</span></div>
+            </div>
+            <div class="meter">
+              <div class="head"><span class="lbl">Weekly</span><span class="cd">4d 11h</span></div>
+              <div class="critbar size-default state-warn" style="--bar-pct:78"><div class="track"><div class="fill"></div></div><span class="pct num">78%</span></div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <span class="pacechip warn"><span class="dot"></span><span>Runs out in 47m</span></span>
+            <button class="btn btn-primary" type="button">Pair with iPhone</button>
+            <button class="btn btn-secondary" type="button">Open settings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: the rules -->
+      <div class="glass">
+        <h3 class="glass-title">Six rules</h3>
+        <p class="glass-sub">Treat these as non-negotiable. Glass that breaks them feels cheap.</p>
+        <ul class="glass-rules">
+          <li><span class="tk"></span><span>Navigation layer only. Never on content cards or list rows.</span></li>
+          <li><span class="tk"></span><span>Always over real content — bokeh, photo, or layered art.</span></li>
+          <li><span class="tk"></span><span>Adjacent glass merges via a virtual <code style="font-family:var(--font-mono);color:var(--howl-cyan-300);">GlassEffectContainer</code>.</span></li>
+          <li><span class="tk"></span><span>6% cyan tint + 1px inner highlight (<code style="font-family:var(--font-mono);color:var(--howl-cyan-300);">.tint(.cyan)</code>).</span></li>
+          <li><span class="tk"></span><span>Lensing, not blur. Specular top edge, soft bottom shadow.</span></li>
+          <li><span class="tk"></span><span>Pressed state shifts highlight ~3px and dims shadow.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="anno">Reference CSS for designers + Claude Code: <code>backdrop-filter: blur(20px) saturate(180%); background: rgba(15,172,237,.06); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 32px rgba(0,0,0,.4);</code></p>
+  </section>
+
+  <!-- ============== NATIVE PATTERNS ============== -->
+  <section id="patterns">
+    <div class="sec-head">
+      <span class="n">08</span>
+      <h2>Native Patterns</h2>
+      <div class="lede">Apple-native chrome our screens inherit: macOS source list + toolbar, iOS inset-grouped list + nav bar, watchOS Smart Stack. All Liquid Glass-aware.</div>
+    </div>
+
+    <!-- macOS source list / sidebar -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="label" style="margin-bottom:14px;">macOS · Source list &amp; toolbar (Tahoe)</div>
+      <div class="mac-window">
+        <div class="mac-tb">
+          <div class="tl-row">
+            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
+          </div>
+          <div class="mac-tb-title">HowlAlert</div>
+          <div class="mac-tb-actions">
+            <span class="mac-tb-btn" title="Pair device">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>
+            </span>
+            <span class="mac-tb-btn" title="Settings">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+          </div>
+        </div>
+        <div class="mac-split">
+          <aside class="mac-side">
+            <div class="side-section">Devices</div>
+            <div class="side-item active">
+              <span class="side-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg></span>
+              <span>This Mac</span>
+            </div>
+            <div class="side-item">
+              <span class="side-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18" r="1"/></svg></span>
+              <span>iPhone 17 Pro</span>
+              <span class="side-pulse"></span>
+            </div>
+            <div class="side-item">
+              <span class="side-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="3"/><path d="M10 1h4M10 23h4"/></svg></span>
+              <span>Apple Watch</span>
+            </div>
+
+            <div class="side-section">Activity</div>
+            <div class="side-item">
+              <span class="side-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+              <span>Live</span>
+            </div>
+            <div class="side-item">
+              <span class="side-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
+              <span>History</span>
+            </div>
+            <div class="side-item">
+              <span class="side-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              <span>Notifications</span>
+            </div>
+          </aside>
+          <div class="mac-main">
+            <div class="mac-grouped">
+              <div class="mac-grouped-head">5-Hour window</div>
+              <div class="mac-grouped-card">
+                <div class="critbar size-default state-ok" style="--bar-pct:62"><div class="track"><div class="fill"></div></div><span class="pct num">62%</span></div>
+                <div class="mac-grouped-meta"><span>Runs out in 47m at this pace</span><span class="num">2h 47m</span></div>
+              </div>
+            </div>
+            <div class="mac-grouped">
+              <div class="mac-grouped-head">Recent activity</div>
+              <div class="mac-grouped-list">
+                <div class="mac-list-row"><span>claude-opus-4-5</span><span class="num">42,118 tok</span></div>
+                <div class="mac-list-row"><span>claude-sonnet-4-5</span><span class="num">21,484 tok</span></div>
+                <div class="mac-list-row"><span>claude-haiku-4-5</span><span class="num">3,830 tok</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="anno">macOS uses a source list (sidebar) + a content area with grouped sections. Section headers are uppercase, small, low-contrast. Rows have 28pt height with 12pt leading inset. <code class="swift-api">NavigationSplitView</code> · <code class="swift-api">List(selection:)</code></p>
+    </div>
+
+    <!-- iOS inset grouped list -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="label" style="margin-bottom:14px;">iOS · Inset-grouped list &amp; nav bar</div>
+      <div class="ios-frame">
+        <div class="ios-statusbar">
+          <span class="num">9:41</span>
+          <span class="ios-island"></span>
+          <span class="ios-status-right">
+            <svg width="15" height="10" viewBox="0 0 15 10" fill="currentColor"><rect x="0" y="6" width="2" height="4"/><rect x="4" y="4" width="2" height="6"/><rect x="8" y="2" width="2" height="8"/><rect x="12" y="0" width="2" height="10"/></svg>
+            <svg width="15" height="10" viewBox="0 0 17 11" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8.5 9.5c-2 0-3.5-1-3.5-2.5S6.5 4.5 8.5 4.5s3.5 1 3.5 2.5-1.5 2.5-3.5 2.5z" fill="currentColor"/><path d="M2 6c2-2 5-3.5 6.5-3.5S13 4 15 6"/></svg>
+            <span class="ios-batt"><span></span></span>
+          </span>
+        </div>
+        <div class="ios-nav">
+          <span class="ios-nav-back">
+            <svg width="13" height="22" viewBox="0 0 13 22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 2 2 11 11 20"/></svg>
+            <span>Back</span>
+          </span>
+          <span class="ios-nav-title">Notifications</span>
+          <span class="ios-nav-action">Done</span>
+        </div>
+        <div class="ios-content">
+          <div class="ios-group-head">5-HOUR WINDOW</div>
+          <div class="ios-group">
+            <div class="ios-row">
+              <div class="ios-row-main"><div class="ios-row-title">Notify at 80%</div></div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="ios-row">
+              <div class="ios-row-main"><div class="ios-row-title">Notify at 95%</div></div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="ios-row">
+              <div class="ios-row-main"><div class="ios-row-title">Notify on reset</div></div>
+              <div class="toggle"></div>
+            </div>
+          </div>
+          <div class="ios-group-foot">A single quiet ping when a new window opens.</div>
+
+          <div class="ios-group-head">QUIET HOURS</div>
+          <div class="ios-group">
+            <div class="ios-row">
+              <div class="ios-row-main"><div class="ios-row-title">From</div></div>
+              <div class="ios-row-value">10:00 PM <span class="ios-chev">›</span></div>
+            </div>
+            <div class="ios-row">
+              <div class="ios-row-main"><div class="ios-row-title">To</div></div>
+              <div class="ios-row-value">8:00 AM <span class="ios-chev">›</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="anno">iOS uses inset-grouped lists. Group headers are caps + tracking. Footers are sentence-cased helper copy. Tap targets are full-width rows; chevron indicates push navigation. <code class="swift-api">List { Section }.listStyle(.insetGrouped)</code></p>
+    </div>
+
+    <!-- watchOS Smart Stack -->
+    <div class="panel">
+      <div class="label" style="margin-bottom:14px;">watchOS · Smart Stack widget</div>
+      <div style="display:flex; gap:24px; align-items:center; flex-wrap: wrap;">
+        <div class="watch-widget">
+          <div class="watch-widget-bg"></div>
+          <div class="watch-widget-content">
+            <div class="watch-widget-head">
+              <span class="stateicon warn" style="width:22px;height:22px;background:rgba(255,255,255,0.18);color:white;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+              </span>
+              <span class="watch-widget-lbl">Claude</span>
+            </div>
+            <div class="watch-widget-pct num">84%</div>
+            <div class="watch-widget-cd num">47m to reset</div>
+          </div>
+        </div>
+        <div style="flex:1; min-width:280px;">
+          <p class="caption" style="margin:0 0 10px;">Smart Stack widgets in watchOS 26 surface contextually — they appear when relevant (approaching a limit) and dismiss when not. State color drives the entire background. Glanceable, no chrome.</p>
+          <ul class="voice-rules" style="margin:0;">
+            <li>One number, one timer. No labels longer than 12 chars.</li>
+            <li>Tint the full background; text stays white-on-state.</li>
+            <li>Tap opens the watchOS app directly to the live screen.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="anno"><code class="swift-api">WidgetFamily.accessoryRectangular</code> · relevance-driven via <code class="swift-api">RelevantContext</code></p>
+    </div>
+  </section>
+
+  <!-- ============== COMPONENTS ============== -->
+  <section id="components">
+    <div class="sec-head">
+      <span class="n">09</span>
+      <h2>Component Library</h2>
+      <div class="lede">Twenty components, built once and reused across every platform. Each shows default, hover/pressed, disabled, and data states.</div>
+    </div>
+
+    <!-- 01 CritBar -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">01</span> &nbsp; <span class="nm">CritBar</span> &nbsp;<code class="swift-api">ProgressView(value:).progressViewStyle(.linear).tint(state)</code></span>
+        <span class="ds">Horizontal progress bar that <strong>depletes</strong> as usage grows. Full cyan at 0% used → empty at 100% used. Three sizes.</span>
+      </div>
+
+      <div class="grid g-3">
+        <div class="state-cell">
+          <span class="label">compact · for Dynamic Island</span>
+          <div class="critbar size-compact state-ok" style="--bar-pct:33"><div class="track"><div class="fill"></div></div><span class="pct num">33%</span></div>
+          <div class="critbar size-compact state-warn" style="--bar-pct:74"><div class="track"><div class="fill"></div></div><span class="pct num">74%</span></div>
+          <div class="critbar size-compact state-crit" style="--bar-pct:92"><div class="track"><div class="fill"></div></div><span class="pct num">92%</span></div>
+        </div>
+        <div class="state-cell">
+          <span class="label">default · popover</span>
+          <div class="critbar size-default state-fresh" style="--bar-pct:8"><div class="track"><div class="fill"></div></div><span class="pct num">8%</span></div>
+          <div class="critbar size-default state-ok" style="--bar-pct:42"><div class="track"><div class="fill"></div></div><span class="pct num">42%</span></div>
+          <div class="critbar size-default state-warn" style="--bar-pct:78"><div class="track"><div class="fill"></div></div><span class="pct num">78%</span></div>
+          <div class="critbar size-default state-crit" style="--bar-pct:94"><div class="track"><div class="fill"></div></div><span class="pct num">94%</span></div>
+        </div>
+        <div class="state-cell">
+          <span class="label">large · iOS dashboard hero</span>
+          <div class="critbar size-large state-ok" style="--bar-pct:67"><div class="track"><div class="fill"></div></div><span class="pct num">67%</span></div>
+          <div class="critbar size-large state-warn" style="--bar-pct:85"><div class="track"><div class="fill"></div></div><span class="pct num">85%</span></div>
+        </div>
+      </div>
+      <p class="anno">Note · the visual fill shrinks as % used increases. % readout grows. This is the inverse of a typical progress bar.</p>
+    </div>
+
+    <!-- 02 TwoBarMeter -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">02</span> &nbsp; <span class="nm">TwoBarMeter</span></span>
+        <span class="ds">Two stacked CritBars labeled "5-Hour Window" and "Weekly", each with its own countdown header.</span>
+      </div>
+      <div class="grid g-2">
+        <div class="state-cell">
+          <span class="label">normal pace</span>
+          <div class="twobar">
+            <div class="meter">
+              <div class="head"><span class="lbl">5-Hour Window</span><span class="cd">3h 14m 22s</span></div>
+              <div class="critbar size-default state-ok" style="--bar-pct:42"><div class="track"><div class="fill"></div></div><span class="pct num">42%</span></div>
+            </div>
+            <div class="meter">
+              <div class="head"><span class="lbl">Weekly</span><span class="cd">4d 11h</span></div>
+              <div class="critbar size-default state-fresh" style="--bar-pct:18"><div class="track"><div class="fill"></div></div><span class="pct num">18%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="state-cell">
+          <span class="label">approaching limit · mixed state</span>
+          <div class="twobar">
+            <div class="meter">
+              <div class="head"><span class="lbl">5-Hour Window</span><span class="cd">47m 12s</span></div>
+              <div class="critbar size-default state-warn" style="--bar-pct:84"><div class="track"><div class="fill"></div></div><span class="pct num">84%</span></div>
+            </div>
+            <div class="meter">
+              <div class="head"><span class="lbl">Weekly</span><span class="cd">2d 04h</span></div>
+              <div class="critbar size-default state-crit" style="--bar-pct:93"><div class="track"><div class="fill"></div></div><span class="pct num">93%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 PaceChip -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">03</span> &nbsp; <span class="nm">PaceChip</span></span>
+        <span class="ds">Pace pill. Cyan "On track", amber "Runs out in 47m", green "Lasts until reset". Auto-hides before 3% of window elapsed.</span>
+      </div>
+      <div class="row">
+        <span class="pacechip"><span class="dot"></span>On track</span>
+        <span class="pacechip warn"><span class="dot"></span>Runs out in 47m</span>
+        <span class="pacechip fresh"><span class="dot"></span>Lasts until reset</span>
+        <span class="pacechip" style="opacity:.5"><span class="dot"></span>Hidden &lt; 3% elapsed</span>
+      </div>
+    </div>
+
+    <!-- 04 ResetCountdown -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">04</span> &nbsp; <span class="nm">ResetCountdown</span></span>
+        <span class="ds">Monospaced timer. Subtle pulse on last 60s. Celebratory cyan/green glow at the moment of reset.</span>
+      </div>
+      <div class="row" style="gap:24px;">
+        <div class="state-cell" style="flex:1">
+          <span class="label">default</span>
+          <div class="reset-cd"><span class="num">3:14:22</span><span class="lbl">until reset</span></div>
+        </div>
+        <div class="state-cell" style="flex:1">
+          <span class="label">last 60s · pulse</span>
+          <div class="reset-cd last-min"><span class="num">0:00:47</span><span class="lbl">until reset</span></div>
+        </div>
+        <div class="state-cell" style="flex:1">
+          <span class="label">reset just hit</span>
+          <div class="reset-cd fresh"><span class="num">0:00:00</span><span class="lbl">reset just hit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 ModelRow -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">05</span> &nbsp; <span class="nm">ModelRow</span></span>
+        <span class="ds">One row per model used in the current window: model name, tokens, mini sparkline.</span>
+      </div>
+      <div class="col">
+        <div class="modelrow">
+          <span class="m-name">Opus <span class="alias">claude-opus-4-5-20251101</span></span>
+          <span class="m-tokens num">42,118 tok</span>
+          <svg class="spark" viewBox="0 0 80 24" preserveAspectRatio="none">
+            <polyline points="0,18 10,16 20,13 30,15 40,10 50,12 60,7 70,9 80,4"
+              fill="none" stroke="#0FACED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="modelrow">
+          <span class="m-name">Sonnet <span class="alias">claude-sonnet-4-5-20250929</span></span>
+          <span class="m-tokens num">21,484 tok</span>
+          <svg class="spark" viewBox="0 0 80 24" preserveAspectRatio="none">
+            <polyline points="0,12 10,14 20,11 30,9 40,11 50,8 60,10 70,7 80,8"
+              fill="none" stroke="#3DBEF1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="modelrow">
+          <span class="m-name">Haiku <span class="alias">claude-haiku-4-5</span></span>
+          <span class="m-tokens num">3,830 tok</span>
+          <svg class="spark" viewBox="0 0 80 24" preserveAspectRatio="none">
+            <polyline points="0,20 10,18 20,19 30,17 40,16 50,17 60,15 70,16 80,14"
+              fill="none" stroke="#7BD3F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06 / 07 / 08 Buttons -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">06–08</span> &nbsp; <span class="nm">Buttons</span> &nbsp;<code class="swift-api">.buttonStyle(.glassProminent | .glass | .borderless)</code></span>
+        <span class="ds">Primary (Liquid Glass cyan, &ldquo;glassProminent&rdquo;), Secondary (neutral glass), Ghost (text-only, underline-on-hover).</span>
+      </div>
+      <div class="grid g-3">
+        <div class="state-cell">
+          <span class="label">Primary · glassProminent</span>
+          <button class="btn btn-primary" type="button">Pair with iPhone</button>
+          <button class="btn btn-primary pressed" type="button">Pressed</button>
+          <button class="btn btn-primary disabled" type="button">Disabled</button>
+        </div>
+        <div class="state-cell">
+          <span class="label">Secondary · neutral glass</span>
+          <button class="btn btn-secondary" type="button">Open settings</button>
+          <button class="btn btn-secondary pressed" type="button">Pressed</button>
+          <button class="btn btn-secondary disabled" type="button">Disabled</button>
+        </div>
+        <div class="state-cell">
+          <span class="label">Ghost · text</span>
+          <button class="btn btn-ghost" type="button"><span class="uline">Continue with Demo Mode</span></button>
+          <button class="btn btn-ghost" type="button" style="color:var(--howl-cyan-400)"><span class="uline">Hover</span></button>
+          <button class="btn btn-ghost disabled" type="button"><span class="uline">Disabled</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 09 PairingCard -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">09</span> &nbsp; <span class="nm">PairingCard</span></span>
+        <span class="ds">QR code + 6-digit fallback + CTA. Used in macOS "Pair another device" and iOS pairing flow.</span>
+      </div>
+      <div class="row">
+        <div class="pairing-card">
+          <div class="qr">
+            <!-- Synthetic QR — purely decorative -->
+            <svg viewBox="0 0 21 21" shape-rendering="crispEdges" aria-hidden="true">
+              <rect width="21" height="21" fill="white"/>
+              <g fill="#091533">
+                <!-- finder squares -->
+                <rect x="0" y="0" width="7" height="7"/>
+                <rect x="1" y="1" width="5" height="5" fill="white"/>
+                <rect x="2" y="2" width="3" height="3"/>
+                <rect x="14" y="0" width="7" height="7"/>
+                <rect x="15" y="1" width="5" height="5" fill="white"/>
+                <rect x="16" y="2" width="3" height="3"/>
+                <rect x="0" y="14" width="7" height="7"/>
+                <rect x="1" y="15" width="5" height="5" fill="white"/>
+                <rect x="2" y="16" width="3" height="3"/>
+                <!-- data dots -->
+                <rect x="9" y="0" width="1" height="1"/><rect x="11" y="0" width="1" height="1"/><rect x="12" y="0" width="1" height="1"/>
+                <rect x="8" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/>
+                <rect x="9" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/>
+                <rect x="8" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/>
+                <rect x="10" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/>
+                <rect x="8" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="13" y="6" width="1" height="1"/>
+                <rect x="0" y="8" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="4" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="13" y="8" width="1" height="1"/><rect x="15" y="8" width="1" height="1"/><rect x="17" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/>
+                <rect x="1" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="8" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/>
+                <rect x="0" y="10" width="1" height="1"/><rect x="2" y="10" width="1" height="1"/><rect x="5" y="10" width="1" height="1"/><rect x="7" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="12" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/>
+                <rect x="1" y="11" width="1" height="1"/><rect x="4" y="11" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/><rect x="11" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/>
+                <rect x="0" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="7" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="14" y="12" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/>
+                <rect x="8" y="14" width="1" height="1"/><rect x="10" y="14" width="1" height="1"/><rect x="12" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/>
+                <rect x="9" y="15" width="1" height="1"/><rect x="11" y="15" width="1" height="1"/><rect x="13" y="15" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/>
+                <rect x="8" y="16" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="14" y="16" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="19" y="16" width="1" height="1"/>
+                <rect x="9" y="17" width="1" height="1"/><rect x="11" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="20" y="17" width="1" height="1"/>
+                <rect x="10" y="18" width="1" height="1"/><rect x="12" y="18" width="1" height="1"/><rect x="16" y="18" width="1" height="1"/><rect x="18" y="18" width="1" height="1"/>
+                <rect x="8" y="19" width="1" height="1"/><rect x="11" y="19" width="1" height="1"/><rect x="14" y="19" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/><rect x="19" y="19" width="1" height="1"/>
+                <rect x="9" y="20" width="1" height="1"/><rect x="13" y="20" width="1" height="1"/><rect x="15" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="20" y="20" width="1" height="1"/>
+              </g>
+            </svg>
+          </div>
+          <div class="six-code">
+            <span class="grp">487</span>
+            <span class="grp">293</span>
+          </div>
+          <button class="btn btn-primary" type="button" style="width:100%">Pair with iPhone</button>
+          <p class="caption" style="margin:0;text-align:center;">Scan from the iPhone app — or type the code.</p>
+        </div>
+
+        <div class="col" style="gap:14px; flex:1; min-width:300px;">
+          <p class="caption" style="margin:0;">Two-card pattern. Card uses Navy 800 surface (<em>not glass</em>), Cyan 500 primary CTA, and a 6-digit fallback that's typed left-to-right.</p>
+          <ul class="voice-rules" style="margin:0;">
+            <li>QR uses pure <code style="font-family:var(--font-mono);color:var(--howl-cyan-300);">#091533</code> on white for camera contrast.</li>
+            <li>6-digit code splits at 3 for easier dictation.</li>
+            <li>CTA always reads <strong>destination</strong>, never "Continue" — "Pair with iPhone" / "Pair with Watch".</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 EmptyState -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">10</span> &nbsp; <span class="nm">EmptyState</span></span>
+        <span class="ds">Wolf illustration + headline + CTA + ghost link "Continue with Demo Mode".</span>
+      </div>
+      <div class="empty-state">
+        <svg viewBox="0 0 512 512" class="wm-96" aria-hidden="true">
+          <use href="#" /> <!-- inline copy -->
+          <defs>
+            <radialGradient id="es-hd" cx="44%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#1E90D4"/><stop offset="100%" stop-color="#0A3E72"/>
+            </radialGradient>
+            <radialGradient id="es-mz" cx="50%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#1AABEE"/><stop offset="100%" stop-color="#0C6AAD"/>
+            </radialGradient>
+            <radialGradient id="es-er" cx="35%" cy="15%" r="75%">
+              <stop offset="0%" stop-color="#1478B8"/><stop offset="100%" stop-color="#082E58"/>
+            </radialGradient>
+          </defs>
+          <circle cx="256" cy="152" r="11" fill="#0FACED"/>
+          <path d="M 224,124 A 38,38 0 0,1 288,124" fill="none" stroke="#0FACED" stroke-width="13" stroke-linecap="round"/>
+          <path d="M 194,96 A 68,68 0 0,1 318,96" fill="none" stroke="#0FACED" stroke-width="11" stroke-linecap="round" opacity="0.75"/>
+          <path d="M 164,70 A 98,98 0 0,1 348,70" fill="none" stroke="#0FACED" stroke-width="9" stroke-linecap="round" opacity="0.45"/>
+          <path d="M 144,316 C 148,262 166,188 204,150 C 220,134 240,170 258,220 Z" fill="url(#es-er)"/>
+          <path d="M 368,316 C 364,262 346,188 308,150 C 292,134 272,170 254,220 Z" fill="url(#es-er)"/>
+          <ellipse cx="256" cy="338" rx="138" ry="132" fill="url(#es-hd)"/>
+          <ellipse cx="256" cy="384" rx="80" ry="62" fill="url(#es-mz)"/>
+          <ellipse cx="212" cy="330" rx="15" ry="18" fill="#0a1224"/>
+          <ellipse cx="300" cy="330" rx="15" ry="18" fill="#0a1224"/>
+          <circle cx="216" cy="324" r="5" fill="#cdeefe"/>
+          <circle cx="304" cy="324" r="5" fill="#cdeefe"/>
+          <ellipse cx="256" cy="372" rx="14" ry="10" fill="#0a1224"/>
+          <path d="M 232,398 Q 256,420 280,398" fill="none" stroke="#0a1224" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h3 class="em-head">No Mac paired yet</h3>
+        <p class="em-sub">Pair with the menu bar app to start keeping tabs on Claude.</p>
+        <button class="btn btn-primary" type="button">Pair with Mac</button>
+        <button class="btn btn-ghost" type="button"><span class="uline">Continue with Demo Mode</span></button>
+      </div>
+    </div>
+
+    <!-- 11 NotificationCard -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">11</span> &nbsp; <span class="nm">NotificationCard</span></span>
+        <span class="ds">In-app notification history rows. State color drives the icon background.</span>
+      </div>
+      <div class="col">
+        <div class="notif fresh">
+          <div class="ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="ttl">Reset just hit</div>
+            <div class="bd">Fresh 5-hour window. Heavy reserve available again.</div>
+          </div>
+          <div class="ts">just now</div>
+        </div>
+        <div class="notif warn">
+          <div class="ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <div class="ttl">Approaching limit</div>
+            <div class="bd">5-hour window at 84%. Runs out in 47m at this pace.</div>
+          </div>
+          <div class="ts">11:42 AM</div>
+        </div>
+        <div class="notif crit">
+          <div class="ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <div class="ttl">Weekly limit at 93%</div>
+            <div class="bd">Roughly 2 days of heavy use left before reset.</div>
+          </div>
+          <div class="ts">Yesterday</div>
+        </div>
+        <div class="notif">
+          <div class="ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <div class="ttl">Claude is waiting on you</div>
+            <div class="bd">"Should I also update the migration script?"</div>
+          </div>
+          <div class="ts">Yesterday</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12 SettingsRow -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">12</span> &nbsp; <span class="nm">SettingsRow</span> &nbsp;<code class="swift-api">Form { Section { Toggle / Picker / Stepper } }</code></span>
+        <span class="ds">Label, optional caption, control on the right. Three control variants.</span>
+      </div>
+      <div class="col">
+        <div class="setrow">
+          <div>
+            <div class="lbl">Notify at 80% used</div>
+            <div class="cap">Push to paired devices when the 5-hour window crosses 80%.</div>
+          </div>
+          <div class="toggle on" aria-label="On"></div>
+        </div>
+        <div class="setrow">
+          <div>
+            <div class="lbl">Notify on reset</div>
+            <div class="cap">A single quiet ping when a new window opens.</div>
+          </div>
+          <div class="toggle" aria-label="Off"></div>
+        </div>
+        <div class="setrow">
+          <div>
+            <div class="lbl">Refresh interval</div>
+            <div class="cap">How often the menu bar agent polls Claude Code.</div>
+          </div>
+          <div class="pillselect" role="radiogroup">
+            <span class="opt">10s</span>
+            <span class="opt active">30s</span>
+            <span class="opt">1m</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13 StateIcon -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">13</span> &nbsp; <span class="nm">StateIcon</span></span>
+        <span class="ds">Bolt symbol that tints to match crit state. Used in menu bar, notifications, status badges.</span>
+      </div>
+      <div class="row" style="gap:24px;">
+        <div class="col" style="align-items:center;gap:8px;">
+          <div class="stateicon fresh">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-fresh);">fresh</span>
+        </div>
+        <div class="col" style="align-items:center;gap:8px;">
+          <div class="stateicon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-cyan-300);">ok</span>
+        </div>
+        <div class="col" style="align-items:center;gap:8px;">
+          <div class="stateicon warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-warn);">warn</span>
+        </div>
+        <div class="col" style="align-items:center;gap:8px;">
+          <div class="stateicon crit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-crit);">crit</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14 WolfMark -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">14</span> &nbsp; <span class="nm">WolfMark</span> &nbsp;<code class="swift-api">WolfMark(size:, variant: .full | .mono)</code></span>
+        <span class="ds">Two variants. <strong>Full</strong> for product chrome and marketing. <strong>Mono</strong> for menu bar templates, complications, and any context that needs a state tint — inherits <code>currentColor</code>.</span>
+      </div>
+
+      <!-- Inline SVG sprite — every wolf mark below pulls from these defs -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <!-- Mono silhouette — single color, takes currentColor -->
+          <symbol id="wolf-mono" viewBox="0 0 512 512">
+            <!-- signal -->
+            <circle cx="256" cy="152" r="11" fill="currentColor"/>
+            <path d="M 224,124 A 38,38 0 0,1 288,124" fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round"/>
+            <path d="M 194,96 A 68,68 0 0,1 318,96" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" opacity="0.7"/>
+            <path d="M 164,70 A 98,98 0 0,1 348,70" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" opacity="0.4"/>
+            <!-- head + ears as one silhouette -->
+            <path d="M 144,316 C 148,262 166,188 204,150 C 220,134 240,170 258,220 Z" fill="currentColor"/>
+            <path d="M 368,316 C 364,262 346,188 308,150 C 292,134 272,170 254,220 Z" fill="currentColor"/>
+            <ellipse cx="256" cy="338" rx="138" ry="132" fill="currentColor"/>
+          </symbol>
+
+          <!-- Template — menu bar style, paths only, no eyes (Apple template image rules) -->
+          <symbol id="wolf-template" viewBox="0 0 24 24">
+            <!-- Single connected silhouette — two pointed ears, rounded jaw. Filled, template-image rules. -->
+            <path d="M 4 11 L 7 3 L 10 9 L 14 9 L 17 3 L 20 11 C 20 18, 16 22, 12 22 C 8 22, 4 18, 4 11 Z" fill="currentColor"/>
+          </symbol>
+        </defs>
+      </svg>
+
+      <style>
+        .wolf-mono { color: currentColor; display: block; }
+        .wolf-mono svg { width: 100%; height: 100%; fill: currentColor; }
+        .wolf-mono svg path[stroke], .wolf-mono svg circle[stroke] { fill: none; }
+        .swatch-tile {
+          width: 84px; height: 84px;
+          border-radius: var(--radius-md);
+          display: flex; align-items: center; justify-content: center;
+          flex: none;
+        }
+      </style>
+
+      <!-- Variant A: full color sizes -->
+      <div class="label" style="margin-bottom:10px;">A · Full color · brand · product chrome</div>
+      <div class="row" style="gap:24px; align-items: flex-end; margin-bottom: 22px;">
+        <div class="col" style="align-items:center;gap:6px;">
+          <img src="assets/logo-dark.svg" class="wm-32" alt="WolfMark 32" />
+          <span class="label" style="text-transform:none;">32 · status</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <img src="assets/logo-dark.svg" class="wm-48" alt="WolfMark 48" />
+          <span class="label" style="text-transform:none;">48 · header</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <img src="assets/logo-dark.svg" class="wm-72" alt="WolfMark 72" />
+          <span class="label" style="text-transform:none;">72 · onboarding</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <img src="assets/logo-dark.svg" class="wm-96" alt="WolfMark 96" />
+          <span class="label" style="text-transform:none;">96 · empty state</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div style="width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(15,172,237,0.6), transparent 70%);display:flex;align-items:center;justify-content:center;">
+            <img src="assets/logo-dark.svg" class="wm-72" alt="WolfMark on cyan glow" />
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-cyan-300);">on cyan glow</span>
+        </div>
+      </div>
+
+      <!-- Variant B: mono / tintable -->
+      <div class="label" style="margin: 10px 0;">B · Mono · tintable · inherits <code>currentColor</code></div>
+      <div class="row" style="gap:14px; align-items: flex-end; margin-bottom: 22px;">
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); color: var(--howl-ink-100);">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;">ink-100</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); color: var(--howl-cyan-500);">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-cyan-300);">cyan-500</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); color: var(--howl-state-fresh);">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-fresh);">fresh</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); color: var(--howl-state-warn);">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-warn);">warn</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); color: var(--howl-state-crit);">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-crit);">crit</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: white; color: var(--howl-navy-900);">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;">navy on white</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-state-warn); color: white;">
+            <div class="wolf-mono" style="width:52px;height:52px;"><svg><use href="#wolf-mono"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:white;">white on warn</span>
+        </div>
+      </div>
+
+      <!-- Variant C: menu bar template — Apple's "template image" convention -->
+      <div class="label" style="margin: 10px 0;">C · Template · macOS menu bar · 22×22 · <strong style="color:var(--howl-cyan-300);font-weight:600;">filled silhouette, auto-tints to text color</strong></div>
+      <div class="row" style="gap:14px; align-items: flex-end;">
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); width: 60px; height: 44px; color: white;">
+            <div class="wolf-mono" style="width:22px;height:22px;"><svg><use href="#wolf-template"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;">dark menu bar</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: #f4f4f4; width: 60px; height: 44px; color: #1a1a1f;">
+            <div class="wolf-mono" style="width:22px;height:22px;"><svg><use href="#wolf-template"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;">light menu bar</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); width: 60px; height: 44px; color: var(--howl-state-warn); position: relative;">
+            <div class="wolf-mono" style="width:22px;height:22px;"><svg><use href="#wolf-template"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-warn);">warn · 80%</span>
+        </div>
+        <div class="col" style="align-items:center;gap:6px;">
+          <div class="swatch-tile" style="background: var(--howl-navy-800); width: 60px; height: 44px; color: var(--howl-state-crit); position: relative; animation: pulse-ring 1.4s ease-out infinite;">
+            <div class="wolf-mono" style="width:22px;height:22px;"><svg><use href="#wolf-template"/></svg></div>
+          </div>
+          <span class="label" style="text-transform:none;color:var(--howl-state-crit);">crit · pulse</span>
+        </div>
+      </div>
+
+      <p class="anno">Menu bar template is a single filled silhouette. State differentiates by COLOR (auto-tinted on idle → amber on warn → red on crit), never by fill style. Apple template-image rules: paths only, no detail, monochrome — macOS handles light/dark tinting for free.</p>
+    </div>
+
+    <!-- 15 PricingToggle -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">15</span> &nbsp; <span class="nm">PricingToggle</span></span>
+        <span class="ds">Two cards side-by-side. Selected card has a 2px cyan border, a checkmark top-right, and the annual gets a "BEST VALUE" ribbon. Annual is default-selected.</span>
+      </div>
+
+      <div class="grid g-2" style="align-items:start;">
+        <div class="state-cell">
+          <span class="label">Default · annual selected</span>
+          <div class="pricing-grid">
+            <div class="price-card selected">
+              <span class="ribbon">Best Value</span>
+              <span class="check">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <div class="ttl">HowlAlert Max</div>
+              <div class="price num">$29.99 <small>/ year</small></div>
+              <div class="meta">$2.50/mo billed yearly</div>
+              <span class="save-chip">Save $30 vs Pro</span>
+            </div>
+            <div class="price-card">
+              <div class="ttl">HowlAlert Pro</div>
+              <div class="price num">$4.99 <small>/ month</small></div>
+              <div class="meta">Billed monthly</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-cell">
+          <span class="label">Alt · monthly selected</span>
+          <div class="pricing-grid">
+            <div class="price-card">
+              <span class="ribbon">Best Value</span>
+              <div class="ttl">HowlAlert Max</div>
+              <div class="price num">$29.99 <small>/ year</small></div>
+              <div class="meta">$2.50/mo billed yearly</div>
+              <span class="save-chip">Save $30 vs Pro</span>
+            </div>
+            <div class="price-card selected">
+              <span class="check">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <div class="ttl">HowlAlert Pro</div>
+              <div class="price num">$4.99 <small>/ month</small></div>
+              <div class="meta">Billed monthly</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16 UsageRow -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">16</span> &nbsp; <span class="nm">UsageRow</span> &nbsp;<code class="swift-api">UsageRow(title:, remaining:, paceTarget:)</code></span>
+        <span class="ds">Rich CritBar with a vertical pace marker showing &ldquo;where you should be by now&rdquo;. Reveals deficit or surplus at a glance.</span>
+      </div>
+      <div class="grid g-2">
+        <div class="state-cell">
+          <span class="label">on pace · cyan</span>
+          <div class="usage-row">
+            <div class="usage-row-head"><span class="usage-row-title">5-Hour Window</span></div>
+            <div class="usage-row-bar">
+              <div class="fill" style="width: 38%;"></div>
+              <div class="pace-mark" style="left: 42%;"></div>
+            </div>
+            <div class="usage-row-meta"><span class="left">62% left</span><span class="right">Resets in 2h 47m</span></div>
+          </div>
+        </div>
+        <div class="state-cell">
+          <span class="label">in deficit · amber + sub-line</span>
+          <div class="usage-row">
+            <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+            <div class="usage-row-bar state-warn">
+              <div class="fill" style="width: 22%;"></div>
+              <div class="pace-mark" style="left: 56%;"></div>
+              <div class="deficit" style="left: 22%; right: 44%;"></div>
+            </div>
+            <div class="usage-row-meta"><span class="left">22% left</span><span class="right">Resets in 3d 14h</span></div>
+            <div class="usage-row-sub"><span>34% in deficit</span><span>Runs out in 2d 18h</span></div>
+          </div>
+        </div>
+        <div class="state-cell">
+          <span class="label">per-model · with alias</span>
+          <div class="usage-row">
+            <div class="usage-row-head"><span class="usage-row-title">Opus<span class="alias">claude-opus-4-5</span></span></div>
+            <div class="usage-row-bar"><div class="fill" style="width: 4%;"></div></div>
+            <div class="usage-row-meta"><span class="left">96% left</span><span class="right">Resets in 3d 14h</span></div>
+          </div>
+        </div>
+        <div class="state-cell">
+          <span class="label">critical</span>
+          <div class="usage-row">
+            <div class="usage-row-head"><span class="usage-row-title">Daily Routines</span></div>
+            <div class="usage-row-bar state-crit">
+              <div class="fill" style="width: 2%;"></div>
+              <div class="pace-mark" style="left: 60%;"></div>
+            </div>
+            <div class="usage-row-meta"><span class="left">2% left</span><span class="right">Runs out in 11m</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="anno">The pace marker is the white vertical line. Fill RIGHT of the marker = surplus. Fill LEFT = deficit (shown via the diagonal-striped overlay between fill and pace).</p>
+    </div>
+
+    <!-- 17 PopoverTabBar -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">17</span> &nbsp; <span class="nm">PopoverTabBar</span> &nbsp;<code class="swift-api">Picker { … }.pickerStyle(.segmented)</code></span>
+        <span class="ds">Segmented tabs in the popover header. Switches timeframe (Overview / Now / Day / Week) or later, alternate services.</span>
+      </div>
+      <div style="max-width: 320px;">
+        <div class="popover-tabbar">
+          <div class="popover-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Overview</span>
+          </div>
+          <div class="popover-tab active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+            <span>Now</span>
+          </div>
+          <div class="popover-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+            <span>Day</span>
+          </div>
+          <div class="popover-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18 MenuActionRow -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">18</span> &nbsp; <span class="nm">MenuActionRow</span> &nbsp;<code class="swift-api">Button(label, systemImage:) · .keyboardShortcut</code></span>
+        <span class="ds">macOS menu row: leading SF Symbol, label, optional keyboard shortcut. Used in the popover footer.</span>
+      </div>
+      <div style="max-width: 320px; background: var(--howl-navy-800); border-radius: var(--radius-md); padding: 4px; border: 1px solid var(--panel-border);">
+        <div class="menu-action">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg></span>
+          <span class="lbl">Switch Account…</span>
+        </div>
+        <div class="menu-action">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+          <span class="lbl">Usage Dashboard</span>
+        </div>
+        <div class="menu-action">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.78 1 6.45 2.55"/><polyline points="21 3 21 12 12 12"/></svg></span>
+          <span class="lbl">Refresh</span>
+          <span class="kbd">⌘R</span>
+        </div>
+        <div class="menu-action">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6"/></svg></span>
+          <span class="lbl">Settings…</span>
+          <span class="kbd">⌘,</span>
+        </div>
+        <div class="menu-action danger">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+          <span class="lbl">Quit HowlAlert</span>
+          <span class="kbd">⌘Q</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 19 CostSummary -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">19</span> &nbsp; <span class="nm">CostSummary</span> &nbsp;<code class="swift-api">Grid / LazyVGrid(columns: 2)</code></span>
+        <span class="ds">2×2 stat grid + 30-day sparkbar. Estimated cost &amp; tokens from local Claude Code logs at current API rates.</span>
+      </div>
+      <div style="max-width: 320px; background: var(--howl-navy-800); border-radius: var(--radius-md); border: 1px solid var(--panel-border);">
+        <div class="cost-summary">
+          <div class="cost-stat">
+            <span class="lbl">Today</span>
+            <span class="val">$5.07</span>
+            <span class="delta up">↑ 12% vs avg</span>
+          </div>
+          <div class="cost-stat">
+            <span class="lbl">30d cost</span>
+            <span class="val">$2,360.40</span>
+          </div>
+          <div class="cost-stat">
+            <span class="lbl">30d tokens</span>
+            <span class="val">3.4 B</span>
+          </div>
+          <div class="cost-stat">
+            <span class="lbl">Latest tokens</span>
+            <span class="val">7.6 M</span>
+          </div>
+        </div>
+        <div class="mini-chart">
+          <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+          <div class="b tall"></div><div class="b"></div><div class="b"></div><div class="b warn"></div>
+          <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+          <div class="b tall"></div><div class="b warn"></div><div class="b tall"></div><div class="b"></div>
+          <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+          <div class="b warn"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+          <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+          <div class="b tall"></div><div class="b"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20 DetailedPopover -->
+    <div class="comp">
+      <div class="comp-head">
+        <span><span class="ix">20</span> &nbsp; <span class="nm">DetailedPopover</span> &nbsp;<code class="swift-api">MenuBarExtra(“HowlAlert”) { … }.menuBarExtraStyle(.window)</code></span>
+        <span class="ds">The full assembled menu bar dropdown — UsageRows, tab bar, cost summary, chart, drill-ins, menu actions. Reference for Section B.</span>
+      </div>
+      <div style="display: flex; justify-content: center; padding: 12px;">
+        <div class="popover-frame">
+          <!-- Header -->
+          <div class="pf-section pf-header">
+            <div class="pf-header-l">
+              <img src="assets/logo-dark.svg" style="width:26px;height:26px;" alt="" />
+              <div>
+                <div class="pf-title">HowlAlert</div>
+                <div class="pf-sub">Updated 4m ago</div>
+              </div>
+            </div>
+            <span class="pf-badge">Max</span>
+          </div>
+
+          <!-- Tab bar -->
+          <div class="pf-section pf-tabwrap">
+            <div class="popover-tabbar">
+              <div class="popover-tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Overview</span>
+              </div>
+              <div class="popover-tab active">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+                <span>Now</span>
+              </div>
+              <div class="popover-tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                <span>Day</span>
+              </div>
+              <div class="popover-tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Week</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Usage rows -->
+          <div class="pf-section pf-rows">
+            <div class="usage-row">
+              <div class="usage-row-head"><span class="usage-row-title">5-Hour Window</span></div>
+              <div class="usage-row-bar">
+                <div class="fill" style="width: 38%;"></div>
+                <div class="pace-mark" style="left: 42%;"></div>
+              </div>
+              <div class="usage-row-meta"><span class="left">62% left</span><span class="right">Resets in 2h 47m</span></div>
+            </div>
+            <div class="usage-row">
+              <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+              <div class="usage-row-bar state-warn">
+                <div class="fill" style="width: 22%;"></div>
+                <div class="pace-mark" style="left: 56%;"></div>
+                <div class="deficit" style="left: 22%; right: 44%;"></div>
+              </div>
+              <div class="usage-row-meta"><span class="left">22% left</span><span class="right">Resets in 3d 14h</span></div>
+              <div class="usage-row-sub"><span>34% in deficit</span><span>Runs out in 2d 18h</span></div>
+            </div>
+            <div class="usage-row">
+              <div class="usage-row-head"><span class="usage-row-title">Opus<span class="alias">claude-opus-4-5</span></span></div>
+              <div class="usage-row-bar"><div class="fill" style="width: 4%;"></div></div>
+              <div class="usage-row-meta"><span class="left">96% left</span><span class="right">Resets in 3d 14h</span></div>
+            </div>
+            <div class="usage-row">
+              <div class="usage-row-head"><span class="usage-row-title">Sonnet<span class="alias">claude-sonnet-4-5</span></span></div>
+              <div class="usage-row-bar"><div class="fill" style="width: 7%;"></div></div>
+              <div class="usage-row-meta"><span class="left">93% left</span><span class="right">Resets in 3d 14h</span></div>
+            </div>
+          </div>
+
+          <!-- Cost summary -->
+          <div class="pf-section">
+            <div class="cost-summary">
+              <div class="cost-stat"><span class="lbl">Today</span><span class="val">$5.07</span><span class="delta up">↑ 12% vs avg</span></div>
+              <div class="cost-stat"><span class="lbl">30d cost</span><span class="val">$2,360.40</span></div>
+              <div class="cost-stat"><span class="lbl">30d tokens</span><span class="val">3.4 B</span></div>
+              <div class="cost-stat"><span class="lbl">Latest tokens</span><span class="val">7.6 M</span></div>
+            </div>
+            <div class="mini-chart">
+              <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+              <div class="b tall"></div><div class="b"></div><div class="b"></div><div class="b warn"></div>
+              <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+              <div class="b tall"></div><div class="b warn"></div><div class="b tall"></div><div class="b"></div>
+              <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+              <div class="b warn"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+              <div class="b"></div><div class="b tall"></div><div class="b"></div><div class="b"></div>
+              <div class="b tall"></div><div class="b"></div>
+            </div>
+            <div class="pf-note">Top model · claude-opus-4-5 — estimated from local Claude logs at current API rates.</div>
+          </div>
+
+          <!-- Drill-ins -->
+          <div class="pf-section">
+            <div class="pf-link">
+              <span>Cost</span>
+              <span class="pf-link-r"><span>$5.07 today</span><span class="chev">›</span></span>
+            </div>
+            <div class="pf-link">
+              <span>Subscription utilization</span>
+              <span class="pf-link-r"><span>$10.19 / $6.00</span><span class="chev">›</span></span>
+            </div>
+          </div>
+
+          <!-- Menu actions -->
+          <div class="pf-section pf-menu">
+            <div class="menu-action">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg></span>
+              <span class="lbl">Switch Account…</span>
+            </div>
+            <div class="menu-action">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+              <span class="lbl">Usage Dashboard</span>
+            </div>
+            <div class="menu-action">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></span>
+              <span class="lbl">Status Page</span>
+            </div>
+            <div class="menu-action">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.78 1 6.45 2.55"/><polyline points="21 3 21 12 12 12"/></svg></span>
+              <span class="lbl">Refresh</span>
+              <span class="kbd">⌘R</span>
+            </div>
+            <div class="menu-action">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6"/></svg></span>
+              <span class="lbl">Settings…</span>
+              <span class="kbd">⌘,</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="anno">This is the design language for the macOS popover (Section B). Every section is a stacked container with a top divider — no nested scroll. Glass material applies to the outer popover only; internal cards are solid Navy surfaces.</p>
+    </div>
+
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Design System Reference</div>
+    <div>Section A of 8 · Approve to proceed to Section B (macOS Menu Bar App)</div>
+  </footer>
+
+</div>
+</body>
+</html>
