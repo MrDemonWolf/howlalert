@@ -1,0 +1,2140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HowlAlert · C · iOS App</title>
+<style>
+  /* ============== Tokens ============== */
+  :root {
+    --howl-navy-900: #091533;
+    --howl-navy-800: #0E1B42;
+    --howl-navy-700: #15275A;
+    --howl-navy-600: #1E3475;
+    --howl-cyan-500: #0FACED;
+    --howl-cyan-400: #3DBEF1;
+    --howl-cyan-300: #7BD3F6;
+    --howl-cyan-100: #D5F0FB;
+    --howl-state-fresh: #3DDC97;
+    --howl-state-ok:    #0FACED;
+    --howl-state-warn:  #FFA533;
+    --howl-state-crit:  #FF4D4D;
+    --howl-ink-100: #F4F7FB;
+    --howl-ink-300: #A8B5CF;
+    --howl-ink-500: #9AA9C5;
+    --howl-ink-700: #3A4666;
+    --howl-light-surface:   #F8FAFE;
+    --howl-light-surface-2: #ECF1F8;
+    --howl-light-ink-900:   #091533;
+    --howl-light-ink-700:   #3A4666;
+    --howl-light-ink-500:   #6A7A99;
+    --howl-light-divider:   #D6DEEB;
+    --page-bg: #1A1A1F;
+    --panel-bg: var(--howl-navy-900);
+    --panel-border: rgba(255,255,255,0.06);
+    --font-sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-pill: 9999px;
+  }
+
+  /* ============== Page chrome ============== */
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--howl-ink-100);
+    font-family: var(--font-sys);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body { padding: 56px 48px 96px; }
+  .doc { max-width: 1320px; margin: 0 auto; }
+  .num, .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+  /* ============== Top nav ============== */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    margin: -56px -48px 32px;
+    padding: 12px 48px;
+    display: flex; align-items: center; gap: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(9,21,51,0.80);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .topnav-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit; font-size: 13px;
+    padding: 4px 8px; border-radius: var(--radius-sm);
+  }
+  .topnav-brand:hover { background: rgba(255,255,255,0.04); }
+  .topnav-brand img { width: 24px; height: 24px; }
+  .topnav-brand strong { color: var(--howl-cyan-300); font-weight: 600; margin-left: 2px; }
+  .topnav-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .topnav-tab {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 11px; border-radius: 999px;
+    color: var(--howl-ink-300); text-decoration: none;
+    border: 1px solid transparent; transition: all 140ms;
+    white-space: nowrap;
+  }
+  .topnav-tab:hover { color: var(--howl-cyan-300); background: rgba(15,172,237,0.06); }
+  .topnav-tab.active {
+    color: var(--howl-cyan-300);
+    background: rgba(15,172,237,0.10);
+    border-color: rgba(15,172,237,0.30);
+  }
+  .topnav-tab.disabled {
+    color: var(--howl-ink-500); opacity: 0.55;
+    cursor: not-allowed; pointer-events: none;
+  }
+  .preview-toggle {
+    display: inline-flex; margin-left: auto;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px; padding: 3px;
+  }
+  .pt-opt {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 999px;
+    background: transparent; border: 0;
+    color: var(--howl-ink-300);
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: color 140ms, background 140ms;
+  }
+  .pt-opt:hover { color: var(--howl-cyan-300); }
+  .pt-opt.active {
+    background: linear-gradient(180deg, rgba(15,172,237,0.92), rgba(15,140,200,0.85));
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.30);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 2px 6px rgba(15,172,237,0.30);
+  }
+  .pt-opt svg { width: 12px; height: 12px; }
+
+  /* ============== Page header ============== */
+  .doc-head {
+    display: flex; align-items: center; gap: 24px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--panel-border);
+    margin-bottom: 56px;
+  }
+  .doc-head .wm { width: 56px; height: 56px; flex: none; }
+  .doc-head h1 { margin: 0; font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; }
+  .doc-head h1 .sub { color: var(--howl-cyan-300); font-weight: 500; margin-left: 10px; font-size: 22px; }
+  .doc-head p { margin: 6px 0 0; color: var(--howl-ink-300); font-size: 15px; line-height: 22px; max-width: 720px; }
+  .doc-head .meta { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--howl-ink-500); font-size: 12px; }
+  .doc-head .meta .v { color: var(--howl-ink-300); font-family: var(--font-mono); }
+
+  section { margin-bottom: 72px; }
+  .sec-head {
+    display: flex; align-items: baseline; gap: 16px;
+    margin-bottom: 24px;
+  }
+  .sec-head .n { font-family: var(--font-mono); color: var(--howl-cyan-300); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+  .sec-head h2 { margin: 0; font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.01em; }
+  .sec-head .lede { margin-left: auto; color: var(--howl-ink-300); font-size: 13px; max-width: 480px; text-align: right; line-height: 18px; }
+  .label { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--howl-ink-500); }
+  .anno { font-size: 12px; line-height: 16px; color: var(--howl-cyan-300); font-family: var(--font-mono); margin-top: 12px; }
+
+  /* ============== Wallpaper stage ============== */
+  .stage {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background:
+      radial-gradient(ellipse at 18% 22%, rgba(15,172,237,0.55), transparent 42%),
+      radial-gradient(ellipse at 82% 70%, rgba(157,89,255,0.40), transparent 48%),
+      radial-gradient(ellipse at 60% 18%, rgba(255,165,51,0.28), transparent 38%),
+      radial-gradient(ellipse at 30% 80%, rgba(61,220,151,0.18), transparent 42%),
+      linear-gradient(180deg, #163576 0%, #0a1a44 60%, #050a1f 100%);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    padding: 48px 24px;
+  }
+  body.light-preview .stage {
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(255,200,100,0.40), transparent 45%),
+      radial-gradient(ellipse at 80% 70%, rgba(180,150,255,0.35), transparent 48%),
+      radial-gradient(ellipse at 50% 50%, rgba(255,180,200,0.30), transparent 50%),
+      linear-gradient(180deg, #e8edf7 0%, #c4cee2 60%, #b0bdd6 100%);
+  }
+  .stage-row { display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+
+  /* ============== iPhone frame ============== */
+  .phone {
+    --phone-w: 280px;
+    --phone-h: 606px;
+    width: var(--phone-w);
+    height: var(--phone-h);
+    border-radius: 44px;
+    background: #050507;
+    padding: 6px;
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.08),
+      inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+    flex: none;
+  }
+  /* Side hardware buttons */
+  .phone::before {
+    content: "";
+    position: absolute;
+    left: -2px;
+    top: 110px;
+    width: 3px; height: 28px;
+    background: #1a1a1f;
+    border-radius: 2px 0 0 2px;
+  }
+  .phone::after {
+    content: "";
+    position: absolute;
+    left: -2px;
+    top: 158px;
+    width: 3px; height: 48px;
+    background: #1a1a1f;
+    border-radius: 2px 0 0 2px;
+    box-shadow: 0 60px 0 #1a1a1f;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    border-radius: 38px;
+    background: var(--howl-navy-900);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  body.light-preview .phone-screen { background: var(--howl-light-surface); }
+
+  /* Status bar */
+  .ios-statusbar {
+    flex: none;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 36px;
+    padding: 12px 22px 0;
+    color: var(--howl-ink-100);
+    font-size: 11px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+  }
+  body.light-preview .ios-statusbar { color: var(--howl-light-ink-900); }
+  .ios-time { font-variant-numeric: tabular-nums; }
+  .ios-island {
+    width: 80px;
+    height: 24px;
+    background: #000;
+    border-radius: 999px;
+    justify-self: center;
+  }
+  body.light-preview .ios-island { background: #000; }
+  .ios-status-right {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .ios-batt {
+    width: 18px; height: 9px;
+    border: 1px solid currentColor;
+    border-radius: 2.5px;
+    padding: 1px;
+    position: relative;
+    display: inline-block;
+  }
+  .ios-batt::after { content: ""; position: absolute; right: -3px; top: 2.5px; width: 2px; height: 3px; background: currentColor; border-radius: 0 1px 1px 0; }
+  .ios-batt span {
+    display: block; width: 80%; height: 100%;
+    background: currentColor; border-radius: 1px;
+  }
+
+  /* Content area */
+  .phone-body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--howl-navy-900);
+  }
+  body.light-preview .phone-body { background: var(--howl-light-surface); }
+
+  /* Home indicator */
+  .home-indicator {
+    flex: none;
+    display: flex; justify-content: center;
+    padding: 6px 0 8px;
+  }
+  .home-indicator span {
+    width: 110px; height: 4px;
+    background: var(--howl-ink-100);
+    opacity: 0.85;
+    border-radius: 2px;
+  }
+  body.light-preview .home-indicator span {
+    background: var(--howl-light-ink-900);
+    opacity: 0.30;
+  }
+
+  /* ============== Phone caption ============== */
+  .phone-cap {
+    margin-top: 14px;
+    text-align: center;
+    max-width: 280px;
+  }
+  .phone-cap .ix {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .phone-cap .nm {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+    margin-top: 4px;
+  }
+  .phone-cap .ds {
+    font-size: 12px;
+    color: var(--howl-ink-300);
+    margin-top: 4px;
+    line-height: 16px;
+  }
+  .phone-with-cap { display: flex; flex-direction: column; align-items: center; }
+
+  /* ============== Screen: Welcome (onboarding) ============== */
+  .scr-welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 16px;
+  }
+  .scr-welcome .wolf-hero {
+    width: 96px; height: 96px;
+    margin-top: 24px;
+    color: var(--howl-cyan-500);
+    filter: drop-shadow(0 8px 28px rgba(15,172,237,0.55));
+  }
+  .scr-welcome .wolf-hero svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+  body.light-preview .scr-welcome .wolf-hero { color: var(--howl-navy-700); }
+  .scr-welcome h1 {
+    margin: 28px 0 8px;
+    font-size: 26px;
+    line-height: 30px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.01em;
+    text-align: center;
+  }
+  body.light-preview .scr-welcome h1 { color: var(--howl-light-ink-900); }
+  .scr-welcome p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 19px;
+    color: var(--howl-ink-300);
+    text-align: center;
+    max-width: 220px;
+  }
+  body.light-preview .scr-welcome p { color: var(--howl-light-ink-700); }
+  .scr-welcome .features {
+    margin-top: 28px;
+    display: flex; flex-direction: column;
+    gap: 14px;
+    align-self: stretch;
+  }
+  .feature {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    align-items: center;
+  }
+  .feature .ico {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15,172,237,0.14);
+    color: var(--howl-cyan-300);
+  }
+  .feature .ico svg { width: 14px; height: 14px; }
+  .feature .txt {
+    font-size: 12px; line-height: 15px;
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .feature .txt { color: var(--howl-light-ink-900); }
+  .scr-welcome .cta-stack {
+    margin-top: auto;
+    align-self: stretch;
+    display: flex; flex-direction: column;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* Buttons (iOS) */
+  .ios-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 0;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .ios-btn-primary {
+    background: var(--howl-cyan-500);
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.20);
+    box-shadow: 0 6px 20px rgba(15,172,237,0.4);
+  }
+  .ios-btn-ghost {
+    background: transparent;
+    color: var(--howl-cyan-400);
+    font-weight: 500;
+  }
+  body.light-preview .ios-btn-ghost { color: var(--howl-cyan-500); }
+
+  /* ============== Screen: Pairing ============== */
+  .scr-pair {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+  .scr-pair .pair-camera {
+    flex: 1;
+    background: #1a1a1f;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .pair-camera::after {
+    /* fake captured macOS popover dimly visible */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(40,55,90,0.65), transparent 55%),
+      linear-gradient(180deg, #0a1224, #050a14);
+    z-index: 0;
+  }
+  .pair-frame {
+    position: relative;
+    z-index: 1;
+    width: 180px; height: 180px;
+    border-radius: 22px;
+  }
+  .pair-frame::before, .pair-frame::after,
+  .pair-frame > i, .pair-frame > span {
+    content: "";
+    position: absolute;
+    width: 22px; height: 22px;
+    border: 3px solid var(--howl-cyan-500);
+    box-shadow: 0 0 12px rgba(15,172,237,0.5);
+  }
+  .pair-frame::before { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 10px 0 0 0; }
+  .pair-frame::after { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 10px 0 0; }
+  .pair-frame > i { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 10px; }
+  .pair-frame > span { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 10px 0; }
+  /* QR within scan frame */
+  .pair-qr-mock {
+    position: absolute;
+    inset: 12%;
+    background:
+      linear-gradient(white, white) padding-box;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.5);
+  }
+  .pair-qr-mock svg { display: block; width: 100%; height: 100%; }
+  .pair-prompt {
+    flex: none;
+    background: var(--howl-navy-900);
+    padding: 18px 22px 14px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  body.light-preview .pair-prompt { background: var(--howl-light-surface); border-top-color: var(--howl-light-divider); }
+  .pair-prompt h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .pair-prompt h3 { color: var(--howl-light-ink-900); }
+  .pair-prompt p {
+    margin: 4px 0 14px;
+    font-size: 12px;
+    line-height: 17px;
+    color: var(--howl-ink-300);
+  }
+  body.light-preview .pair-prompt p { color: var(--howl-light-ink-700); }
+  .pair-prompt .code-fallback {
+    font-size: 12px;
+    color: var(--howl-cyan-400);
+    font-weight: 500;
+    margin-bottom: 14px;
+    display: inline-block;
+  }
+  body.light-preview .pair-prompt .code-fallback { color: var(--howl-cyan-500); }
+
+  /* ============== Screen: Paired (success) ============== */
+  .scr-paired {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 28px 24px 16px;
+  }
+  .paired-circle {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: rgba(61,220,151,0.12);
+    border: 1px solid rgba(61,220,151,0.30);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--howl-state-fresh);
+    margin-bottom: 22px;
+    position: relative;
+    animation: paired-glow 2s ease-in-out infinite;
+  }
+  @keyframes paired-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(61,220,151,0); }
+    50%      { box-shadow: 0 0 36px 4px rgba(61,220,151,0.45); }
+  }
+  .paired-circle svg { width: 44px; height: 44px; }
+  .scr-paired h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    text-align: center;
+  }
+  body.light-preview .scr-paired h1 { color: var(--howl-light-ink-900); }
+  .scr-paired p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--howl-ink-300);
+    text-align: center;
+    max-width: 220px;
+  }
+  body.light-preview .scr-paired p { color: var(--howl-light-ink-700); }
+  .paired-device {
+    margin-top: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--panel-border);
+  }
+  body.light-preview .paired-device {
+    background: white;
+    border-color: var(--howl-light-divider);
+  }
+  .paired-device .device-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .paired-device .device-name { color: var(--howl-light-ink-900); }
+  .paired-device .device-status {
+    font-size: 11px;
+    color: var(--howl-state-fresh);
+    display: flex; align-items: center; gap: 4px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .paired-device .device-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--howl-state-fresh);
+    box-shadow: 0 0 6px var(--howl-state-fresh);
+  }
+  .scr-paired .cta-stack {
+    margin-top: auto;
+    align-self: stretch;
+    padding-bottom: 8px;
+  }
+
+  /* ============== Screen: Dashboard (main) ============== */
+  .scr-dash { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .dash-nav {
+    flex: none;
+    padding: 8px 20px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .dash-nav-l {
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  body.light-preview .dash-nav-l { color: var(--howl-light-ink-500); }
+  .dash-nav-r {
+    display: flex; gap: 14px;
+    color: var(--howl-cyan-400);
+  }
+  body.light-preview .dash-nav-r { color: var(--howl-cyan-500); }
+  .dash-nav-r svg { width: 18px; height: 18px; }
+
+  .dash-large-title {
+    flex: none;
+    padding: 6px 20px 4px;
+  }
+  .dash-large-title h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .dash-large-title h1 { color: var(--howl-light-ink-900); }
+
+  .dash-body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px 16px 80px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Hero card */
+  .dash-hero {
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--howl-navy-800), var(--howl-navy-900));
+    border: 1px solid var(--panel-border);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+  body.light-preview .dash-hero {
+    background: white;
+    border-color: var(--howl-light-divider);
+    box-shadow: 0 4px 12px rgba(20,30,60,0.06);
+  }
+  .dash-hero::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(15,172,237,0.20), transparent 70%);
+    pointer-events: none;
+  }
+  body.light-preview .dash-hero::before {
+    background: radial-gradient(circle, rgba(15,172,237,0.10), transparent 70%);
+  }
+  .dash-hero.state-warn::before {
+    background: radial-gradient(circle, rgba(255,165,51,0.22), transparent 70%);
+  }
+  .dash-hero.state-crit::before {
+    background: radial-gradient(circle, rgba(255,77,77,0.26), transparent 70%);
+  }
+  .dash-hero.state-fresh::before {
+    background: radial-gradient(circle, rgba(61,220,151,0.22), transparent 70%);
+  }
+  .dash-hero-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+  .dash-hero-head .lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+    color: var(--howl-ink-500);
+  }
+  body.light-preview .dash-hero-head .lbl { color: var(--howl-light-ink-500); }
+  .dash-hero-pct {
+    font-family: var(--font-mono);
+    font-size: 52px;
+    line-height: 1;
+    font-weight: 700;
+    color: var(--howl-cyan-500);
+    letter-spacing: -0.02em;
+    font-feature-settings: "tnum";
+    position: relative; z-index: 1;
+  }
+  .dash-hero-pct small {
+    font-size: 22px;
+    color: var(--howl-ink-500);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  body.light-preview .dash-hero-pct small { color: var(--howl-light-ink-500); }
+  .dash-hero.state-warn .dash-hero-pct { color: var(--howl-state-warn); }
+  .dash-hero.state-crit .dash-hero-pct { color: var(--howl-state-crit); }
+  .dash-hero.state-fresh .dash-hero-pct { color: var(--howl-state-fresh); }
+  .dash-hero-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative; z-index: 1;
+  }
+  .reset-cd {
+    font-family: var(--font-mono);
+    font-size: 17px;
+    color: var(--howl-ink-100);
+    font-feature-settings: "tnum";
+    font-weight: 500;
+  }
+  body.light-preview .reset-cd { color: var(--howl-light-ink-900); }
+  .reset-cd small {
+    color: var(--howl-ink-500);
+    font-size: 11px;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  body.light-preview .reset-cd small { color: var(--howl-light-ink-500); }
+  .pacechip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(15,172,237,0.12);
+    color: var(--howl-cyan-300);
+    border: 1px solid rgba(15,172,237,0.28);
+    line-height: 1;
+    font-feature-settings: "tnum";
+  }
+  body.light-preview .pacechip { color: var(--howl-cyan-500); background: rgba(15,172,237,0.08); }
+  .pacechip.warn { background: rgba(255,165,51,0.12); color: var(--howl-state-warn); border-color: rgba(255,165,51,0.30); }
+  .pacechip.fresh { background: rgba(61,220,151,0.12); color: var(--howl-state-fresh); border-color: rgba(61,220,151,0.30); }
+  .pacechip.crit { background: rgba(255,77,77,0.12); color: var(--howl-state-crit); border-color: rgba(255,77,77,0.30); }
+  .pacechip .d { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* Usage rows (within dashboard cards) */
+  .usage-card {
+    border-radius: 14px;
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    padding: 14px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+  }
+  body.light-preview .usage-card {
+    background: white;
+    border-color: var(--howl-light-divider);
+    box-shadow: 0 4px 12px rgba(20,30,60,0.06);
+  }
+  .usage-row { display: flex; flex-direction: column; gap: 6px; }
+  .usage-row-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .usage-row-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .usage-row-title { color: var(--howl-light-ink-900); }
+  .usage-row-bar {
+    position: relative; height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    overflow: hidden;
+  }
+  body.light-preview .usage-row-bar { background: rgba(20,30,60,0.08); }
+  .usage-row-bar .fill {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    background: var(--howl-cyan-500);
+    border-radius: inherit;
+  }
+  .usage-row-bar.state-fresh .fill { background: var(--howl-state-fresh); }
+  .usage-row-bar.state-warn .fill { background: var(--howl-state-warn); }
+  .usage-row-bar.state-crit .fill { background: var(--howl-state-crit); }
+  .usage-row-bar .pace-mark {
+    position: absolute; top: -2px; bottom: -2px;
+    width: 2px; background: rgba(255,255,255,0.85);
+    border-radius: 1px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  }
+  body.light-preview .usage-row-bar .pace-mark {
+    background: rgba(9,21,51,0.85);
+    box-shadow: 0 0 4px rgba(255,255,255,0.5);
+  }
+  .usage-row-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+    color: var(--howl-ink-300);
+  }
+  body.light-preview .usage-row-meta { color: var(--howl-light-ink-700); }
+  .usage-row-meta .left { color: var(--howl-ink-100); font-weight: 500; }
+  body.light-preview .usage-row-meta .left { color: var(--howl-light-ink-900); }
+
+  /* Section group head (light/dark-aware) */
+  .group-head {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+    color: var(--howl-ink-500);
+    padding: 0 4px;
+  }
+  body.light-preview .group-head { color: var(--howl-light-ink-500); }
+  .group-foot {
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    padding: 4px 4px 0;
+    line-height: 15px;
+  }
+  body.light-preview .group-foot { color: var(--howl-light-ink-500); }
+
+  /* Model rows */
+  .model-card {
+    border-radius: 14px;
+    background: var(--howl-navy-800);
+    border: 1px solid var(--panel-border);
+    padding: 4px 0;
+    overflow: hidden;
+  }
+  body.light-preview .model-card {
+    background: white; border-color: var(--howl-light-divider);
+    box-shadow: 0 4px 12px rgba(20,30,60,0.06);
+  }
+  .modelrow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 10px 14px;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid var(--panel-border);
+  }
+  body.light-preview .modelrow { border-top-color: var(--howl-light-divider); }
+  .modelrow:first-child { border-top: 0; }
+  .modelrow .nm { font-size: 12px; color: var(--howl-ink-100); font-weight: 500; }
+  body.light-preview .modelrow .nm { color: var(--howl-light-ink-900); }
+  .modelrow .nm .alias { color: var(--howl-ink-500); margin-left: 6px; font-family: var(--font-mono); font-size: 10px; }
+  body.light-preview .modelrow .nm .alias { color: var(--howl-light-ink-500); }
+  .modelrow .tk { font-family: var(--font-mono); font-size: 11px; color: var(--howl-cyan-400); font-feature-settings: "tnum"; }
+  body.light-preview .modelrow .tk { color: var(--howl-cyan-500); }
+
+  /* Tab bar */
+  .tabbar {
+    flex: none;
+    height: 60px;
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    background: rgba(9,21,51,0.78);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    color: var(--howl-ink-500);
+  }
+  body.light-preview .tabbar {
+    background: rgba(248,250,254,0.85);
+    border-top-color: var(--howl-light-divider);
+    color: var(--howl-light-ink-500);
+  }
+  .tab {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    font-size: 10px; font-weight: 500;
+    height: 100%;
+    justify-content: center;
+    position: relative;
+  }
+  /* Hairline separators between tabs */
+  .tab + .tab::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 14px; bottom: 14px;
+    width: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+  body.light-preview .tab + .tab::before {
+    background: rgba(20,30,60,0.10);
+  }
+  /* Active tab pill behind icon+label */
+  .tab.active {
+    color: var(--howl-cyan-400);
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--howl-cyan-400);
+    box-shadow: 0 0 8px rgba(15,172,237,0.5);
+  }
+  body.light-preview .tab.active { color: var(--howl-cyan-500); }
+  body.light-preview .tab.active::after { background: var(--howl-cyan-500); box-shadow: 0 0 8px rgba(15,172,237,0.4); }
+  .tab svg { width: 22px; height: 22px; }
+
+  /* ============== Inset-grouped lists (settings + history) ============== */
+  .ios-content {
+    flex: 1; overflow: auto;
+    padding: 8px 0 16px;
+    display: flex; flex-direction: column;
+    gap: 14px;
+  }
+  .ios-group {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--panel-border);
+    margin: 0 16px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  body.light-preview .ios-group {
+    background: white;
+    border-color: var(--howl-light-divider);
+    box-shadow: 0 2px 8px rgba(20,30,60,0.04);
+  }
+  .ios-group-head {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--howl-ink-500);
+    padding: 0 16px 6px;
+  }
+  body.light-preview .ios-group-head { color: var(--howl-light-ink-500); }
+  .ios-group-foot {
+    font-size: 11px;
+    color: var(--howl-ink-500);
+    padding: 6px 16px 0;
+    line-height: 15px;
+  }
+  body.light-preview .ios-group-foot { color: var(--howl-light-ink-500); }
+  .ios-row {
+    display: flex; align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    min-height: 42px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .ios-row {
+    border-top-color: var(--howl-light-divider);
+    color: var(--howl-light-ink-900);
+  }
+  .ios-row:first-child { border-top: 0; }
+  .ios-row-ico {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--howl-cyan-500);
+    color: white;
+    flex: none;
+  }
+  .ios-row-ico.warn { background: var(--howl-state-warn); }
+  .ios-row-ico.crit { background: var(--howl-state-crit); }
+  .ios-row-ico.fresh { background: var(--howl-state-fresh); }
+  .ios-row-ico.gray { background: var(--howl-ink-500); }
+  .ios-row-ico svg { width: 14px; height: 14px; }
+  .ios-row-main { flex: 1; min-width: 0; }
+  .ios-row-title { font-size: 13px; }
+  .ios-row-sub { font-size: 11px; color: var(--howl-ink-500); margin-top: 1px; }
+  body.light-preview .ios-row-sub { color: var(--howl-light-ink-500); }
+  .ios-row-r {
+    color: var(--howl-ink-500);
+    font-size: 12px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  body.light-preview .ios-row-r { color: var(--howl-light-ink-500); }
+  .ios-row-r .num { color: var(--howl-ink-300); font-family: var(--font-mono); font-feature-settings: "tnum"; }
+  body.light-preview .ios-row-r .num { color: var(--howl-light-ink-700); }
+  .ios-chev { color: var(--howl-ink-500); font-size: 15px; }
+  body.light-preview .ios-chev { color: var(--howl-light-ink-500); }
+
+  /* Toggle */
+  .toggle {
+    width: 36px; height: 22px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    position: relative;
+    flex: none;
+  }
+  body.light-preview .toggle { background: rgba(20,30,60,0.16); }
+  .toggle::after {
+    content: ""; position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 180ms;
+  }
+  .toggle.on { background: var(--howl-state-fresh); }
+  .toggle.on::after { transform: translateX(14px); }
+
+  /* time picker */
+  .ios-timepick {
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+    font-size: 12px;
+    color: var(--howl-ink-100);
+  }
+  body.light-preview .ios-timepick {
+    background: var(--howl-light-surface-2);
+    color: var(--howl-light-ink-900);
+  }
+
+  /* ============== Phone "large title" navigation (Settings/History/Notif) ============== */
+  .nav-pri {
+    flex: none;
+    padding: 6px 20px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-pri .back-btn {
+    display: flex; align-items: center; gap: 2px;
+    color: var(--howl-cyan-400);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  body.light-preview .nav-pri .back-btn { color: var(--howl-cyan-500); }
+  .nav-pri .back-btn svg { width: 16px; height: 16px; }
+  .nav-pri .nav-action {
+    color: var(--howl-cyan-400);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  body.light-preview .nav-pri .nav-action { color: var(--howl-cyan-500); }
+  .nav-title-large {
+    padding: 6px 20px 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--howl-ink-100);
+    letter-spacing: -0.01em;
+  }
+  body.light-preview .nav-title-large { color: var(--howl-light-ink-900); }
+
+  /* ============== Stage layouts ============== */
+  .annot-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 220px;
+    gap: 28px;
+    align-items: center;
+  }
+  .annot {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--howl-ink-300);
+    font-size: 13px;
+    line-height: 17px;
+  }
+  body.light-preview .annot { color: var(--howl-light-ink-700); }
+  .annot.right { text-align: right; }
+  .annot .a-card {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(15,172,237,0.06);
+    border: 1px solid rgba(15,172,237,0.18);
+    position: relative;
+  }
+  body.light-preview .annot .a-card {
+    background: white;
+    border-color: var(--howl-light-divider);
+    box-shadow: 0 2px 6px rgba(20,30,60,0.04);
+  }
+  .annot .a-card .a-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--howl-cyan-300);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  body.light-preview .annot .a-card .a-tag { color: var(--howl-cyan-500); }
+  .annot .a-card p { margin: 0; color: var(--howl-ink-100); font-size: 13px; line-height: 18px; }
+  body.light-preview .annot .a-card p { color: var(--howl-light-ink-900); }
+
+  /* ============== States grid ============== */
+  .states-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    justify-content: center;
+  }
+  .states-grid .phone {
+    --phone-w: 240px;
+    --phone-h: 520px;
+  }
+
+  /* ============== Page footer ============== */
+  .doc-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between;
+    color: var(--howl-ink-500); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Brand wolf silhouette — single path, matches macOS template. Inherits currentColor. -->
+    <symbol id="ic-wolf-filled" viewBox="0 0 24 24">
+      <path d="M 4 11 L 7 3 L 10 9 L 14 9 L 17 3 L 20 11 C 20 18, 16 22, 12 22 C 8 22, 4 18, 4 11 Z" fill="currentColor"/>
+    </symbol>
+    <!-- ic-bell -->
+    <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <!-- ic-bolt -->
+    <symbol id="ic-bolt" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10" fill="currentColor"/></symbol>
+    <symbol id="ic-bolt-outline" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <!-- ic-clock -->
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="12 7 12 12 15 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- ic-gear -->
+    <symbol id="ic-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <!-- ic-mac -->
+    <symbol id="ic-mac" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2 20h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <!-- ic-check -->
+    <symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- ic-chev-right -->
+    <symbol id="ic-chev-right" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- ic-chev-left -->
+    <symbol id="ic-chev-left" viewBox="0 0 24 24"><polyline points="15 6 9 12 15 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- ic-moon -->
+    <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/></symbol>
+    <!-- ic-info -->
+    <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></symbol>
+    <!-- ic-add -->
+    <symbol id="ic-add" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <!-- ic-star -->
+    <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" fill="currentColor"/></symbol>
+    <!-- ic-phone -->
+    <symbol id="ic-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="18" r="0.8" fill="currentColor"/></symbol>
+    <!-- ic-shield -->
+    <symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor"/></symbol>
+    <!-- ic-help -->
+    <symbol id="ic-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- ic-cell -->
+    <symbol id="ic-cell" viewBox="0 0 18 11"><rect x="0" y="7" width="2.5" height="4" fill="currentColor"/><rect x="4" y="5" width="2.5" height="6" fill="currentColor"/><rect x="8" y="3" width="2.5" height="8" fill="currentColor"/><rect x="12" y="1" width="2.5" height="10" fill="currentColor"/></symbol>
+    <!-- ic-wifi -->
+    <symbol id="ic-wifi" viewBox="0 0 16 11"><path d="M1 4 c2-2.5 5-3.5 7-3.5 s5 1 7 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M3 6.5 c1.5-1.5 3-2 5-2 s3.5 .5 5 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 9 c.8-.8 1.6-1 2.5-1 s1.7 .2 2.5 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="10.4" r="0.8" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <!-- ============== TOP NAV ============== -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="index.html">
+      <img src="assets/logo-dark.svg" alt="HowlAlert" />
+      <span>HowlAlert <strong>Design</strong></span>
+    </a>
+    <div class="topnav-tabs">
+      <a class="topnav-tab" href="index.html">Index</a>
+      <a class="topnav-tab" href="design-system.html">A · System</a>
+      <a class="topnav-tab" href="section-b-macos.html">B · macOS</a>
+      <a class="topnav-tab active" href="section-c-ios.html">C · iOS</a>
+      <a class="topnav-tab" href="section-d-watch.html">D · Watch</a>
+      <a class="topnav-tab" href="section-e-island.html">E · Island</a>
+      <a class="topnav-tab" href="section-f-paywall.html">F · Paywall</a>
+      <a class="topnav-tab" href="section-g-icons.html">G · Icons</a>
+      <a class="topnav-tab" href="section-h-marketing.html">H · Marketing</a>
+    </div>
+    <div class="preview-toggle" role="radiogroup" aria-label="Preview mode">
+      <button class="pt-opt active" data-mode="dark" aria-checked="true">
+        <svg><use href="#ic-moon"/></svg>
+        <span>Dark</span>
+      </button>
+      <button class="pt-opt" data-mode="light" aria-checked="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <span>Light</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============== HEADER ============== -->
+  <header class="doc-head">
+    <img src="assets/logo-dark.svg" class="wm" alt="HowlAlert" />
+    <div>
+      <h1>iOS App <span class="sub">Section C</span></h1>
+      <p>iPhone 17 Pro · iOS 26 · light + dark mode. Onboarding flow, dashboard hero with state variations, history, notification preferences, and settings. All built on the design system.</p>
+    </div>
+    <div class="meta">
+      <div>393 × 852 pt</div>
+      <div class="v">iOS 26 · iPhone 17 Pro</div>
+      <div>light + dark · Liquid Glass tab bar</div>
+    </div>
+  </header>
+
+  <!-- ============== C.1: ONBOARDING ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">C.1</span>
+      <h2>Onboarding · three screens</h2>
+      <div class="lede">Welcome → Pair with Mac → Connected. Wolf as centerpiece; restraint after that.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+
+        <!-- Welcome -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-welcome">
+                  <div class="wolf-hero" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><use href="#ic-wolf-filled"/></svg>
+                  </div>
+                  <h1>Keep tabs on Claude</h1>
+                  <p>Your Mac watches your Claude Code usage. HowlAlert pushes alerts to your phone before you hit a limit.</p>
+                  <div class="features">
+                    <div class="feature">
+                      <span class="ico"><svg><use href="#ic-bolt"/></svg></span>
+                      <span class="txt">Live usage in your pocket</span>
+                    </div>
+                    <div class="feature">
+                      <span class="ico"><svg><use href="#ic-bell"/></svg></span>
+                      <span class="txt">Notifications before limits</span>
+                    </div>
+                    <div class="feature">
+                      <span class="ico"><svg><use href="#ic-shield"/></svg></span>
+                      <span class="txt">Private. Never leaves your devices.</span>
+                    </div>
+                  </div>
+                  <div class="cta-stack">
+                    <button class="ios-btn ios-btn-primary" type="button">Pair with Mac</button>
+                    <button class="ios-btn ios-btn-ghost" type="button">Continue with Demo Mode</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.1.a · WELCOME</div>
+            <div class="nm">First launch</div>
+            <div class="ds">Wolf hero, three-feature briefing, primary CTA + demo escape hatch.</div>
+          </div>
+        </div>
+
+        <!-- Pair -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="nav-pri">
+                  <span class="back-btn"><svg><use href="#ic-chev-left"/></svg>Back</span>
+                  <span></span>
+                </div>
+                <div class="scr-pair">
+                  <div class="pair-camera">
+                    <div class="pair-frame">
+                      <i></i><span></span>
+                      <div class="pair-qr-mock">
+                        <!-- Tiny stylized QR pattern -->
+                        <svg viewBox="0 0 21 21" shape-rendering="crispEdges">
+                          <rect width="21" height="21" fill="white"/>
+                          <g fill="#091533">
+                            <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="white"/><rect x="2" y="2" width="3" height="3"/>
+                            <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="white"/><rect x="16" y="2" width="3" height="3"/>
+                            <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="white"/><rect x="2" y="16" width="3" height="3"/>
+                            <rect x="9" y="0" width="1" height="1"/><rect x="11" y="0" width="2" height="1"/>
+                            <rect x="8" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/>
+                            <rect x="9" y="3" width="2" height="1"/><rect x="12" y="3" width="1" height="1"/>
+                            <rect x="8" y="4" width="3" height="1"/><rect x="13" y="4" width="1" height="1"/>
+                            <rect x="9" y="5" width="2" height="1"/>
+                            <rect x="8" y="6" width="1" height="1"/><rect x="10" y="6" width="2" height="1"/>
+                            <rect x="0" y="8" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="5" y="8" width="2" height="1"/><rect x="9" y="8" width="2" height="1"/><rect x="13" y="8" width="3" height="1"/><rect x="18" y="8" width="2" height="1"/>
+                            <rect x="3" y="9" width="2" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="11" y="9" width="2" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/>
+                            <rect x="0" y="10" width="2" height="1"/><rect x="4" y="10" width="3" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="10" y="10" width="2" height="1"/><rect x="14" y="10" width="2" height="1"/><rect x="17" y="10" width="2" height="1"/>
+                            <rect x="2" y="11" width="2" height="1"/><rect x="6" y="11" width="2" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="13" y="11" width="3" height="1"/><rect x="18" y="11" width="2" height="1"/>
+                            <rect x="0" y="12" width="1" height="1"/><rect x="3" y="12" width="2" height="1"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="1" height="1"/><rect x="14" y="12" width="2" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/>
+                            <rect x="9" y="14" width="2" height="1"/><rect x="13" y="14" width="3" height="1"/><rect x="17" y="14" width="1" height="1"/><rect x="19" y="14" width="2" height="1"/>
+                            <rect x="8" y="15" width="1" height="1"/><rect x="11" y="15" width="2" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="18" y="15" width="2" height="1"/>
+                            <rect x="9" y="16" width="3" height="1"/><rect x="14" y="16" width="2" height="1"/><rect x="17" y="16" width="1" height="1"/>
+                            <rect x="8" y="17" width="1" height="1"/><rect x="11" y="17" width="2" height="1"/><rect x="15" y="17" width="3" height="1"/><rect x="20" y="17" width="1" height="1"/>
+                            <rect x="9" y="18" width="2" height="1"/><rect x="13" y="18" width="1" height="1"/><rect x="16" y="18" width="3" height="1"/>
+                            <rect x="8" y="19" width="1" height="1"/><rect x="10" y="19" width="2" height="1"/><rect x="14" y="19" width="1" height="1"/><rect x="17" y="19" width="2" height="1"/><rect x="20" y="19" width="1" height="1"/>
+                            <rect x="9" y="20" width="3" height="1"/><rect x="13" y="20" width="3" height="1"/><rect x="18" y="20" width="2" height="1"/>
+                          </g>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pair-prompt">
+                    <h3>Scan from your Mac</h3>
+                    <p>Open HowlAlert in the menu bar, then <strong>Pair another device</strong>.</p>
+                    <a href="#" class="code-fallback">or enter the 6-digit code</a>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.1.b · PAIRING</div>
+            <div class="nm">Scan the QR</div>
+            <div class="ds">Camera view with brand cyan cropping frame + 6-digit fallback.</div>
+          </div>
+        </div>
+
+        <!-- Paired -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-paired">
+                  <div class="paired-circle">
+                    <svg><use href="#ic-check"/></svg>
+                  </div>
+                  <h1>Paws on the bone</h1>
+                  <p>HowlAlert is now keeping tabs on your Mac. Heads up before every limit.</p>
+                  <div class="paired-device">
+                    <span class="device-name">MrDemonWolf's MacBook Pro</span>
+                    <span class="device-status"><span class="dot"></span>Connected</span>
+                  </div>
+                  <div class="cta-stack">
+                    <button class="ios-btn ios-btn-primary" type="button">See the dashboard</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.1.c · CONNECTED</div>
+            <div class="nm">Pairing success</div>
+            <div class="ds">Green pulse + device card. Title is on-brand without being precious.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="anno">Three-screen flow takes ~12 seconds. The Mac handshake happens over local network (no account, no cloud).</p>
+  </section>
+
+  <!-- ============== C.2: DASHBOARD HERO ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">C.2</span>
+      <h2>Dashboard · hero state</h2>
+      <div class="lede">The home screen. Mirrors the macOS popover language: hero %, countdown, pace chip, dual-bar meter, model breakdown. Tab bar at the foot.</div>
+    </div>
+
+    <div class="stage">
+      <div class="annot-row">
+        <div class="annot right">
+          <div class="a-card">
+            <div class="a-tag">HERO %</div>
+            <p>Single big number = "% of your 5-hour window left". State-tinted; 52pt monospaced tabular.</p>
+          </div>
+          <div class="a-card">
+            <div class="a-tag">PACE CHIP</div>
+            <p>Inline status: "On track", "Lasts until reset", "Runs out in 47m". Auto-hides under 3% elapsed.</p>
+          </div>
+        </div>
+
+        <div class="phone-with-cap" style="margin: 0 auto;">
+          <div class="phone" style="--phone-w: 320px; --phone-h: 692px;">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-dash">
+                  <div class="dash-nav">
+                    <span class="dash-nav-l">MrDemonWolf's MacBook Pro</span>
+                    <span class="dash-nav-r">
+                      <svg><use href="#ic-gear"/></svg>
+                    </span>
+                  </div>
+                  <div class="dash-large-title"><h1>Live</h1></div>
+                  <div class="dash-body">
+                    <div class="dash-hero">
+                      <div class="dash-hero-head">
+                        <span class="lbl">5-hour window left</span>
+                      </div>
+                      <div class="dash-hero-pct">62<small>%</small></div>
+                      <div class="dash-hero-meta">
+                        <span class="reset-cd">3:14:22 <small>until reset</small></span>
+                        <span class="pacechip"><span class="d"></span>On track</span>
+                      </div>
+                    </div>
+
+                    <div class="group-head">Usage</div>
+                    <div class="usage-card">
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">5-Hour Window</span></div>
+                        <div class="usage-row-bar">
+                          <div class="fill" style="width: 38%;"></div>
+                          <div class="pace-mark" style="left: 42%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">62% left</span><span class="right">Resets in 3h 14m</span></div>
+                      </div>
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+                        <div class="usage-row-bar">
+                          <div class="fill" style="width: 78%;"></div>
+                          <div class="pace-mark" style="left: 70%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">78% left</span><span class="right">Resets in 4d 11h</span></div>
+                      </div>
+                    </div>
+
+                    <div class="group-head">Recent activity</div>
+                    <div class="model-card">
+                      <div class="modelrow">
+                        <span class="nm">Opus<span class="alias">opus-4-5</span></span>
+                        <span class="tk">42,118 tok</span>
+                      </div>
+                      <div class="modelrow">
+                        <span class="nm">Sonnet<span class="alias">sonnet-4-5</span></span>
+                        <span class="tk">21,484 tok</span>
+                      </div>
+                      <div class="modelrow">
+                        <span class="nm">Haiku<span class="alias">haiku-4-5</span></span>
+                        <span class="tk">3,830 tok</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabbar">
+                    <div class="tab active">
+                      <svg><use href="#ic-bolt"/></svg>
+                      <span>Live</span>
+                    </div>
+                    <div class="tab">
+                      <svg><use href="#ic-clock"/></svg>
+                      <span>History</span>
+                    </div>
+                    <div class="tab">
+                      <svg><use href="#ic-gear"/></svg>
+                      <span>Settings</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.2 · LIVE</div>
+            <div class="nm">Dashboard</div>
+            <div class="ds">Pull-to-refresh repolls the Mac. Tab bar at the bottom; Live is default.</div>
+          </div>
+        </div>
+
+        <div class="annot">
+          <div class="a-card">
+            <div class="a-tag">DUAL METER</div>
+            <p>5-hour + weekly bars. White vertical pace marker = "where you should be by now". Inline group head matches iOS conventions.</p>
+          </div>
+          <div class="a-card">
+            <div class="a-tag">TAB BAR</div>
+            <p>Liquid Glass material, three tabs: Live · History · Settings. Pairing &amp; notification prefs live under Settings.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== C.3: DASHBOARD STATES ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">C.3</span>
+      <h2>Dashboard · four states</h2>
+      <div class="lede">Fresh / On-pace / Approaching / Critical. Hero % colors with state; ambient glow tints to match.</div>
+    </div>
+
+    <div class="stage">
+      <div class="states-grid">
+
+        <!-- Fresh -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-dash">
+                  <div class="dash-large-title" style="padding-top: 16px;"><h1>Live</h1></div>
+                  <div class="dash-body">
+                    <div class="dash-hero state-fresh">
+                      <div class="dash-hero-head">
+                        <span class="lbl">5-hour window left</span>
+                      </div>
+                      <div class="dash-hero-pct">96<small>%</small></div>
+                      <div class="dash-hero-meta">
+                        <span class="reset-cd">4:48:00<small>full</small></span>
+                        <span class="pacechip fresh"><span class="d"></span>Reset just hit</span>
+                      </div>
+                    </div>
+                    <div class="usage-card">
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">5-Hour</span></div>
+                        <div class="usage-row-bar state-fresh"><div class="fill" style="width: 4%;"></div></div>
+                        <div class="usage-row-meta"><span class="left">96% left</span><span class="right">4h 48m</span></div>
+                      </div>
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+                        <div class="usage-row-bar state-fresh"><div class="fill" style="width: 12%;"></div></div>
+                        <div class="usage-row-meta"><span class="left">88% left</span><span class="right">6d 04h</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabbar">
+                    <div class="tab active"><svg><use href="#ic-bolt"/></svg><span>Live</span></div>
+                    <div class="tab"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                    <div class="tab"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.3.a · FRESH</div>
+            <div class="nm">Reset just hit</div>
+            <div class="ds">96%+ left. Green ambient + reset-celebration chip.</div>
+          </div>
+        </div>
+
+        <!-- On-pace -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-dash">
+                  <div class="dash-large-title" style="padding-top: 16px;"><h1>Live</h1></div>
+                  <div class="dash-body">
+                    <div class="dash-hero">
+                      <div class="dash-hero-head">
+                        <span class="lbl">5-hour window left</span>
+                      </div>
+                      <div class="dash-hero-pct">62<small>%</small></div>
+                      <div class="dash-hero-meta">
+                        <span class="reset-cd">3:14:22<small>left</small></span>
+                        <span class="pacechip"><span class="d"></span>On track</span>
+                      </div>
+                    </div>
+                    <div class="usage-card">
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">5-Hour</span></div>
+                        <div class="usage-row-bar">
+                          <div class="fill" style="width: 38%;"></div>
+                          <div class="pace-mark" style="left: 42%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">62% left</span><span class="right">3h 14m</span></div>
+                      </div>
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+                        <div class="usage-row-bar">
+                          <div class="fill" style="width: 78%;"></div>
+                          <div class="pace-mark" style="left: 70%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">78% left</span><span class="right">4d 11h</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabbar">
+                    <div class="tab active"><svg><use href="#ic-bolt"/></svg><span>Live</span></div>
+                    <div class="tab"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                    <div class="tab"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.3.b · ON PACE</div>
+            <div class="nm">On track</div>
+            <div class="ds">Default. Cyan; pace marker right of fill.</div>
+          </div>
+        </div>
+
+        <!-- Approaching -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-dash">
+                  <div class="dash-large-title" style="padding-top: 16px;"><h1>Live</h1></div>
+                  <div class="dash-body">
+                    <div class="dash-hero state-warn">
+                      <div class="dash-hero-head">
+                        <span class="lbl">5-hour window left</span>
+                      </div>
+                      <div class="dash-hero-pct">16<small>%</small></div>
+                      <div class="dash-hero-meta">
+                        <span class="reset-cd">0:47:12<small>left</small></span>
+                        <span class="pacechip warn"><span class="d"></span>Runs out in 47m</span>
+                      </div>
+                    </div>
+                    <div class="usage-card">
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">5-Hour</span></div>
+                        <div class="usage-row-bar state-warn">
+                          <div class="fill" style="width: 84%;"></div>
+                          <div class="pace-mark" style="left: 60%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">16% left</span><span class="right">47m</span></div>
+                      </div>
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+                        <div class="usage-row-bar state-warn">
+                          <div class="fill" style="width: 65%;"></div>
+                          <div class="pace-mark" style="left: 56%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">35% left</span><span class="right">3d 14h</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabbar">
+                    <div class="tab active"><svg><use href="#ic-bolt"/></svg><span>Live</span></div>
+                    <div class="tab"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                    <div class="tab"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.3.c · APPROACHING</div>
+            <div class="nm">Runs out soon</div>
+            <div class="ds">70-89% used. Amber tint + countdown chip.</div>
+          </div>
+        </div>
+
+        <!-- Critical -->
+        <div class="phone-with-cap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="scr-dash">
+                  <div class="dash-large-title" style="padding-top: 16px;"><h1>Live</h1></div>
+                  <div class="dash-body">
+                    <div class="dash-hero state-crit">
+                      <div class="dash-hero-head">
+                        <span class="lbl">5-hour window left</span>
+                      </div>
+                      <div class="dash-hero-pct">3<small>%</small></div>
+                      <div class="dash-hero-meta">
+                        <span class="reset-cd">0:08:44<small>left</small></span>
+                        <span class="pacechip crit"><span class="d"></span>9m left</span>
+                      </div>
+                    </div>
+                    <div class="usage-card">
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">5-Hour</span></div>
+                        <div class="usage-row-bar state-crit">
+                          <div class="fill" style="width: 97%;"></div>
+                          <div class="pace-mark" style="left: 70%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">3% left</span><span class="right">9m</span></div>
+                      </div>
+                      <div class="usage-row">
+                        <div class="usage-row-head"><span class="usage-row-title">Weekly</span></div>
+                        <div class="usage-row-bar state-crit">
+                          <div class="fill" style="width: 93%;"></div>
+                          <div class="pace-mark" style="left: 60%;"></div>
+                        </div>
+                        <div class="usage-row-meta"><span class="left">7% left</span><span class="right">2d 18h</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabbar">
+                    <div class="tab active"><svg><use href="#ic-bolt"/></svg><span>Live</span></div>
+                    <div class="tab"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                    <div class="tab"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.3.d · CRITICAL</div>
+            <div class="nm">9 minutes left</div>
+            <div class="ds">90%+ used. Red tint everywhere; ambient glow gets stronger.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== C.4: HISTORY ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">C.4</span>
+      <h2>History · alert timeline</h2>
+      <div class="lede">Every alert HowlAlert has sent. Time-grouped, state-tinted icons.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+        <div class="phone-with-cap">
+          <div class="phone" style="--phone-w: 320px; --phone-h: 692px;">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="dash-large-title" style="padding-top: 14px;"><h1>History</h1></div>
+                <div class="ios-content">
+                  <div>
+                    <div class="ios-group-head">Today</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico warn"><svg><use href="#ic-bolt"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Approaching limit</div>
+                          <div class="ios-row-sub">5-hour window at 84%. Runs out in 47m.</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">11:42 AM</span><span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico fresh"><svg><use href="#ic-check"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Reset just hit</div>
+                          <div class="ios-row-sub">Fresh 5-hour window.</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">9:00 AM</span><span class="ios-chev">›</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="ios-group-head">Yesterday</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico crit"><svg><use href="#ic-bolt"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Weekly limit at 93%</div>
+                          <div class="ios-row-sub">Roughly 2 days of heavy use left.</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">8:14 PM</span><span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico"><svg><use href="#ic-bell"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Claude is waiting on you</div>
+                          <div class="ios-row-sub">"Should I also update the migration script?"</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">3:08 PM</span><span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico warn"><svg><use href="#ic-bolt"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Approaching limit</div>
+                          <div class="ios-row-sub">5-hour at 80%.</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">2:11 PM</span><span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico fresh"><svg><use href="#ic-check"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Reset just hit</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">9:00 AM</span><span class="ios-chev">›</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="ios-group-head">Earlier this week</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico gray"><svg><use href="#ic-bolt"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Couldn't reach Claude</div>
+                          <div class="ios-row-sub">Recovered after 30s.</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">Mon 4:22</span><span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico warn"><svg><use href="#ic-bolt"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">Approaching limit</div>
+                        </div>
+                        <span class="ios-row-r"><span class="num">Mon 3:00</span><span class="ios-chev">›</span></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tabbar">
+                  <div class="tab"><svg><use href="#ic-bolt-outline"/></svg><span>Live</span></div>
+                  <div class="tab active"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                  <div class="tab"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.4 · HISTORY</div>
+            <div class="nm">Alert timeline</div>
+            <div class="ds">Inset-grouped list, day-grouped. Tap any row to see full detail.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== C.5: NOTIFICATION PREFS ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">C.5</span>
+      <h2>Notification preferences</h2>
+      <div class="lede">When to ping; when to stay quiet. Sits under Settings → Notifications.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+        <div class="phone-with-cap">
+          <div class="phone" style="--phone-w: 320px; --phone-h: 692px;">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="nav-pri">
+                  <span class="back-btn"><svg><use href="#ic-chev-left"/></svg>Settings</span>
+                  <span></span>
+                </div>
+                <div class="dash-large-title"><h1>Notifications</h1></div>
+                <div class="ios-content">
+                  <div>
+                    <div class="ios-group-head">Usage alerts</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">At 80% used</div></div>
+                        <div class="toggle on"></div>
+                      </div>
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">At 95% used</div></div>
+                        <div class="toggle on"></div>
+                      </div>
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">On reset</div></div>
+                        <div class="toggle"></div>
+                      </div>
+                    </div>
+                    <div class="ios-group-foot">Alerts arrive via push when the 5-hour window crosses each threshold.</div>
+                  </div>
+
+                  <div>
+                    <div class="ios-group-head">Claude Desktop bridge</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">"Waiting on you" prompts</div>
+                          <div class="ios-row-sub">Surface tool-use confirmations.</div>
+                        </div>
+                        <div class="toggle on"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="ios-group-head">Quiet hours</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">Enabled</div></div>
+                        <div class="toggle on"></div>
+                      </div>
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">From</div></div>
+                        <span class="ios-timepick">10:00 PM</span>
+                      </div>
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">To</div></div>
+                        <span class="ios-timepick">8:00 AM</span>
+                      </div>
+                    </div>
+                    <div class="ios-group-foot">During quiet hours, alerts are suppressed unless usage is critical (90%+).</div>
+                  </div>
+
+                  <div>
+                    <div class="ios-group-head">Sound &amp; haptics</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">Alert sound</div></div>
+                        <span class="ios-row-r">Howl <span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <div class="ios-row-main"><div class="ios-row-title">Haptics</div></div>
+                        <div class="toggle on"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tabbar">
+                  <div class="tab"><svg><use href="#ic-bolt-outline"/></svg><span>Live</span></div>
+                  <div class="tab"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                  <div class="tab active"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.5 · NOTIFICATIONS</div>
+            <div class="nm">Notification preferences</div>
+            <div class="ds">Inset-grouped list with toggles + time pickers. Footers explain why.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== C.6: SETTINGS ============== -->
+  <section>
+    <div class="sec-head">
+      <span class="n">C.6</span>
+      <h2>Settings · account &amp; about</h2>
+      <div class="lede">Paired devices, premium status, about. The wolf reappears in the About row — only here, only at this scale.</div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-row">
+        <div class="phone-with-cap">
+          <div class="phone" style="--phone-w: 320px; --phone-h: 692px;">
+            <div class="phone-screen">
+              <div class="ios-statusbar">
+                <span class="ios-time num">9:41</span>
+                <span class="ios-island"></span>
+                <span class="ios-status-right">
+                  <svg width="14" height="10"><use href="#ic-cell"/></svg>
+                  <svg width="13" height="10"><use href="#ic-wifi"/></svg>
+                  <span class="ios-batt"><span></span></span>
+                </span>
+              </div>
+              <div class="phone-body">
+                <div class="dash-large-title" style="padding-top: 14px;"><h1>Settings</h1></div>
+                <div class="ios-content">
+                  <!-- Pairing status -->
+                  <div>
+                    <div class="ios-group-head">Paired devices</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico"><svg><use href="#ic-mac"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">MrDemonWolf's MacBook Pro</div>
+                          <div class="ios-row-sub" style="color: var(--howl-state-fresh);">Connected · last seen now</div>
+                        </div>
+                        <span class="ios-chev">›</span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico gray"><svg><use href="#ic-add"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title" style="color: var(--howl-cyan-400);">Pair another Mac</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Premium -->
+                  <div>
+                    <div class="ios-group-head">Subscription</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico warn"><svg><use href="#ic-star"/></svg></span>
+                        <div class="ios-row-main">
+                          <div class="ios-row-title">HowlAlert Max</div>
+                          <div class="ios-row-sub">Renews May 27, 2027 · $29.99/yr</div>
+                        </div>
+                        <span class="ios-chev">›</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- App settings -->
+                  <div>
+                    <div class="ios-group-head">App</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico"><svg><use href="#ic-bell"/></svg></span>
+                        <div class="ios-row-main"><div class="ios-row-title">Notifications</div></div>
+                        <span class="ios-chev">›</span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico gray"><svg><use href="#ic-moon"/></svg></span>
+                        <div class="ios-row-main"><div class="ios-row-title">Appearance</div></div>
+                        <span class="ios-row-r">Auto <span class="ios-chev">›</span></span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico"><svg><use href="#ic-shield"/></svg></span>
+                        <div class="ios-row-main"><div class="ios-row-title">Privacy</div></div>
+                        <span class="ios-chev">›</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Support -->
+                  <div>
+                    <div class="ios-group-head">Support</div>
+                    <div class="ios-group">
+                      <div class="ios-row">
+                        <span class="ios-row-ico gray"><svg><use href="#ic-help"/></svg></span>
+                        <div class="ios-row-main"><div class="ios-row-title">Help &amp; FAQ</div></div>
+                        <span class="ios-chev">›</span>
+                      </div>
+                      <div class="ios-row">
+                        <span class="ios-row-ico"><svg><use href="#ic-info"/></svg></span>
+                        <div class="ios-row-main"><div class="ios-row-title">Contact</div></div>
+                        <span class="ios-chev">›</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- About -->
+                  <div>
+                    <div class="ios-group-head">About</div>
+                    <div class="ios-group">
+                      <div class="ios-row" style="padding: 14px 14px;">
+                        <div style="width: 40px; height: 40px; flex: none; color: var(--howl-cyan-500); display: flex; align-items: center; justify-content: center;">
+                          <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; fill: currentColor;"><use href="#ic-wolf-filled"/></svg>
+                        </div>
+                        <div class="ios-row-main" style="margin-left: 4px;">
+                          <div class="ios-row-title" style="font-weight: 600;">HowlAlert</div>
+                          <div class="ios-row-sub">Version 1.0.0 (build 26.5.27)</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="ios-group-foot">Made by MrDemonWolf. Not affiliated with Anthropic.</div>
+                  </div>
+                </div>
+                <div class="tabbar">
+                  <div class="tab"><svg><use href="#ic-bolt-outline"/></svg><span>Live</span></div>
+                  <div class="tab"><svg><use href="#ic-clock"/></svg><span>History</span></div>
+                  <div class="tab active"><svg><use href="#ic-gear"/></svg><span>Settings</span></div>
+                </div>
+              </div>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="phone-cap">
+            <div class="ix">C.6 · SETTINGS</div>
+            <div class="nm">Account &amp; about</div>
+            <div class="ds">Paired Macs, subscription status, app prefs, support, about. Wolf only in About.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <div>HowlAlert · Section C · iOS App</div>
+    <div>7 screens · light + dark · ready for approval</div>
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll('.pt-opt').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.pt-opt').forEach(function (b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      document.body.classList.toggle('light-preview', btn.dataset.mode === 'light');
+    });
+  });
+</script>
+</body>
+</html>
