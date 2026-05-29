@@ -1,0 +1,3 @@
+{
+  "extends": "@howlalert/config/tsconfig.base.json"
+}
