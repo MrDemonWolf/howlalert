@@ -10,9 +10,11 @@ let package = Package(
     ],
     products: [
         .library(name: "HowlAlertCore", targets: ["HowlAlertCore"]),
+        .executable(name: "howlalert-hook", targets: ["howlalert-hook"]),
     ],
     targets: [
         .target(name: "HowlAlertCore"),
+        .executableTarget(name: "howlalert-hook", dependencies: ["HowlAlertCore"]),
         .testTarget(name: "HowlAlertCoreTests", dependencies: ["HowlAlertCore"]),
     ]
 )

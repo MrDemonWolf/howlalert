@@ -55,6 +55,11 @@ final class UsageModel {
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+
+        // Instant refresh when a Claude Code turn ends (Stop hook → HAA-122).
+        HowlSignal.observeStop { [weak self] in
+            Task { @MainActor in self?.refresh() }
+        }
     }
 
     /// One-shot: refresh against real transcripts and write the snapshot to a
@@ -150,6 +155,21 @@ final class UsageModel {
             line = "[HowlAlert] no active 5h window (fresh)\n"
         }
         FileHandle.standardError.write(Data(line.utf8))
+
+        // Diagnostic: when HOWL_SIGNAL_PROBE is set, append a line per refresh so
+        // the FSEvents / Stop-hook pipeline can be observed from a file (a GUI
+        // app's stderr isn't reliably capturable).
+        if let probe = ProcessInfo.processInfo.environment["HOWL_SIGNAL_PROBE"] {
+            let url = URL(fileURLWithPath: probe)
+            let entry = Data("refresh \(Date())\n".utf8)
+            if let h = try? FileHandle(forWritingTo: url) {
+                defer { try? h.close() }
+                _ = try? h.seekToEnd()
+                h.write(entry)
+            } else {
+                try? entry.write(to: url)
+            }
+        }
     }
 }
 
