@@ -6,6 +6,7 @@ import HowlAlertUI
 /// actions. (HAA-124)
 struct PopoverContent: View {
     @AppStorage("demoMode") private var demoMode = false
+    @Environment(\.openSettings) private var openSettings
     private var model = UsageModel.shared
 
     var body: some View {
@@ -15,7 +16,13 @@ struct PopoverContent: View {
                 demoEnabled: demoMode,
                 onRefresh: { model.refresh() },
                 onQuit: { NSApp.terminate(nil) },
-                onToggleDemo: { demoMode.toggle() }
+                onToggleDemo: { demoMode.toggle() },
+                onSettings: {
+                    openSettings()
+                    // A menu-bar (LSUIElement) app isn't active by default; bring
+                    // the freshly-opened Settings window to the front.
+                    NSApp.activate(ignoringOtherApps: true)
+                }
             )
         }
     }

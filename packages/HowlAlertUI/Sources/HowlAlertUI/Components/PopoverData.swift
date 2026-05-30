@@ -53,14 +53,20 @@ public struct PopoverData: Sendable, Equatable {
     /// Shown only when present (the weekly window isn't wired live yet).
     public var week: Window?
     public var models: [Model]
-    /// e.g. "Updated 12s ago" — `nil` hides it (demo).
+    /// Static fallback line, e.g. "Updated just now" — `nil` hides it. Used by the
+    /// demo showcase; live data prefers `lastUpdated` so the footer ticks.
     public var updatedText: String?
+    /// When the live snapshot was last computed. When set, the popover footer
+    /// renders a self-updating "Updated Ns ago" via `TimelineView` and ignores
+    /// `updatedText`. `nil` for the static demo.
+    public var lastUpdated: Date?
 
     public init(
         paceText: String, paceState: HowlState,
         critRemaining: Double, critState: HowlState, critLabel: String,
         resetText: String, resetState: HowlState, resetLastMinute: Bool,
-        session: Window, week: Window? = nil, models: [Model] = [], updatedText: String? = nil
+        session: Window, week: Window? = nil, models: [Model] = [],
+        updatedText: String? = nil, lastUpdated: Date? = nil
     ) {
         self.paceText = paceText
         self.paceState = paceState
@@ -74,6 +80,7 @@ public struct PopoverData: Sendable, Equatable {
         self.week = week
         self.models = models
         self.updatedText = updatedText
+        self.lastUpdated = lastUpdated
     }
 
     /// Rich static showcase — mirrors the design refs.
