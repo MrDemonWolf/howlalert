@@ -24,6 +24,11 @@ struct HowlAlertApp: App {
             StatusItemLabel()
         }
         .menuBarExtraStyle(.window)
+
+        // Native Preferences window (⌘, from the popover's Settings row).
+        Settings {
+            SettingsView()
+        }
     }
 }
 

@@ -16,6 +16,19 @@ final class UsageModel {
 
     private(set) var snapshot: UsageSnapshot?
 
+    /// When `refresh()` last recomputed the snapshot — drives the popover's live
+    /// "Updated Ns ago" footer.
+    private(set) var lastRefresh: Date?
+
+    /// Refresh cadence (seconds) for the safety-net timer, settings-controlled
+    /// (`refreshInterval`). FSEvents + the Stop hook drive instant updates; this
+    /// is just the floor. Default 60s; 0/unset → 60.
+    static let defaultRefreshInterval: TimeInterval = 60
+    private var refreshInterval: TimeInterval {
+        let v = UserDefaults.standard.double(forKey: "refreshInterval")
+        return v > 0 ? v : Self.defaultRefreshInterval
+    }
+
     /// Menu-bar state — `.fresh` when there's no active window yet. Maps the
     /// Core `UsageState` onto the UI `HowlState` (separate enums, same cases).
     var state: HowlState {
@@ -50,16 +63,23 @@ final class UsageModel {
         watcher.start()
         self.watcher = watcher
 
-        let timer = Timer(timeInterval: 60, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.refresh() }
-        }
-        RunLoop.main.add(timer, forMode: .common)
-        self.timer = timer
+        armTimer()
 
         // Instant refresh when a Claude Code turn ends (Stop hook → HAA-122).
         HowlSignal.observeStop { [weak self] in
             Task { @MainActor in self?.refresh() }
         }
+    }
+
+    /// (Re)build the safety-net timer at the current `refreshInterval`. Call after
+    /// the user changes the cadence in Settings.
+    func armTimer() {
+        timer?.invalidate()
+        let timer = Timer(timeInterval: refreshInterval, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
     }
 
     /// One-shot: refresh against real transcripts and write the snapshot to a
@@ -100,6 +120,7 @@ final class UsageModel {
         }
 
         snapshot = UsageEngine.snapshot(events: events, config: config, now: now)
+        lastRefresh = now
         logSnapshot()
     }
 
@@ -113,7 +134,7 @@ final class UsageModel {
                 resetText: "No active session", resetState: .fresh, resetLastMinute: false,
                 session: .init(title: "Session", remaining: 1, pace: 0, state: .fresh,
                                trailingValue: "100%", metaLeading: "Idle"),
-                models: modelRows(), updatedText: updatedText()
+                models: modelRows(), lastUpdated: lastRefresh
             )
         }
         let remaining = s.fractionRemaining
@@ -128,7 +149,7 @@ final class UsageModel {
                            trailingValue: "\(Int((remaining * 100).rounded()))%",
                            metaLeading: "\(formatTokens(s.tokensUsed)) tokens",
                            deficit: s.willLastToReset ? nil : pace.text.lowercased()),
-            models: modelRows(), updatedText: updatedText()
+            models: modelRows(), lastUpdated: lastRefresh
         )
     }
 
@@ -138,13 +159,11 @@ final class UsageModel {
     }
 
     private func modelRows() -> [PopoverData.Model] {
-        UsageEngine.recentModels(events: events, now: Date()).map {
+        UsageEngine.recentModels(events: events, now: lastRefresh ?? Date()).map {
             PopoverData.Model(name: prettyModel($0.model), points: $0.sparkline,
                               value: formatTokens($0.totalTokens), state: .ok)
         }
     }
-
-    private func updatedText() -> String? { "Updated just now" }
 
     private func logSnapshot() {
         let line: String

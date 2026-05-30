@@ -5,31 +5,42 @@ import HowlAlertUI
 ///
 /// Placeholder SF Symbol for now — a system symbol auto-sizes and template-
 /// renders correctly in the menu bar (the custom `WolfShape` didn't, so it read
-/// as nearly invisible). `.ok`/`.fresh` render monochrome (adapts to light/dark
-/// menu bar); `.warn`/`.crit` take the brand state color; `.crit` adds a pulsing
-/// badge. Swap back to a properly-rendered wolf template in a later polish pass.
+/// as nearly invisible). HIG-correct for a status item: monochrome by default so
+/// it adapts to the light/dark menu bar, taking the brand state color only when
+/// something needs attention. State changes `.bounce` once; `.crit` pulses — both
+/// via native `.symbolEffect` (macOS 26) rather than hand-rolled animation. Swap
+/// back to a properly-rendered wolf template in a later polish pass.
 struct MenuBarIcon: View {
     let state: HowlState
-    @State private var pulse = false
 
     private var isAttention: Bool { state == .warn || state == .crit }
 
     var body: some View {
         Image(systemName: "gauge.with.dots.needle.bottom.50percent")
+            .symbolRenderingMode(.hierarchical)
             .foregroundStyle(isAttention ? state.color : Color.primary)
             .overlay(alignment: .topTrailing) {
                 if state == .crit {
-                    Circle()
-                        .fill(HowlColor.stateCrit)
-                        .frame(width: 5, height: 5)
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 5))
+                        .foregroundStyle(HowlColor.stateCrit)
                         .offset(x: 2, y: -2)
-                        .scaleEffect(pulse ? 1.0 : 0.55)
-                        .opacity(pulse ? 1.0 : 0.4)
-                        .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
-                        .onAppear { pulse = true }
+                        .symbolEffect(.pulse, options: .repeating)
                 }
             }
-            .accessibilityLabel("HowlAlert — \(state)")
+            // Nudge the glyph on every state transition (the badge carries the
+            // continuous pulse while critical).
+            .symbolEffect(.bounce, value: state)
+            .accessibilityLabel("HowlAlert — \(accessibilityState)")
+    }
+
+    private var accessibilityState: String {
+        switch state {
+        case .fresh: "idle"
+        case .ok: "on track"
+        case .warn: "running low"
+        case .crit: "almost out"
+        }
     }
 }
 
