@@ -34,7 +34,8 @@ Xcode project at `apps/desktop/HowlAlert.xcodeproj` (objectVersion 77, file-syst
 - `HowlAlertApp.swift` — `MenuBarExtra` (`.window`): state-driven `MenuBarIcon` label + `PopoverShell { DetailedPopover() }`.
 - `MenuBarIcon.swift` — `WolfMark(.mono)` tinted by `HowlState`, crit pulse badge.
 - `PopoverShell.swift` — Liquid Glass popover chrome (nav layer only).
-- **QA harness:** `HOWL_QA_RENDER=/path.png <app-binary>` renders the popover to PNG via `ImageRenderer` and exits. **Limitation:** `ImageRenderer` can't rasterize Liquid Glass (blanks the subtree) — QA PNG shows content only; view glass live in the popover or the `#Preview`s.
+- `UsageModel.swift` + `TranscriptWatcher.swift` (HAA-121) — `@Observable @MainActor` model: FSEvents watch (`TranscriptWatcher`, 1s-latency debounce) + 60s timer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`; 14-day retention. Drives the menu-bar icon's live state (`StatusItemLabel`). Validated on real `~/.claude` (13k events, 35% of P90 window). Binding the snapshot into `DetailedPopover` = HAA-124.
+- **QA harness:** `HOWL_QA_RENDER=/path.png <app-binary>` renders the popover to PNG via `ImageRenderer` and exits. `HOWL_USAGE_DUMP=/path.txt <app-binary>` dumps the live snapshot (real `~/.claude`) to a file and exits. **Limitation:** `ImageRenderer` can't rasterize Liquid Glass (blanks the subtree) — QA PNG shows content only; view glass live in the popover or the `#Preview`s.
 
 ## packages/HowlAlertUI (HAA-118 — In Progress)
 
@@ -48,12 +49,13 @@ Design bundle (source of truth): `apps/docs/design-bundle/` — `design-system.h
 
 ## packages/HowlAlertCore (HAA-123 — Done)
 
-Pure, testable usage engine. `swift-tools-version: 6.2`, `.v26`. **`swift test` green — 32 tests.**
-- `UsageEvent` + `ClaudeTranscriptParser` — `~/.claude` JSONL → token events; dedupe `messageId:requestId` (last chunk wins, parent beats subagent, non-sidechain wins), drop all-zero, ISO-8601. Patterns studied from CodexBar, reimplemented.
+Pure, testable usage engine. `swift-tools-version: 6.2`, `.v26`. **`swift test` green — 42 tests.**
+- `UsageEvent` + `ClaudeTranscriptParser` — `~/.claude` JSONL → token events; dedupe `messageId:requestId` (last chunk wins, parent beats subagent, non-sidechain wins), drop all-zero, ISO-8601. Patterns studied from CodexBar, reimplemented. Validated against real transcripts (fields match exactly).
 - `FiveHourWindow` — first-activity-anchored 5h blocks, gap-split > 5h; `currentBlock` + `completedBlockTotals`.
 - `PlanLimitEstimator` + `Percentile` — P90 (type-7) of completed-window totals; remote `limits.json` override; config fallback (NO hard-coded limit).
 - `UsageEngine.snapshot(events:config:now:)` → `UsageSnapshot` (used %, resets-at, ok/warn/crit, burn-rate run-out).
-- **Not yet wired into the app** — HAA-121 feeds it live files, HAA-124 binds the snapshot to the UI.
+- `ClaudeConfig.discoverTranscriptRoots()` (HAA-121) — `CLAUDE_CONFIG_DIR` env → `~/.config/claude/projects` → `~/.claude/projects`, existing + deduped.
+- `TranscriptReader` (HAA-121) — enumerate `*.jsonl`, `modifiedAfter` filter, per-file byte `FileCursor` incremental reads (only complete lines), `/subagents/` path → `.subagent`.
 
 ## CodexBar reference (study, never copy — MIT)
 
@@ -80,7 +82,7 @@ Old backlog HAA-1–112 → Done (board cleared). Fresh v2.1 backlog:
 | HAA-118 | HowlAlertUI tokens + 20 components | In Progress (pixel QA left) |
 | HAA-119 | apps/desktop Xcode shell | **Done** |
 | HAA-120 | MenuBarExtra + Liquid Glass popover shell | **Done** |
-| HAA-121 | FSEvents watcher on `~/.claude/projects/**/*.jsonl` | To Do |
+| HAA-121 | FSEvents watcher on `~/.claude/projects/**/*.jsonl` | **Done** |
 | HAA-122 | Stop hook handler binary | To Do |
 | HAA-123 | 5h window math + P90 (tests) | **Done** |
 | HAA-124 | Popover UI + Demo Mode + refresh cadence | To Do |
@@ -88,8 +90,8 @@ Old backlog HAA-1–112 → Done (board cleared). Fresh v2.1 backlog:
 
 ## Next steps
 
-- [ ] **HAA-121** — FSEvents watcher on `~/.claude/projects/**/*.jsonl`; resolve roots (`CLAUDE_CONFIG_DIR`, then `~/.config/claude/projects`, then `~/.claude/projects`); incremental reads → feed `ClaudeTranscriptParser` → `UsageEngine`. (Wires the engine to live data.)
-- [ ] **HAA-124** — bind `UsageSnapshot` to `DetailedPopover` + Demo Mode + refresh cadence. (Needs 121.)
+- [x] **HAA-121** (Done) — FSEvents watcher + `TranscriptReader` + `UsageModel`; live pipeline validated on real `~/.claude`. Drives menu-bar icon state.
+- [ ] **HAA-124** — bind `UsageModel.snapshot` to `DetailedPopover` content (replace placeholders) + Demo Mode + refresh cadence UI. Pipeline is ready; this is the UI bind. Consider whether cache-read tokens should count toward the window (currently included — inflates absolute totals; P90 makes it self-relative).
 - [ ] **HAA-122** — Stop hook handler binary (Claude Code Stop hook → nudge a refresh).
 - [ ] Finish **HAA-118** pixel/type-scale QA vs HTML refs → mark Done.
 - [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap (last P0; needs Apple Dev portal — ASK first).

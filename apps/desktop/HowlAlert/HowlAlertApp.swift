@@ -17,26 +17,41 @@ import HowlAlertUI
 struct HowlAlertApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
-    /// Placeholder usage state — replaced by live computation in HAA-124.
-    @State private var state: HowlState = .warn
-
     var body: some Scene {
         MenuBarExtra {
             PopoverShell {
                 DetailedPopover()
             }
         } label: {
-            MenuBarIcon(state: state)
+            StatusItemLabel()
         }
         .menuBarExtraStyle(.window)
     }
 }
 
+/// Menu-bar label, driven by the live `UsageModel` state (HAA-121). Its own
+/// view so SwiftUI observation re-renders the icon when usage changes.
+private struct StatusItemLabel: View {
+    private var model = UsageModel.shared
+    var body: some View {
+        MenuBarIcon(state: model.state)
+    }
+}
+
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        guard let path = ProcessInfo.processInfo.environment["HOWL_QA_RENDER"] else { return }
-        QARenderer.render(to: URL(fileURLWithPath: path))
-        NSApp.terminate(nil)
+        if let path = ProcessInfo.processInfo.environment["HOWL_QA_RENDER"] {
+            QARenderer.render(to: URL(fileURLWithPath: path))
+            NSApp.terminate(nil)
+            return
+        }
+        if let dump = ProcessInfo.processInfo.environment["HOWL_USAGE_DUMP"] {
+            MainActor.assumeIsolated { UsageModel.shared.dump(to: URL(fileURLWithPath: dump)) }
+            NSApp.terminate(nil)
+            return
+        }
+        // Start the live usage pipeline: watch ~/.claude, parse, compute snapshot.
+        Task { @MainActor in UsageModel.shared.start() }
     }
 }
 
