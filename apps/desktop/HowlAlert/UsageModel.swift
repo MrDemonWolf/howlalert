@@ -53,8 +53,9 @@ final class UsageModel {
     /// and `dump` paths — which also call `refresh()` — never post notifications.
     private var isLive = false
     /// Last state we notified about, to fire only on a rise in severity (and to
-    /// re-arm once usage drops, e.g. after a window reset).
-    private var lastNotifiedState: HowlState?
+    /// re-arm once usage drops, e.g. after a window reset). The transition rule
+    /// itself is the pure `usageAlert(...)` in HowlAlertCore (unit-tested).
+    private var lastNotifiedState: UsageState?
 
     init(config: LimitsConfig = .howlBundledDefault, retentionDays: Double = 14) {
         self.roots = ClaudeConfig.discoverTranscriptRoots()
@@ -143,40 +144,25 @@ final class UsageModel {
     /// first live snapshot only seeds the baseline so launch is silent.
     private func notifyIfNeeded() {
         guard isLive else { return }
-        let current = state
+        let current = snapshot?.state ?? .fresh
+        let prefs = AlertPreferences(
+            low: UserDefaults.standard.object(forKey: "notifyLow") as? Bool ?? true,
+            almostOut: UserDefaults.standard.object(forKey: "notifyAlmostOut") as? Bool ?? true
+        )
 
-        guard let last = lastNotifiedState else {
-            lastNotifiedState = current   // seed: no notification on first refresh
-            return
+        let result = usageAlert(previous: lastNotifiedState, current: current, preferences: prefs)
+        lastNotifiedState = result.baseline
+        guard let alert = result.alert else { return }
+
+        let title: String
+        switch alert {
+        case .low: title = "Running low"
+        case .almostOut: title = "Almost out"
         }
-
-        // Usage eased off — re-arm so the next rise notifies again.
-        if Self.severity(current) < Self.severity(last) {
-            lastNotifiedState = current
-            return
-        }
-        // No rise → nothing to announce.
-        guard Self.severity(current) > Self.severity(last) else { return }
-
-        let defaults = UserDefaults.standard
-        let wantsWarn = defaults.object(forKey: "notifyLow") as? Bool ?? true
-        let wantsCrit = defaults.object(forKey: "notifyAlmostOut") as? Bool ?? true
-
-        let content: (title: String, body: String)?
-        switch current {
-        case .crit where wantsCrit: content = ("Almost out", notificationBody())
-        case .warn where wantsWarn: content = ("Running low", notificationBody())
-        default: content = nil
-        }
-
-        // Always advance the baseline so we don't re-evaluate this rise next time,
-        // even if the matching toggle is off.
-        lastNotifiedState = current
-        guard let content else { return }
 
         let note = UNMutableNotificationContent()
-        note.title = content.title
-        note.body = content.body
+        note.title = title
+        note.body = notificationBody()
         note.sound = .default
         let request = UNNotificationRequest(identifier: "howl.window.\(current)", content: note, trigger: nil)
         UNUserNotificationCenter.current().add(request)
@@ -187,16 +173,6 @@ final class UsageModel {
         guard let s = snapshot else { return "Your 5-hour window is running down." }
         let pct = Int((s.fractionRemaining * 100).rounded())
         return "\(pct)% of your 5-hour window left · resets in \(naturalDuration(s.timeUntilReset))"
-    }
-
-    /// Severity rank for transition comparisons.
-    private static func severity(_ state: HowlState) -> Int {
-        switch state {
-        case .fresh: 0
-        case .ok: 1
-        case .warn: 2
-        case .crit: 3
-        }
     }
 
     /// Live snapshot mapped into popover view data. The weekly window isn't
