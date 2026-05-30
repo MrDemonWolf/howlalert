@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UserNotifications
 import HowlAlertCore
 import HowlAlertUI
 
@@ -48,6 +49,13 @@ final class UsageModel {
     private var watcher: TranscriptWatcher?
     private var timer: Timer?
 
+    /// True only while the real pipeline is running (`start()`), so the QA-render
+    /// and `dump` paths — which also call `refresh()` — never post notifications.
+    private var isLive = false
+    /// Last state we notified about, to fire only on a rise in severity (and to
+    /// re-arm once usage drops, e.g. after a window reset).
+    private var lastNotifiedState: HowlState?
+
     init(config: LimitsConfig = .howlBundledDefault, retentionDays: Double = 14) {
         self.roots = ClaudeConfig.discoverTranscriptRoots()
         self.config = config
@@ -56,6 +64,8 @@ final class UsageModel {
 
     /// Begin watching + a one-shot initial read, plus a 60s safety-net timer.
     func start() {
+        isLive = true
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         refresh()
         let watcher = TranscriptWatcher(roots: roots) { [weak self] in
             Task { @MainActor in self?.refresh() }
@@ -121,7 +131,72 @@ final class UsageModel {
 
         snapshot = UsageEngine.snapshot(events: events, config: config, now: now)
         lastRefresh = now
+        notifyIfNeeded()
         logSnapshot()
+    }
+
+    // MARK: - Local notifications
+
+    /// Post a local notification when usage crosses *up* into warn/crit (gated by
+    /// the per-threshold Settings toggles). Fires once per rise — never every
+    /// refresh — and re-arms when usage drops (e.g. after a window reset). The
+    /// first live snapshot only seeds the baseline so launch is silent.
+    private func notifyIfNeeded() {
+        guard isLive else { return }
+        let current = state
+
+        guard let last = lastNotifiedState else {
+            lastNotifiedState = current   // seed: no notification on first refresh
+            return
+        }
+
+        // Usage eased off — re-arm so the next rise notifies again.
+        if Self.severity(current) < Self.severity(last) {
+            lastNotifiedState = current
+            return
+        }
+        // No rise → nothing to announce.
+        guard Self.severity(current) > Self.severity(last) else { return }
+
+        let defaults = UserDefaults.standard
+        let wantsWarn = defaults.object(forKey: "notifyLow") as? Bool ?? true
+        let wantsCrit = defaults.object(forKey: "notifyAlmostOut") as? Bool ?? true
+
+        let content: (title: String, body: String)?
+        switch current {
+        case .crit where wantsCrit: content = ("Almost out", notificationBody())
+        case .warn where wantsWarn: content = ("Running low", notificationBody())
+        default: content = nil
+        }
+
+        // Always advance the baseline so we don't re-evaluate this rise next time,
+        // even if the matching toggle is off.
+        lastNotifiedState = current
+        guard let content else { return }
+
+        let note = UNMutableNotificationContent()
+        note.title = content.title
+        note.body = content.body
+        note.sound = .default
+        let request = UNNotificationRequest(identifier: "howl.window.\(current)", content: note, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    /// Body line in the brand voice, e.g. "16% of your 5-hour window left · resets in 47m".
+    private func notificationBody() -> String {
+        guard let s = snapshot else { return "Your 5-hour window is running down." }
+        let pct = Int((s.fractionRemaining * 100).rounded())
+        return "\(pct)% of your 5-hour window left · resets in \(naturalDuration(s.timeUntilReset))"
+    }
+
+    /// Severity rank for transition comparisons.
+    private static func severity(_ state: HowlState) -> Int {
+        switch state {
+        case .fresh: 0
+        case .ok: 1
+        case .warn: 2
+        case .crit: 3
+        }
     }
 
     /// Live snapshot mapped into popover view data. The weekly window isn't
