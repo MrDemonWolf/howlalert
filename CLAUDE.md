@@ -21,7 +21,7 @@ Three surfaces + a relay:
 
 | Surface | Path | Distribution | Cost |
 |---|---|---|---|
-| Desktop menu bar | `apps/macos` | Notarized DMG via Homebrew cask | Free |
+| Desktop menu bar | `apps/desktop` | Notarized DMG via Homebrew cask | Free |
 | Mobile (iOS + watchOS) | `apps/mobile` | App Store | Paid |
 | Server (APNs relay) | `apps/server` | Hono on Bun → Dokploy | — |
 | Admin + Docs | `apps/web`, `apps/docs` | Next.js + fumadocs | — |
@@ -49,14 +49,14 @@ Both grant the same RevenueCat entitlement `pro_features` — **never gate featu
 
 ## 5. Monorepo layout
 
-Bun + Turborepo. Workspaces glob `apps/*` + `packages/*` **excluding the Swift dirs** (`!apps/macos`, `!apps/mobile`, `!packages/HowlAlertUI`).
+Bun + Turborepo. Workspaces glob `apps/*` + `packages/*` **excluding the Swift dirs** (`!apps/desktop`, `!apps/mobile`, `!packages/HowlAlertUI`).
 
 ```
 apps/
   server/   @howlalert/server  — Hono + tRPC on Bun (:3000)
   web/      @howlalert/web      — Next.js 15 admin (:3001)
   docs/     @howlalert/docs     — fumadocs (:4000)
-  macos/    Xcode desktop app   (Swift, not a Bun workspace)
+  desktop/  Xcode macOS app     (Swift, not a Bun workspace)
   mobile/   Xcode iOS+watchOS   (Swift, not a Bun workspace)
 packages/
   api/      @howlalert/api      — tRPC routers + context
@@ -68,7 +68,7 @@ packages/
   HowlAlertUI/  Swift design system (not a Bun workspace)
 ```
 
-Two Xcode projects only: `apps/macos` = desktop, `apps/mobile` = iOS + watchOS together. Never split watch into its own project.
+Two Xcode projects only: `apps/desktop` = macOS desktop, `apps/mobile` = iOS + watchOS together. Never split watch into its own project.
 
 ## 6. Commands
 
@@ -104,7 +104,7 @@ Colors: navy `#091533`, cyan `#0FACED`, green `#3DDC97` / amber `#FFA533` / red 
 - ❌ Don't store sensitive user data on the server — device tokens + pairing HMACs only.
 - ❌ Don't hard-code Claude plan limits — P90 auto-detect + remote `limits.json`.
 - ❌ Don't use React Native — iOS/watchOS is native Swift.
-- ❌ Don't make more than two Xcode projects (`macos` = desktop, `mobile` = iOS + watch).
+- ❌ Don't make more than two Xcode projects (`desktop` = macOS, `mobile` = iOS + watch).
 - ❌ Don't add conditional pre-26 fallbacks — target macOS 26 / iOS 26 / watchOS 26 only.
 - ❌ Don't revert `ink-500` to `#6A7A99` (fails AA) — use `#9AA9C5`.
 - ❌ Don't commit secrets (`.p8`, App Store Connect keys, RevenueCat keys). Use `.env` (gitignored) + Dokploy env vars + Xcode `.xcconfig` (gitignored).
