@@ -98,6 +98,49 @@ final class UsageModel {
         logSnapshot()
     }
 
+    /// Live snapshot mapped into popover view data. The weekly window isn't
+    /// wired yet (needs more history than retention) so `week` stays nil here.
+    var popoverData: PopoverData {
+        guard let s = snapshot else {
+            return PopoverData(
+                paceText: "On track", paceState: .ok,
+                critRemaining: 1, critState: .fresh, critLabel: "5-hour window",
+                resetText: "No active session", resetState: .fresh, resetLastMinute: false,
+                session: .init(title: "Session", remaining: 1, pace: 0, state: .fresh,
+                               trailingValue: "100%", metaLeading: "Idle"),
+                models: modelRows(), updatedText: updatedText()
+            )
+        }
+        let remaining = s.fractionRemaining
+        let elapsed = min(1, max(0, s.now.timeIntervalSince(s.windowStart) / FiveHourWindow.duration))
+        let pace = paceDescriptor(s)
+        return PopoverData(
+            paceText: pace.text, paceState: pace.state,
+            critRemaining: remaining, critState: state, critLabel: "5-hour window",
+            resetText: "Resets in \(naturalDuration(s.timeUntilReset))",
+            resetState: state, resetLastMinute: s.timeUntilReset < 60,
+            session: .init(title: "Session", remaining: remaining, pace: elapsed, state: state,
+                           trailingValue: "\(Int((remaining * 100).rounded()))%",
+                           metaLeading: "\(formatTokens(s.tokensUsed)) tokens",
+                           deficit: s.willLastToReset ? nil : pace.text.lowercased()),
+            models: modelRows(), updatedText: updatedText()
+        )
+    }
+
+    private func paceDescriptor(_ s: UsageSnapshot) -> (text: String, state: HowlState) {
+        guard !s.willLastToReset, let runOut = s.projectedRunOut else { return ("On track", .ok) }
+        return ("Runs out in \(naturalDuration(max(0, runOut.timeIntervalSince(s.now))))", state)
+    }
+
+    private func modelRows() -> [PopoverData.Model] {
+        UsageEngine.recentModels(events: events, now: Date()).map {
+            PopoverData.Model(name: prettyModel($0.model), points: $0.sparkline,
+                              value: formatTokens($0.totalTokens), state: .ok)
+        }
+    }
+
+    private func updatedText() -> String? { "Updated just now" }
+
     private func logSnapshot() {
         let line: String
         if let s = snapshot {
@@ -108,6 +151,34 @@ final class UsageModel {
         }
         FileHandle.standardError.write(Data(line.utf8))
     }
+}
+
+// MARK: - Formatting
+
+/// "3.2M", "950K", "420" — compact token counts.
+func formatTokens(_ n: Int) -> String {
+    let value = Double(n)
+    if value >= 1_000_000 { return String(format: "%.1fM", value / 1_000_000) }
+    if value >= 1_000 { return String(format: "%.0fK", value / 1_000) }
+    return "\(n)"
+}
+
+/// "47m", "2h 5m" — natural, watching-not-monitoring voice.
+func naturalDuration(_ seconds: TimeInterval) -> String {
+    let total = max(0, Int(seconds.rounded()))
+    let minutes = total / 60
+    if minutes < 60 { return "\(minutes)m" }
+    return "\(minutes / 60)h \(minutes % 60)m"
+}
+
+/// "claude-opus-4-7" → "Opus 4.7"; falls back to the raw id.
+func prettyModel(_ id: String) -> String {
+    var parts = id.split(separator: "-").map(String.init)
+    if parts.first == "claude" { parts.removeFirst() }
+    guard let family = parts.first else { return id }
+    let version = parts.dropFirst().joined(separator: ".")
+    let name = family.prefix(1).uppercased() + family.dropFirst()
+    return version.isEmpty ? name : "\(name) \(version)"
 }
 
 extension LimitsConfig {

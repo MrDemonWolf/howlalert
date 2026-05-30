@@ -34,7 +34,8 @@ Xcode project at `apps/desktop/HowlAlert.xcodeproj` (objectVersion 77, file-syst
 - `HowlAlertApp.swift` — `MenuBarExtra` (`.window`): state-driven `MenuBarIcon` label + `PopoverShell { DetailedPopover() }`.
 - `MenuBarIcon.swift` — `WolfMark(.mono)` tinted by `HowlState`, crit pulse badge.
 - `PopoverShell.swift` — Liquid Glass popover chrome (nav layer only).
-- `UsageModel.swift` + `TranscriptWatcher.swift` (HAA-121) — `@Observable @MainActor` model: FSEvents watch (`TranscriptWatcher`, 1s-latency debounce) + 60s timer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`; 14-day retention. Drives the menu-bar icon's live state (`StatusItemLabel`). Validated on real `~/.claude` (13k events, 35% of P90 window). Binding the snapshot into `DetailedPopover` = HAA-124.
+- `UsageModel.swift` + `TranscriptWatcher.swift` (HAA-121) — `@Observable @MainActor` model: FSEvents watch (`TranscriptWatcher`, 1s-latency debounce) + 60s timer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`; 14-day retention. Drives the menu-bar icon's live state (`StatusItemLabel`). Validated on real `~/.claude`.
+- `PopoverContent.swift` + `UsageModel.popoverData` (HAA-124) — maps the live snapshot + `recentModels` → `PopoverData`, bound into `DetailedPopover`. **Demo Mode** via `@AppStorage("demoMode")` (toggle row → `.demo` showcase). Refresh/Quit actions wired. Formatting helpers (`formatTokens`, `naturalDuration`, `prettyModel`). Live popover verified showing real % + model. Week row deferred (no live weekly window yet).
 - **QA harness:** `HOWL_QA_RENDER=/path.png <app-binary>` renders the popover to PNG via `ImageRenderer` and exits. `HOWL_USAGE_DUMP=/path.txt <app-binary>` dumps the live snapshot (real `~/.claude`) to a file and exits. **Limitation:** `ImageRenderer` can't rasterize Liquid Glass (blanks the subtree) — QA PNG shows content only; view glass live in the popover or the `#Preview`s.
 
 ## packages/HowlAlertUI (HAA-118 — In Progress)
@@ -43,19 +44,21 @@ Xcode project at `apps/desktop/HowlAlert.xcodeproj` (objectVersion 77, file-syst
 - Tokens: `HowlColor` (ink-500 = `#9AA9C5` AAA — never `#6A7A99`), `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`, `HowlState`
 - 20 components: CritBar, TwoBarMeter, UsageMeter, UsageRow, PaceChip, ResetCountdown, ModelRow(+Sparkline), Primary/Secondary/Ghost button styles, PairingCard, EmptyState, NotificationCard, SettingsRow(+PillSelect), StateIcon, WolfMark(full/mono/template), PricingToggle, PopoverTabBar, MenuActionRow, CostSummary, DetailedPopover
 - `HowlGlass.swift` (added HAA-120): `View.howlGlass(_:in:)` + `HowlGlassGroup` (GlassEffectContainer). Nav layer only.
+- `PopoverData` + data-driven `DetailedPopover(data:demoEnabled:onRefresh:onQuit:onToggleDemo:)` (HAA-124): default `.demo`; renders week row only when present; menu rows fire optional callbacks.
 - **Pending (to close HAA-118):** pixel QA vs HTML refs; exact type-scale reconciliation.
 
 Design bundle (source of truth): `apps/docs/design-bundle/` — `design-system.html` + `section-b..h-*.html` + `chats/chat1.md`. Build from `design-system.html`.
 
 ## packages/HowlAlertCore (HAA-123 — Done)
 
-Pure, testable usage engine. `swift-tools-version: 6.2`, `.v26`. **`swift test` green — 42 tests.**
+Pure, testable usage engine. `swift-tools-version: 6.2`, `.v26`. **`swift test` green — 47 tests.**
 - `UsageEvent` + `ClaudeTranscriptParser` — `~/.claude` JSONL → token events; dedupe `messageId:requestId` (last chunk wins, parent beats subagent, non-sidechain wins), drop all-zero, ISO-8601. Patterns studied from CodexBar, reimplemented. Validated against real transcripts (fields match exactly).
 - `FiveHourWindow` — first-activity-anchored 5h blocks, gap-split > 5h; `currentBlock` + `completedBlockTotals`.
 - `PlanLimitEstimator` + `Percentile` — P90 (type-7) of completed-window totals; remote `limits.json` override; config fallback (NO hard-coded limit).
 - `UsageEngine.snapshot(events:config:now:)` → `UsageSnapshot` (used %, resets-at, ok/warn/crit, burn-rate run-out).
 - `ClaudeConfig.discoverTranscriptRoots()` (HAA-121) — `CLAUDE_CONFIG_DIR` env → `~/.config/claude/projects` → `~/.claude/projects`, existing + deduped.
 - `TranscriptReader` (HAA-121) — enumerate `*.jsonl`, `modifiedAfter` filter, per-file byte `FileCursor` incremental reads (only complete lines), `/subagents/` path → `.subagent`.
+- `ModelUsage` + `UsageEngine.recentModels(...)` (HAA-124) — top models by volume within a span, each with a bucketed sparkline.
 
 ## CodexBar reference (study, never copy — MIT)
 
@@ -85,13 +88,16 @@ Old backlog HAA-1–112 → Done (board cleared). Fresh v2.1 backlog:
 | HAA-121 | FSEvents watcher on `~/.claude/projects/**/*.jsonl` | **Done** |
 | HAA-122 | Stop hook handler binary | To Do |
 | HAA-123 | 5h window math + P90 (tests) | **Done** |
-| HAA-124 | Popover UI + Demo Mode + refresh cadence | To Do |
+| HAA-124 | Popover UI + Demo Mode + refresh cadence | **Done** |
 | HAA-125 | Sparkle + notarized DMG + Homebrew tap | To Do |
 
 ## Next steps
 
 - [x] **HAA-121** (Done) — FSEvents watcher + `TranscriptReader` + `UsageModel`; live pipeline validated on real `~/.claude`. Drives menu-bar icon state.
-- [ ] **HAA-124** — bind `UsageModel.snapshot` to `DetailedPopover` content (replace placeholders) + Demo Mode + refresh cadence UI. Pipeline is ready; this is the UI bind. Consider whether cache-read tokens should count toward the window (currently included — inflates absolute totals; P90 makes it self-relative).
+- [x] **HAA-124** (Done) — live popover binding + Demo Mode + recent models + refresh actions. Verified on real data.
+- [ ] **Weekly window** (new follow-up, not yet ticketed) — needs a 7-day window + limit detection (more history than 14-day retention). Then the Week row goes live.
+- [ ] Decide whether cache-read tokens count toward the window (currently included; P90 keeps it self-relative).
+- [ ] "Updated just now" is static text — make it a live relative timer in a later polish pass.
 - [ ] **HAA-122** — Stop hook handler binary (Claude Code Stop hook → nudge a refresh).
 - [ ] Finish **HAA-118** pixel/type-scale QA vs HTML refs → mark Done.
 - [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap (last P0; needs Apple Dev portal — ASK first).
