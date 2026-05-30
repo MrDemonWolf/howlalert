@@ -1,122 +1,108 @@
 # HANDOFF — HowlAlert v2.1
 
-> Continuation notes for a fresh Claude Code session. Read `CLAUDE.md` first, then this. Last updated 2026-05-29.
+> Continuation notes for a fresh Claude Code session. Read `CLAUDE.md` first, then this. Last updated 2026-05-30.
+
+## TL;DR — start here
+
+Phase 0 desktop is **functional end-to-end**: the menu-bar app watches `~/.claude`, computes the 5-hour usage window with a P90-auto-detected limit, and shows it live in the popover. **6 of 8 P0 tickets done** (HAA-118 pixel-QA + HAA-125 packaging remain). Docs auto-deploy to GitHub Pages. CI green on every push.
+
+To see it: open `apps/desktop/HowlAlert.xcodeproj` in Xcode 26 → **⌘R** → click the wolf icon in the menu bar. Or `swift test` in `packages/HowlAlertCore` (47 tests).
 
 ## Where things stand
 
-Repo was **wiped from the old v3 plan and rebuilt as v2.1** (Hono on Bun + Postgres + Redis → Dokploy; Apple apps target **macOS 26 / iOS 26 / watchOS 26 only**). Old v3 committed state is backed up on branch `backup/pre-v2.1-wipe` (origin). Working tree clean; `main` in sync with origin. Pushes to `main` bypass the "Solo Main Protection" ruleset (expected — solo admin).
+Repo wiped from the old v3 plan, rebuilt as **v2.1** (Hono on Bun + Postgres + Redis → Dokploy; Apple apps **macOS 26 / iOS 26 / watchOS 26 only**). Old v3 backed up on branch `backup/pre-v2.1-wipe`. Working tree clean; `main` in sync. Pushes to `main` bypass "Solo Main Protection" (solo admin).
 
 ## Key commits (newest first)
 
-- `c52f4c8` feat(core): HAA-123 usage engine (HowlAlertCore) — 5h window + P90, 32 tests
-- `16884ff` feat(desktop): HAA-120 MenuBarExtra status item + Liquid Glass popover shell
-- `49e87af` refactor(desktop): rename apps/macos → apps/desktop, org bundle id
-- `b8ca65d` feat(macos): HAA-119 Phase-0 Xcode shell rendering DetailedPopover
-- `72cbaee` docs: archive original v2.1 kickoff prompt (`docs/v2.1-kickoff-prompt.md`)
-- `fda98e5` feat(ui): HowlAlertUI full 20-component set
-- `4093c8e` feat(ui): HowlAlertUI scaffold (tokens + first components) + design bundle
-- `91f5c9a` docs: regenerate CLAUDE.md (v2.1 rules + structure, 26-only)
-- `85ecb6d` Redis service + Swift dirs + workspace excludes
-- `8403f6a` better-t-stack scaffold (Hono+Next+Drizzle+Postgres+tRPC+better-auth+fumadocs+turborepo)
-- `6b7257b` wipe v3 (the reset)
+- `a86aaca` HAA-122 Stop-hook binary → instant refresh
+- `52843a6` HAA-124 bind live usage to popover + Demo Mode
+- `dbb3cc2` HAA-121 FSEvents watcher → live pipeline
+- `2afbd49` CI: GitHub Pages docs deploy + CI/license/sponsors workflows
+- `779d0ce` docs: sync HANDOFF + CLAUDE.md
+- `c52f4c8` HAA-123 usage engine (HowlAlertCore) — 5h window + P90
+- `16884ff` HAA-120 MenuBarExtra + Liquid Glass popover shell
+- `49e87af` rename apps/macos → apps/desktop, org bundle id
+- `b8ca65d` HAA-119 Phase-0 Xcode shell
+- earlier: scaffold, Redis, CLAUDE.md, HowlAlertUI 20 components
 
-## Monorepo (built + verified)
+## Monorepo
 
-- `apps/server` `@howlalert/server` Hono+tRPC (:3000) · `apps/web` `@howlalert/web` Next (:3001) · `apps/docs` `@howlalert/docs` fumadocs (:4000)
-- `packages/{api,auth,config,db,env,ui}` `@howlalert/*`
-- `packages/db/docker-compose.yml` = Postgres + Redis (NOT root). `bun run db:start` brings both up.
+- JS: `apps/server` `@howlalert/server` (:3000) · `apps/web` (:3001) · `apps/docs` fumadocs (:4000) · `packages/{api,auth,config,db,env,ui}`
+- `packages/db/docker-compose.yml` = Postgres + Redis. `bun run db:start`.
 - **Swift dirs** (excluded from Bun workspaces): `apps/desktop`, `apps/mobile`, `packages/HowlAlertUI`, `packages/HowlAlertCore`
-- Verified earlier: `bun install` clean · pg+redis healthy · `db:push` · all 3 dev servers 200 · `redis-cli ping` PONG.
 
-## apps/desktop (HAA-119 + HAA-120 — Done)
+## packages/HowlAlertCore (usage engine — pure, tested)
 
-Xcode project at `apps/desktop/HowlAlert.xcodeproj` (objectVersion 77, file-system-synchronized group). Menu-bar-only (`LSUIElement`), macOS 26, Hardened Runtime. Bundle id `com.mrdemonwolf.howlalert` (release) / `.dev` (debug). Imports `packages/HowlAlertUI` via local SPM ref.
-- `HowlAlertApp.swift` — `MenuBarExtra` (`.window`): state-driven `MenuBarIcon` label + `PopoverShell { DetailedPopover() }`.
-- `MenuBarIcon.swift` — `WolfMark(.mono)` tinted by `HowlState`, crit pulse badge.
-- `PopoverShell.swift` — Liquid Glass popover chrome (nav layer only).
-- `UsageModel.swift` + `TranscriptWatcher.swift` (HAA-121) — `@Observable @MainActor` model: FSEvents watch (`TranscriptWatcher`, 1s-latency debounce) + 60s timer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`; 14-day retention. Drives the menu-bar icon's live state (`StatusItemLabel`). Validated on real `~/.claude`.
-- `PopoverContent.swift` + `UsageModel.popoverData` (HAA-124) — maps the live snapshot + `recentModels` → `PopoverData`, bound into `DetailedPopover`. **Demo Mode** via `@AppStorage("demoMode")` (toggle row → `.demo` showcase). Refresh/Quit actions wired. Formatting helpers (`formatTokens`, `naturalDuration`, `prettyModel`). Live popover verified showing real % + model. Week row deferred (no live weekly window yet).
-- **QA harness:** `HOWL_QA_RENDER=/path.png <app-binary>` renders the popover to PNG via `ImageRenderer` and exits. `HOWL_USAGE_DUMP=/path.txt <app-binary>` dumps the live snapshot (real `~/.claude`) to a file and exits. **Limitation:** `ImageRenderer` can't rasterize Liquid Glass (blanks the subtree) — QA PNG shows content only; view glass live in the popover or the `#Preview`s.
-
-## packages/HowlAlertUI (HAA-118 — In Progress)
-
-`swift-tools-version: 6.2`, platforms `.v26`. **`swift build` green.**
-- Tokens: `HowlColor` (ink-500 = `#9AA9C5` AAA — never `#6A7A99`), `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`, `HowlState`
-- 20 components: CritBar, TwoBarMeter, UsageMeter, UsageRow, PaceChip, ResetCountdown, ModelRow(+Sparkline), Primary/Secondary/Ghost button styles, PairingCard, EmptyState, NotificationCard, SettingsRow(+PillSelect), StateIcon, WolfMark(full/mono/template), PricingToggle, PopoverTabBar, MenuActionRow, CostSummary, DetailedPopover
-- `HowlGlass.swift` (added HAA-120): `View.howlGlass(_:in:)` + `HowlGlassGroup` (GlassEffectContainer). Nav layer only.
-- `PopoverData` + data-driven `DetailedPopover(data:demoEnabled:onRefresh:onQuit:onToggleDemo:)` (HAA-124): default `.demo`; renders week row only when present; menu rows fire optional callbacks.
-- **Pending (to close HAA-118):** pixel QA vs HTML refs; exact type-scale reconciliation.
-
-Design bundle (source of truth): `apps/docs/design-bundle/` — `design-system.html` + `section-b..h-*.html` + `chats/chat1.md`. Build from `design-system.html`.
-
-## packages/HowlAlertCore (HAA-123 — Done)
-
-Pure, testable usage engine. `swift-tools-version: 6.2`, `.v26`. **`swift test` green — 47 tests.**
-- `UsageEvent` + `ClaudeTranscriptParser` — `~/.claude` JSONL → token events; dedupe `messageId:requestId` (last chunk wins, parent beats subagent, non-sidechain wins), drop all-zero, ISO-8601. Patterns studied from CodexBar, reimplemented. Validated against real transcripts (fields match exactly).
-- `FiveHourWindow` — first-activity-anchored 5h blocks, gap-split > 5h; `currentBlock` + `completedBlockTotals`.
+`swift-tools-version: 6.2`, `.v26`. **`swift test` → 47 tests green.**
+- `UsageEvent` + `ClaudeTranscriptParser` — JSONL → events; dedupe `messageId:requestId` (last chunk wins, parent>subagent, non-sidechain wins), drop all-zero, ISO-8601. Fields validated against real transcripts.
+- `FiveHourWindow` — first-activity-anchored 5h blocks, gap-split >5h; `currentBlock`, `completedBlockTotals`.
 - `PlanLimitEstimator` + `Percentile` — P90 (type-7) of completed-window totals; remote `limits.json` override; config fallback (NO hard-coded limit).
-- `UsageEngine.snapshot(events:config:now:)` → `UsageSnapshot` (used %, resets-at, ok/warn/crit, burn-rate run-out).
-- `ClaudeConfig.discoverTranscriptRoots()` (HAA-121) — `CLAUDE_CONFIG_DIR` env → `~/.config/claude/projects` → `~/.claude/projects`, existing + deduped.
-- `TranscriptReader` (HAA-121) — enumerate `*.jsonl`, `modifiedAfter` filter, per-file byte `FileCursor` incremental reads (only complete lines), `/subagents/` path → `.subagent`.
-- `ModelUsage` + `UsageEngine.recentModels(...)` (HAA-124) — top models by volume within a span, each with a bucketed sparkline.
+- `UsageEngine.snapshot(...)` → `UsageSnapshot`; `UsageEngine.recentModels(...)` → `[ModelUsage]` (per-model totals + sparkline).
+- `ClaudeConfig.discoverTranscriptRoots()`; `TranscriptReader` (incremental byte-cursor reads, `modifiedAfter` filter).
+- `HowlSignal` — Darwin notification post/observe (Stop-hook IPC).
+- `howlalert-hook` executable target — posts the stop signal (the Stop-hook binary).
 
-## CodexBar reference (study, never copy — MIT)
+## packages/HowlAlertUI (design system)
 
-Local clone: `/Users/nathanialhenniges/Developer/tmp/CodexBar`. Key finding: CodexBar **does NOT compute the 5h window or plan limits from JSONL** — it scrapes those from Anthropic's OAuth API / `claude /usage` CLI. Its JSONL engine (`Sources/CodexBarCore/Vendored/CostUsage/CostUsageScanner+Claude.swift`) only does daily token aggregation + cost. So HowlAlert's window/P90 math is net-new; only the parsing/dedupe patterns were reusable prior art.
+`swift build` green. Tokens (`HowlColor` ink-500 `#9AA9C5` — never `#6A7A99`, `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`, `HowlState`). 20 components. `HowlGlass.howlGlass(_:in:)` + `HowlGlassGroup`. **`DetailedPopover` is data-driven**: `init(data: PopoverData = .demo, demoEnabled:, onRefresh:, onQuit:, onToggleDemo:)`; week row renders only when present.
+Design source of truth: `apps/docs/design-bundle/` (`design-system.html` + `section-b..h-*.html`).
 
-## CI / Deploy (`.github/workflows/`)
+## apps/desktop (menu-bar app — functional)
 
-Mirrored from WolfWave (pinned action SHAs):
-- `docs.yml` — push to `main` → build `apps/docs` static export → deploy to **GitHub Pages**. **Docs are statically exported** now (`next.config.mjs` `output: "export"`, `basePath` default `/howlalert`, `trailingSlash`; search → fumadocs `staticGET` + `RootProvider search type:"static"`; `og`/`llms` routes are `force-static`). Local build verified → `apps/docs/out/`. **One-time:** enable repo Settings → Pages → Source = **GitHub Actions**.
-- `test.yml` — CI. `js` job (ubuntu): `bun install`, `check-types`, docs build. `swift` job (`macos-26`, paths-filtered): `swift test` HowlAlertCore, `swift build` HowlAlertUI, `xcodebuild build` desktop.
-- `license-year.yml` — annual LICENSE year bump. **Dormant: no LICENSE file yet** (repo license TBD — paid app, ask before choosing).
-- `update_sponsors.yml` — sponsorkit SVG. **Dormant: dispatch-only.** Needs `SPONSORKIT_TOKEN` secret + sponsor config + `apps/docs/public/` + GitHub Sponsors before re-adding a cron.
-- Local docs dev without basePath: `NEXT_PUBLIC_BASE_PATH="" bun run --filter @howlalert/docs dev`.
+`HowlAlert.xcodeproj` (objectVersion 77, FS-synchronized group). `LSUIElement`, macOS 26, Hardened Runtime. Bundle id `com.mrdemonwolf.howlalert` / `.dev` debug. Imports both Swift packages via local SPM refs.
+- Pipeline: `TranscriptWatcher` (FSEvents, 1s debounce) + 60s timer + `HowlSignal` Stop-hook observer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`. `UsageModel` (`@Observable @MainActor`, 14-day retention), started synchronously in `applicationDidFinishLaunching`.
+- `UsageModel.popoverData` maps snapshot + recentModels → `PopoverData`. `PopoverContent` shows live data, or `.demo` when Demo Mode (`@AppStorage("demoMode")`); wires Refresh/Quit/Demo toggle. `StatusItemLabel` → menu-bar icon reflects live state.
+- **Diagnostic env hooks** (file-based, since GUI stderr isn't capturable): `HOWL_QA_RENDER=/x.png` renders the popover to PNG; `HOWL_USAGE_DUMP=/x.txt` dumps the live snapshot; `HOWL_SIGNAL_PROBE=/x.txt` appends a line per refresh.
+
+## Stop hook wiring (manual, optional)
+
+Build the binary: `cd packages/HowlAlertCore && swift build` → `.build/debug/howlalert-hook`. Register in `~/.claude/settings.json`:
+```json
+"hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "/abs/path/howlalert-hook" } ] } ] }
+```
+(Auto-bundling the binary into the .app + auto-registering is future work.)
+
+## Test in Xcode
+
+- Open `apps/desktop/HowlAlert.xcodeproj` in **Xcode 26**. Signing & Capabilities → set Team to your Apple ID (free/personal is fine for local; or it falls back to "Sign to Run Locally"). **⌘R** → wolf icon in menu bar → click for the live popover.
+- Live `#Preview`s (glass renders in canvas, unlike `ImageRenderer`): `PopoverShell.swift`, `MenuBarIcon.swift`, `DetailedPopover.swift`.
+- Build headless: `xcodebuild -project HowlAlert.xcodeproj -scheme HowlAlert -configuration Debug -destination 'platform=macOS' build` — **use `-scheme`, never `-target`**.
+
+## CI / Deploy (`.github/workflows/`, pinned SHAs)
+
+- `docs.yml` — push to `main` → static-export `apps/docs` → **GitHub Pages**. Live: **https://mrdemonwolf.github.io/howlalert/**. (Pages source already = GitHub Actions.)
+- `test.yml` — `js` (ubuntu: check-types + docs build) + `swift` (macos-26: `swift test` Core, `swift build` UI, `xcodebuild` desktop, paths-filtered).
+- `license-year.yml` — dormant (no LICENSE yet — repo license TBD, paid app, ask).
+- `update_sponsors.yml` — dispatch-only (needs SPONSORKIT_TOKEN + config + Sponsors).
 
 ## Jira (project HAA, cloud `7566ead4-4eb1-467e-87cd-f187718109ab`)
 
-Old backlog HAA-1–112 → Done (board cleared). Fresh v2.1 backlog:
-- Epics: `HAA-113` P0 · `HAA-114` P1 · `HAA-115` P2 · `HAA-116` P3 · `HAA-117` P4
-- P0 `HAA-118–125` · P1 `HAA-126–132` · P2 `HAA-133–138` · P3 `HAA-139–142` · P4 `HAA-143–148`
-
-**P0 status:**
+Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 | Key | What | Status |
 |---|---|---|
-| HAA-118 | HowlAlertUI tokens + 20 components | In Progress (pixel QA left) |
+| HAA-118 | HowlAlertUI tokens + 20 components | In Progress (pixel/type-scale QA left) |
 | HAA-119 | apps/desktop Xcode shell | **Done** |
-| HAA-120 | MenuBarExtra + Liquid Glass popover shell | **Done** |
-| HAA-121 | FSEvents watcher on `~/.claude/projects/**/*.jsonl` | **Done** |
-| HAA-122 | Stop hook handler binary | To Do |
-| HAA-123 | 5h window math + P90 (tests) | **Done** |
-| HAA-124 | Popover UI + Demo Mode + refresh cadence | **Done** |
-| HAA-125 | Sparkle + notarized DMG + Homebrew tap | To Do |
+| HAA-120 | MenuBarExtra + Liquid Glass shell | **Done** |
+| HAA-121 | FSEvents watcher | **Done** |
+| HAA-122 | Stop hook binary | **Done** |
+| HAA-123 | 5h window + P90 (tests) | **Done** |
+| HAA-124 | Popover UI + Demo Mode + refresh | **Done** |
+| HAA-125 | Sparkle + DMG + Homebrew | To Do |
 
 ## Next steps
 
-- [x] **HAA-121** (Done) — FSEvents watcher + `TranscriptReader` + `UsageModel`; live pipeline validated on real `~/.claude`. Drives menu-bar icon state.
-- [x] **HAA-124** (Done) — live popover binding + Demo Mode + recent models + refresh actions. Verified on real data.
-- [ ] **Weekly window** (new follow-up, not yet ticketed) — needs a 7-day window + limit detection (more history than 14-day retention). Then the Week row goes live.
-- [ ] Decide whether cache-read tokens count toward the window (currently included; P90 keeps it self-relative).
-- [ ] "Updated just now" is static text — make it a live relative timer in a later polish pass.
-- [ ] **HAA-122** — Stop hook handler binary (Claude Code Stop hook → nudge a refresh).
-- [ ] Finish **HAA-118** pixel/type-scale QA vs HTML refs → mark Done.
-- [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap (last P0; needs Apple Dev portal — ASK first).
-
-## Build / test commands
-
-```bash
-cd packages/HowlAlertCore && swift test     # 32 tests, the usage engine
-cd packages/HowlAlertUI   && swift build    # design system compiles
-# desktop app (use -scheme, NOT -target — -target won't resolve the SPM product):
-cd apps/desktop && xcodebuild -project HowlAlert.xcodeproj -scheme HowlAlert \
-  -configuration Debug -destination 'platform=macOS' build
-```
+- [ ] **HAA-118** — close out: pixel/type-scale QA of components vs `section-*.html`, then mark Done. (Smallest remaining P0.)
+- [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap. **NEEDS YOU:** Apple Developer ID cert, notarization creds (App Store Connect API key / `.p8`), a Homebrew tap repo. Ask/walk through before starting. Don't `codesign --deep`; use `LinusU/node-appdmg` (not `create-dmg`).
+- [ ] **Weekly window** (not yet ticketed) — a 7-day window + limit so the popover Week row goes live (needs more history than the 14-day retention for a reliable P90; reconsider retention or weekly P90 source).
+- [ ] Decide whether **cache-read tokens** count toward the window (currently included; P90 keeps it self-relative).
+- [ ] Polish: "Updated just now" → live relative timer; Stop-hook binary auto-bundle + auto-register.
+- [ ] Then P1 (`HAA-126–132`): server APNs relay, pairing (HMAC), push, etc.
 
 ## Gotchas
 
-- **xcodebuild:** build the desktop app with `-scheme HowlAlert`, never `-target` — `-target` fails to resolve the local SPM package (`unable to resolve module dependency: 'HowlAlertUI'`).
-- **ImageRenderer ≠ Liquid Glass:** off-screen `ImageRenderer` blanks any `glassEffect` subtree. Glass only renders in a live window / Xcode canvas.
-- **Swift 6 strict concurrency:** `ISO8601DateFormatter` isn't Sendable for static use — use the value-type `Date.ISO8601FormatStyle` instead.
-- **Docker pulls** fail on this machine with osxkeychain `-128` — bypass with a PATH-shadow stub (memory `env-docker-keychain`). Cached images survive restarts.
-- `.v26` SwiftPM platform needs `swift-tools-version: 6.2+`.
-- Don't `git push --force` to main. One Jira ticket per session.
+- **xcodebuild:** desktop app builds with `-scheme HowlAlert`, never `-target` (won't resolve local SPM packages).
+- **ImageRenderer ≠ Liquid Glass:** off-screen renderer blanks `glassEffect` subtrees. Glass only renders live (window / Xcode canvas). QA PNGs show content only.
+- **GUI app stderr isn't capturable** headlessly, and a backgrounded headless launch skips `didFinishLaunching` — use the file-based `HOWL_*` env hooks to observe runtime behavior, or run in Xcode.
+- **Swift 6 strict concurrency:** `ISO8601DateFormatter` not Sendable for static use — use `Date.ISO8601FormatStyle`.
+- **Docker pulls** fail with osxkeychain `-128` — PATH-shadow stub (memory `env-docker-keychain`).
+- `.v26` SwiftPM platform needs `swift-tools-version: 6.2+`. Don't force-push `main`.
