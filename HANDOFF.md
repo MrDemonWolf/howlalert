@@ -49,7 +49,9 @@ Design source of truth: `apps/docs/design-bundle/` (`design-system.html` + `sect
 
 ## apps/desktop (menu-bar app — functional)
 
-`HowlAlert.xcodeproj` (objectVersion 77, FS-synchronized group). `LSUIElement`, macOS 26, Hardened Runtime. Bundle id `com.mrdemonwolf.howlalert` / `.dev` debug. Imports both Swift packages via local SPM refs.
+`HowlAlert.xcodeproj` (objectVersion 77, FS-synchronized group). `LSUIElement`, macOS 26, Hardened Runtime. Bundle id `com.mrdemonwolf.howlalert.mac` / `.mac.dev` debug. Imports both Swift packages via local SPM refs.
+
+**Bundle-ID scheme (per-app unique; iOS owns the root):** iOS `com.mrdemonwolf.howlalert` · watch `com.mrdemonwolf.howlalert.watchkitapp` · macOS `com.mrdemonwolf.howlalert.mac`. Shared CloudKit container `iCloud.com.mrdemonwolf.howlalert` (desktop↔mobile pairing). Set iOS/watch ids when the mobile project is created. IAP SKUs (`com.howlalert.*`) are a separate namespace.
 - Pipeline: `TranscriptWatcher` (FSEvents, 1s debounce) + 60s timer + `HowlSignal` Stop-hook observer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`. `UsageModel` (`@Observable @MainActor`, 14-day retention), started synchronously in `applicationDidFinishLaunching`.
 - `UsageModel.popoverData` maps snapshot + recentModels → `PopoverData`. `PopoverContent` shows live data, or `.demo` when Demo Mode (`@AppStorage("demoMode")`); wires Refresh/Quit/Demo toggle. `StatusItemLabel` → menu-bar icon reflects live state.
 - **Diagnostic env hooks** (file-based, since GUI stderr isn't capturable): `HOWL_QA_RENDER=/x.png` renders the popover to PNG; `HOWL_USAGE_DUMP=/x.txt` dumps the live snapshot; `HOWL_SIGNAL_PROBE=/x.txt` appends a line per refresh.

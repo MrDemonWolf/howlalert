@@ -136,9 +136,15 @@ Colors: navy `#091533`, cyan `#0FACED`, green `#3DDC97` / amber `#FFA533` / red 
 | GitHub | `mrdemonwolf/howlalert` |
 | Jira | project `HAA`, cloud ID `7566ead4-4eb1-467e-87cd-f187718109ab` |
 | Server (APNs relay) | Hono on Bun → Dokploy |
+| Bundle ID — iOS | `com.mrdemonwolf.howlalert` (root) |
+| Bundle ID — watchOS | `com.mrdemonwolf.howlalert.watchkitapp` (must prefix the iOS id) |
+| Bundle ID — macOS desktop | `com.mrdemonwolf.howlalert.mac` (debug `.mac.dev`) |
+| CloudKit container (shared) | `iCloud.com.mrdemonwolf.howlalert` |
 | App Store SKU (Pro) | `com.howlalert.pro.monthly` |
 | App Store SKU (Max) | `com.howlalert.max.annual` |
 | RevenueCat entitlement | `pro_features` |
+
+> Bundle IDs are **per-app unique** (3 separate App Store / Developer records). The iOS app owns the root; macOS/watch are suffixed. IAP SKUs are a separate namespace (no overlap). The CloudKit container is **shared** across all apps — that's how desktop ↔ mobile pair.
 | Local DB | `postgresql://postgres:password@localhost:5432/howlalert` |
 | Local Redis | `redis://localhost:6379` |
 
