@@ -1,0 +1,42 @@
+name: License Year
+
+# Bumps the copyright year in LICENSE every Jan 1 and opens a PR.
+# Requires a LICENSE file with a "Copyright (c) YYYY" line — until one exists
+# this is a no-op. (HowlAlert's repo license is still TBD — it's a paid app.)
+
+on:
+  schedule:
+    # January 1st at 12:00 AM CST (06:00 UTC)
+    - cron: "0 6 1 1 *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  update-year:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Update copyright year in LICENSE
+        run: |
+          if [ ! -f LICENSE ]; then
+            echo "No LICENSE file — nothing to update."
+            exit 0
+          fi
+          CURRENT_YEAR=$(date +%Y)
+          echo "CURRENT_YEAR=$CURRENT_YEAR" >> "$GITHUB_ENV"
+          sed -i "s/Copyright (c) [0-9]\{4\}/Copyright (c) $CURRENT_YEAR/" LICENSE
+
+      - name: Create Pull Request
+        if: env.CURRENT_YEAR != ''
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          commit-message: "chore: update license year to ${{ env.CURRENT_YEAR }}"
+          title: "chore: update license year to ${{ env.CURRENT_YEAR }}"
+          body: "Automated annual update of the copyright year in LICENSE."
+          branch: chore/update-license-year
+          delete-branch: true

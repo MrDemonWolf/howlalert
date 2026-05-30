@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  js:
+    name: JS — types + docs build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Type check (all workspaces)
+        run: bun run check-types
+
+      - name: Build docs (verify static export)
+        run: bunx turbo build --filter=@howlalert/docs
+
+  swift:
+    name: Swift — packages + desktop build
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: latest-stable
+
+      - name: Detect Swift changes
+        id: filter
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        with:
+          filters: |
+            swift:
+              - 'apps/desktop/**'
+              - 'apps/mobile/**'
+              - 'packages/HowlAlertCore/**'
+              - 'packages/HowlAlertUI/**'
+
+      - name: Skip notice (no Swift changes)
+        if: steps.filter.outputs.swift != 'true'
+        run: echo "No Swift changes detected — skipping Swift build & test."
+
+      - name: Test HowlAlertCore (usage engine)
+        if: steps.filter.outputs.swift == 'true'
+        run: swift test
+        working-directory: packages/HowlAlertCore
+
+      - name: Build HowlAlertUI (design system)
+        if: steps.filter.outputs.swift == 'true'
+        run: swift build
+        working-directory: packages/HowlAlertUI
+
+      - name: Build desktop app
+        if: steps.filter.outputs.swift == 'true'
+        working-directory: apps/desktop
+        run: |
+          xcodebuild -project HowlAlert.xcodeproj -scheme HowlAlert \
+            -configuration Debug -destination 'platform=macOS' \
+            ARCHS="arm64" build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO

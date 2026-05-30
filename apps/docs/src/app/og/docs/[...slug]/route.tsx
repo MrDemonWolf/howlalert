@@ -6,6 +6,7 @@ import { appName } from "@/lib/shared";
 import { getPageImage, source } from "@/lib/source";
 
 export const revalidate = false;
+export const dynamic = "force-static";
 
 export async function GET(_req: Request, { params }: RouteContext<"/og/docs/[...slug]">) {
   const { slug } = await params;
