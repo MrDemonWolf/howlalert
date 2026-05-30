@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C0DE000000000000000000F1 /* HowlAlertUI in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000F0 /* HowlAlertUI */; };
+		C0DE000000000000000000F3 /* HowlAlertCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000F4 /* HowlAlertCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE000000000000000000F1 /* HowlAlertUI in Frameworks */,
+				C0DE000000000000000000F3 /* HowlAlertCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			name = HowlAlert;
 			packageProductDependencies = (
 				C0DE000000000000000000F0 /* HowlAlertUI */,
+				C0DE000000000000000000F4 /* HowlAlertCore */,
 			);
 			productName = HowlAlert;
 			productReference = C0DE000000000000000000A1 /* HowlAlert.app */;
@@ -102,6 +105,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C0DE000000000000000000F2 /* XCLocalSwiftPackageReference "../../packages/HowlAlertUI" */,
+				C0DE000000000000000000F5 /* XCLocalSwiftPackageReference "../../packages/HowlAlertCore" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0DE000000000000000000D2 /* Products */;
@@ -326,6 +330,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../packages/HowlAlertUI;
 		};
+		C0DE000000000000000000F5 /* XCLocalSwiftPackageReference "../../packages/HowlAlertCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../packages/HowlAlertCore;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -333,6 +341,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE000000000000000000F2 /* XCLocalSwiftPackageReference "../../packages/HowlAlertUI" */;
 			productName = HowlAlertUI;
+		};
+		C0DE000000000000000000F4 /* HowlAlertCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE000000000000000000F5 /* XCLocalSwiftPackageReference "../../packages/HowlAlertCore" */;
+			productName = HowlAlertCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
