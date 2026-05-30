@@ -6,7 +6,7 @@
 
 Phase 0 desktop is **functional end-to-end**: the menu-bar app watches `~/.claude`, computes the 5-hour usage window with a P90-auto-detected limit, and shows it live in the popover. **6 of 8 P0 tickets done** (HAA-118 pixel-QA + HAA-125 packaging remain). Docs auto-deploy to GitHub Pages. CI green on every push.
 
-To see it: open `apps/desktop/HowlAlert.xcodeproj` in Xcode 26 → **⌘R** → click the wolf icon in the menu bar. Or `swift test` in `packages/HowlAlertCore` (47 tests).
+To see it: open `apps/desktop/HowlAlert.xcodeproj` in Xcode 26 → **⌘R** → click the wolf icon in the menu bar. Or `swift test` in `packages/HowlAlertCore` (57 tests).
 
 ## Where things stand
 
@@ -35,13 +35,14 @@ Repo wiped from the old v3 plan, rebuilt as **v2.1** (Hono on Bun + Postgres + R
 
 ## packages/HowlAlertCore (usage engine — pure, tested)
 
-`swift-tools-version: 6.2`, `.v26`. **`swift test` → 47 tests green.**
+`swift-tools-version: 6.2`, `.v26`. **`swift test` → 57 tests green.**
 - `UsageEvent` + `ClaudeTranscriptParser` — JSONL → events; dedupe `messageId:requestId` (last chunk wins, parent>subagent, non-sidechain wins), drop all-zero, ISO-8601. Fields validated against real transcripts.
 - `FiveHourWindow` — first-activity-anchored 5h blocks, gap-split >5h; `currentBlock`, `completedBlockTotals`.
 - `PlanLimitEstimator` + `Percentile` — P90 (type-7) of completed-window totals; remote `limits.json` override; config fallback (NO hard-coded limit).
 - `UsageEngine.snapshot(...)` → `UsageSnapshot`; `UsageEngine.recentModels(...)` → `[ModelUsage]` (per-model totals + sparkline).
 - `ClaudeConfig.discoverTranscriptRoots()`; `TranscriptReader` (incremental byte-cursor reads, `modifiedAfter` filter).
 - `HowlSignal` — Darwin notification post/observe (Stop-hook IPC).
+- `UsageAlert` + `usageAlert(previous:current:preferences:)` — pure local-notification transition rule (fire on a rise into warn/crit, re-arm on drop, seed silently, gate via `AlertPreferences`). `UsageState.severity`. 10 unit tests; the desktop `UsageModel.notifyIfNeeded()` just maps the result to a `UNNotificationRequest`.
 - `howlalert-hook` executable target — posts the stop signal (the Stop-hook binary).
 
 ## packages/HowlAlertUI (design system)
@@ -63,7 +64,10 @@ Design source of truth: `apps/docs/design-bundle/` (`design-system.html` + `sect
   - **Native `Settings` scene** — new `apps/desktop/HowlAlert/SettingsView.swift` (`TabView` General + About, `Form` `.formStyle(.grouped)`). General wires **launch-at-login via `SMAppService.mainApp`** (toggle mirrors real `.status`), **refresh cadence** (`@AppStorage("refreshInterval")` → `UsageModel.armTimer()`), demo toggle. About = `WolfMark` + version + links. `Settings { SettingsView() }` added to `HowlAlertApp`; popover Settings row wired via `@Environment(\.openSettings)` + `NSApp.activate` (new `onSettings` closure on `DetailedPopover`).
   - **Live footer** — `PopoverData.lastUpdated: Date?`; `DetailedPopover` footer in `TimelineView(.periodic by:1)` → "Updated Ns ago" (`relativeUpdated`) ticking while open. `UsageModel` stamps `lastRefresh` per `refresh()`.
   - **Code-quality** — timer interval is settings-driven (`armTimer()`); `recentModels` uses the snapshot's `now` not a fresh `Date()`.
-  - **Tab bar wired** — `PopoverTabBar` now uses the design's text labels (Overview / 5-Hour / Weekly / Models, per section-b-macos.html) instead of SF Symbols, and the selection actually switches the `DetailedPopover` middle panel (was a dead control). Weekly shows an honest placeholder until the weekly window is live; Models shows per-model rows (placeholder when empty). Header / action rows / footer are shared across tabs.
+  - **Tab bar wired** — `PopoverTabBar` now uses text labels (Overview / 5-Hour / Weekly / Models) instead of SF Symbols, and the selection actually switches the `DetailedPopover` middle panel (was a dead control). Weekly shows an honest placeholder until the weekly window is live; Models shows per-model rows (placeholder when empty). Header / action rows / footer are shared across tabs.
+- **APPROVED design deviations (2026-05-30, Nathanial confirmed — do NOT "fix" back to the mock):**
+  - **Settings = native `Settings {}` Preferences window** (⌘,), tabs General / Notifications / About. `section-b-macos.html` shows a dimmed *sheet over the popover* (tabs Pairing/Notifications/Integration/About) — we chose the standard-macOS window for native feel. Pairing (P1) + Integration (Stop-hook setup) tabs not built yet; fold them in when those features land.
+  - **Popover tab bar = text labels Overview / 5-Hour / Weekly / Models** (not the mock's SF-Symbol icons Overview/Now/Day/Week). Chosen because it's honest to current data (no daily data; weekly not live; Models is real). Revisit icon styling later if desired.
 - **Diagnostic env hooks** (file-based, since GUI stderr isn't capturable): `HOWL_QA_RENDER=/x.png` renders the popover to PNG; `HOWL_USAGE_DUMP=/x.txt` dumps the live snapshot; `HOWL_SIGNAL_PROBE=/x.txt` appends a line per refresh.
 
 ## Stop hook wiring (manual, optional)
@@ -107,7 +111,7 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 - [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap. **NEEDS YOU:** Apple Developer ID cert, notarization creds (App Store Connect API key / `.p8`), a Homebrew tap repo. Ask/walk through before starting. Don't `codesign --deep`; use `LinusU/node-appdmg` (not `create-dmg`).
 - [ ] **Weekly window** (not yet ticketed) — a 7-day window + limit so the popover Week row goes live (needs more history than the 14-day retention for a reliable P90; reconsider retention or weekly P90 source).
 - [ ] Decide whether **cache-read tokens** count toward the window (currently included; P90 keeps it self-relative).
-- [ ] Polish DONE (native pass 2): live relative timer ✓; native `Settings` scene ✓ (General / Notifications / About); local notifications on warn/crit ✓ (needs GUI eyeball — auth prompt + delivery can't be verified headlessly); popover tab bar wired to per-tab panels ✓ (only Overview verified via QA render; 5-Hour/Weekly/Models switch on click — GUI eyeball). REMAINING: Stop-hook binary auto-bundle + auto-register; wolf template-image menu-bar icon (replace SF-Symbol placeholder); weekly window data (then the Weekly tab goes live — needs >14d retention/P90 decision); consider unit-testing the warn/crit transition logic (currently in the app target, untested).
+- [ ] Polish DONE (native pass 2): live relative timer ✓; native `Settings` scene ✓ (General / Notifications / About); local notifications on warn/crit ✓ (needs GUI eyeball — auth prompt + delivery can't be verified headlessly); popover tab bar wired to per-tab panels ✓ (only Overview verified via QA render; 5-Hour/Weekly/Models switch on click — GUI eyeball). REMAINING: Stop-hook binary auto-bundle + auto-register; wolf template-image menu-bar icon (replace SF-Symbol placeholder); weekly window data (then the Weekly tab goes live — needs >14d retention/P90 decision). [warn/crit transition logic now extracted to Core + unit-tested ✓]
 - [ ] Then P1 (`HAA-126–132`): server APNs relay, pairing (HMAC), push, etc.
 
 ## Gotchas
