@@ -1,12 +1,13 @@
 import SwiftUI
 import HowlAlertUI
 
-/// Menu-bar status-item icon (HAA-120).
+/// Menu-bar status-item icon (HAA-120 / HAA-124).
 ///
-/// The wolf mark, tinted by usage state. `.ok`/`.fresh` render template-style
-/// (adapts to light/dark menu bar); `.warn`/`.crit` take the brand state color,
-/// and `.crit` adds a pulsing badge so it reads at a glance. Mirrors the `.howl`
-/// icon in section-b-macos.html.
+/// Placeholder SF Symbol for now — a system symbol auto-sizes and template-
+/// renders correctly in the menu bar (the custom `WolfShape` didn't, so it read
+/// as nearly invisible). `.ok`/`.fresh` render monochrome (adapts to light/dark
+/// menu bar); `.warn`/`.crit` take the brand state color; `.crit` adds a pulsing
+/// badge. Swap back to a properly-rendered wolf template in a later polish pass.
 struct MenuBarIcon: View {
     let state: HowlState
     @State private var pulse = false
@@ -14,14 +15,14 @@ struct MenuBarIcon: View {
     private var isAttention: Bool { state == .warn || state == .crit }
 
     var body: some View {
-        WolfMark(.mono, size: 18)
+        Image(systemName: "gauge.with.dots.needle.bottom.50percent")
             .foregroundStyle(isAttention ? state.color : Color.primary)
             .overlay(alignment: .topTrailing) {
                 if state == .crit {
                     Circle()
                         .fill(HowlColor.stateCrit)
-                        .frame(width: 6, height: 6)
-                        .offset(x: 1, y: -1)
+                        .frame(width: 5, height: 5)
+                        .offset(x: 2, y: -2)
                         .scaleEffect(pulse ? 1.0 : 0.55)
                         .opacity(pulse ? 1.0 : 0.4)
                         .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)

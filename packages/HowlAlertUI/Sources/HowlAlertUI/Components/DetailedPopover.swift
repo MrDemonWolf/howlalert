@@ -55,18 +55,23 @@ public struct DetailedPopover: View {
             }
 
             VStack(spacing: 0) {
-                MenuActionRow(systemImage: "iphone", label: "Open in iPhone")
-                MenuActionRow(systemImage: "qrcode", label: "Pair device")
-                MenuActionRow(systemImage: "arrow.clockwise", label: "Refresh", shortcut: "⌘R")
-                    .onTapGesture { onRefresh?() }
+                MenuActionRow(systemImage: "iphone", label: "Open in iPhone",
+                              help: "Open HowlAlert on your paired iPhone")
+                MenuActionRow(systemImage: "qrcode", label: "Pair device",
+                              help: "Pair a new device")
+                MenuActionRow(systemImage: "arrow.clockwise", label: "Refresh", shortcut: "⌘R",
+                              help: "Recompute usage now") { onRefresh?() }
+                    .keyboardShortcut("r", modifiers: .command)
                 if onToggleDemo != nil {
                     MenuActionRow(systemImage: "wand.and.stars", label: "Demo data",
-                                  shortcut: demoEnabled ? "on" : "off")
-                        .onTapGesture { onToggleDemo?() }
+                                  shortcut: demoEnabled ? "On" : "Off",
+                                  help: "Show example data instead of your live usage") { onToggleDemo?() }
                 }
-                MenuActionRow(systemImage: "gearshape", label: "Settings", shortcut: "⌘,")
-                MenuActionRow(systemImage: "power", label: "Quit", shortcut: "⌘Q", danger: true)
-                    .onTapGesture { onQuit?() }
+                MenuActionRow(systemImage: "gearshape", label: "Settings", shortcut: "⌘,",
+                              help: "HowlAlert settings")
+                MenuActionRow(systemImage: "power", label: "Quit", shortcut: "⌘Q", danger: true,
+                              help: "Quit HowlAlert") { onQuit?() }
+                    .keyboardShortcut("q", modifiers: .command)
             }
 
             if let updated = data.updatedText {
