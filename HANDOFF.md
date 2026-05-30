@@ -28,7 +28,8 @@ Repo was **wiped from the old v3 plan and rebuilt as v2.1** (Hono on Bun + Postg
 Swift package at `packages/HowlAlertUI`. `swift-tools-version: 6.2`, platforms `.v26`. **`swift build` is green.**
 - Tokens (exact from design bundle): `HowlColor` (ink-500 = `#9AA9C5` AAA — never `#6A7A99`), `HowlSpacing`, `HowlRadius`, `HowlTypography`, `HowlMotion`, `HowlState`
 - 20 components: CritBar, TwoBarMeter, UsageMeter, UsageRow, PaceChip, ResetCountdown, ModelRow(+Sparkline), Primary/Secondary/Ghost button styles, PairingCard, EmptyState, NotificationCard, SettingsRow(+PillSelect), StateIcon, WolfMark(full/mono/template), PricingToggle, PopoverTabBar, MenuActionRow, CostSummary, DetailedPopover
-- **Pending:** visual/pixel QA vs the HTML refs (can't render SwiftUI headlessly); exact type-scale reconciliation; Liquid Glass material wrappers.
+- Liquid Glass wrapper added in HAA-120: `HowlGlass.swift` → `View.howlGlass(_:in:)` + `HowlGlassGroup` (GlassEffectContainer). Nav layer only.
+- **Pending:** visual/pixel QA vs the HTML refs (can't render SwiftUI headlessly); exact type-scale reconciliation.
 
 Design bundle (source of truth) lives at `apps/docs/design-bundle/`: `design-system.html` + `section-b..h-*.html` + `chats/chat1.md` (intent). Build from `design-system.html`.
 
@@ -42,8 +43,9 @@ Old backlog HAA-1–112 all moved to **Done** (board cleared). Fresh v2.1 backlo
 ## Next steps
 
 - [x] **HAA-119** (Done) — `apps/desktop` Xcode shell imports HowlAlertUI and renders `DetailedPopover` (MenuBarExtra `.window`). `HOWL_QA_RENDER=<path>` dumps the popover to PNG headlessly. Build with `-scheme` (not `-target`). Bundle id `com.mrdemonwolf.howlalert` (`.dev` debug).
-- [ ] Finish HAA-118 visual QA → mark Done.
-- [ ] Then HAA-120+ (MenuBarExtra, FSEvents, Stop hook, 5h window math + P90).
+- [x] **HAA-120** (Done) — real `MenuBarExtra`: state-driven `MenuBarIcon` (WolfMark.mono tinted by HowlState, crit pulse) + `PopoverShell` Liquid Glass chrome. Glass can't be captured by `ImageRenderer` off-screen (blanks subtree) — view it live in the popover or the `#Preview`s; QA PNG renders content only. Scope line: 120 = chrome/glass/status-item, 124 = live data + Demo Mode.
+- [ ] Finish HAA-118 visual QA (pixel/type-scale vs HTML refs) → mark Done.
+- [ ] HAA-121 (FSEvents watcher), HAA-122 (Stop hook binary), HAA-123 (5h math + P90, tests), HAA-124 (live data + Demo Mode + refresh), HAA-125 (Sparkle + DMG + Homebrew).
 
 ## Test HowlAlertUI now
 
