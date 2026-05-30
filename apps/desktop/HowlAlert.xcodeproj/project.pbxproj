@@ -269,7 +269,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert.mac.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
@@ -295,7 +295,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrdemonwolf.howlalert.mac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
