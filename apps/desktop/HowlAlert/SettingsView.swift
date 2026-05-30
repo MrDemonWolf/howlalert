@@ -12,6 +12,8 @@ struct SettingsView: View {
         TabView {
             GeneralSettingsTab()
                 .tabItem { Label("General", systemImage: "gearshape") }
+            NotificationsSettingsTab()
+                .tabItem { Label("Notifications", systemImage: "bell") }
             AboutSettingsTab()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
@@ -78,6 +80,25 @@ private struct GeneralSettingsTab: View {
             launchAtLogin = SMAppService.mainApp.status == .enabled
             loginError = "Couldn't update the login item: \(error.localizedDescription)"
         }
+    }
+}
+
+/// Which window-state crossings post a local notification. Both default on; the
+/// firing + threshold logic lives in `UsageModel.notifyIfNeeded()`.
+private struct NotificationsSettingsTab: View {
+    @AppStorage("notifyLow") private var notifyLow = true
+    @AppStorage("notifyAlmostOut") private var notifyAlmostOut = true
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("When usage is running low", isOn: $notifyLow)
+                Toggle("When usage is almost out", isOn: $notifyAlmostOut)
+            } footer: {
+                Text("HowlAlert posts a local notification as your 5-hour window crosses each level — once per crossing, not on every refresh. macOS asks for permission the first time it runs.")
+            }
+        }
+        .formStyle(.grouped)
     }
 }
 
