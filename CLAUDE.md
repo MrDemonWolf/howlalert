@@ -42,6 +42,7 @@ Both grant the same RevenueCat entitlement `pro_features` — **never gate featu
 - **Desktop:** Swift 6 / SwiftUI, `LSUIElement = true`, FSEvents + Hardened Runtime + Developer ID notarization. **macOS 26.0+ only.**
 - **Mobile:** Swift 6 / SwiftUI — ONE Xcode project, two targets (iOS app + watchOS app). **iOS 26.0+ / watchOS 26.0+ only.**
 - **Shared Swift UI:** `packages/HowlAlertUI` Swift package — design tokens + 20 components, imported by both Xcode projects via local Swift Package reference.
+- **Shared Swift logic:** `packages/HowlAlertCore` Swift package — usage engine (JSONL parse + dedupe, 5h-window math, P90 limit auto-detect). Pure + unit-tested (`swift test`); no UI. Imported by `apps/desktop` (+ `apps/mobile` later).
 - **Liquid Glass:** unconditional (26-only) — navigation layer only (toolbars, popovers, floating CTAs), never on content cards. No `@available` guards, no `.ultraThinMaterial` fallback.
 - **Server:** Hono + tRPC on Bun → Dokploy. **Postgres + Drizzle** (device tokens, pairing records) and **Redis/ioredis** (APNs JWT ~50min TTL, replay nonces, Live Activity throttle, rate limits).
 - **Admin:** Next.js 15 + tRPC + better-auth. **Docs:** fumadocs. **Monorepo:** Turborepo + Bun workspaces.
@@ -84,9 +85,15 @@ bun run dev:web                               # @howlalert/web only (:3001)
 bun run --filter @howlalert/docs dev          # docs only (:4000)
 bun run build                                 # turbo build (all)
 bun run check-types                           # turbo check-types (tsc)
+
+# Swift (not Bun workspaces)
+cd packages/HowlAlertCore && swift test       # usage-engine unit tests (32)
+cd packages/HowlAlertUI   && swift build      # design system compiles
+cd apps/desktop && xcodebuild -project HowlAlert.xcodeproj -scheme HowlAlert \
+  -configuration Debug -destination 'platform=macOS' build   # use -scheme, NOT -target
 ```
 
-Docker compose lives at `packages/db/docker-compose.yml` (not root). No test runner or linter is configured yet — don't invent `bun test`/lint commands until one is set up. Swift apps build in Xcode.
+Docker compose lives at `packages/db/docker-compose.yml` (not root). No JS test runner/linter configured yet — don't invent `bun test`/lint commands. Swift logic is unit-tested via `swift test` in `packages/HowlAlertCore`; build the desktop app with `xcodebuild -scheme` (never `-target` — it won't resolve the local SPM package).
 
 ## 7. Architecture notes
 
