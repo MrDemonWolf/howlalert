@@ -3,6 +3,9 @@ import SwiftUI
 /// Assembled menu-bar dropdown — the reference composition that exercises the
 /// whole toolkit. Driven by `PopoverData` (defaults to the `.demo` showcase).
 /// Mirrors the DetailedPopover in design-system.html / section-b-macos.html.
+///
+/// The tab bar (Overview / 5-Hour / Weekly / Models) switches the middle panel;
+/// the header, action rows, and footer are shared across tabs.
 public struct DetailedPopover: View {
     @State private var tab = 0
 
@@ -12,6 +15,8 @@ public struct DetailedPopover: View {
     private let onToggleDemo: (() -> Void)?
     private let onSettings: (() -> Void)?
     private let demoEnabled: Bool
+
+    private static let tabTitles = ["Overview", "5-Hour", "Weekly", "Models"]
 
     public init(
         data: PopoverData = .demo,
@@ -37,52 +42,104 @@ public struct DetailedPopover: View {
                 PaceChip(data.paceText, state: data.paceState)
             }
 
-            CritBar(remaining: data.critRemaining, state: data.critState, label: data.critLabel)
-            ResetCountdown(data.resetText, state: data.resetState, lastMinute: data.resetLastMinute)
+            PopoverTabBar(tabs: Self.tabTitles, selection: $tab)
 
-            PopoverTabBar(
-                tabs: ["square.grid.2x2", "clock", "calendar", "calendar.badge.clock"],
-                selection: $tab
-            )
-
-            usageRow(data.session)
-            if let week = data.week { usageRow(week) }
-
-            if !data.models.isEmpty {
-                VStack(alignment: .leading, spacing: HowlSpacing.s2) {
-                    Text("Recent").font(HowlTypography.caption).foregroundStyle(HowlColor.ink500)
-                    ForEach(data.models, id: \.name) { m in
-                        ModelRow(name: m.name, points: m.points, value: m.value, state: m.state)
-                    }
-                }
-            }
-
-            VStack(spacing: 0) {
-                MenuActionRow(systemImage: "iphone", label: "Open in iPhone",
-                              help: "Open HowlAlert on your paired iPhone")
-                MenuActionRow(systemImage: "qrcode", label: "Pair device",
-                              help: "Pair a new device")
-                MenuActionRow(systemImage: "arrow.clockwise", label: "Refresh", shortcut: "⌘R",
-                              help: "Recompute usage now") { onRefresh?() }
-                    .keyboardShortcut("r", modifiers: .command)
-                if onToggleDemo != nil {
-                    MenuActionRow(systemImage: "wand.and.stars", label: "Demo data",
-                                  shortcut: demoEnabled ? "On" : "Off",
-                                  help: "Show example data instead of your live usage") { onToggleDemo?() }
-                }
-                MenuActionRow(systemImage: "gearshape", label: "Settings", shortcut: "⌘,",
-                              help: "HowlAlert settings") { onSettings?() }
-                    .keyboardShortcut(",", modifiers: .command)
-                MenuActionRow(systemImage: "power", label: "Quit", shortcut: "⌘Q", danger: true,
-                              help: "Quit HowlAlert") { onQuit?() }
-                    .keyboardShortcut("q", modifiers: .command)
-            }
-
-            footer
+            panel
         }
         .padding(HowlSpacing.s5)
         .frame(width: 340)
         .background(HowlColor.navy900, in: RoundedRectangle(cornerRadius: HowlRadius.xl, style: .continuous))
+    }
+
+    /// The selected tab's content, plus the shared action rows and footer.
+    @ViewBuilder private var panel: some View {
+        VStack(alignment: .leading, spacing: HowlSpacing.s4) {
+            switch tab {
+            case 1: fiveHourPanel
+            case 2: weeklyPanel
+            case 3: modelsPanel
+            default: overviewPanel
+            }
+
+            actionRows
+            footer
+        }
+    }
+
+    // MARK: - Tab panels
+
+    /// Everything at a glance — the original composition.
+    @ViewBuilder private var overviewPanel: some View {
+        critSection
+        usageRow(data.session)
+        if let week = data.week { usageRow(week) }
+        modelsSection
+    }
+
+    /// Focus the active 5-hour window.
+    @ViewBuilder private var fiveHourPanel: some View {
+        critSection
+        usageRow(data.session)
+    }
+
+    /// Weekly window — live once enough history exists; an honest placeholder
+    /// until then (the desktop app leaves `week` nil for now).
+    @ViewBuilder private var weeklyPanel: some View {
+        if let week = data.week {
+            usageRow(week)
+        } else {
+            placeholder("Not enough history yet", detail: "The weekly window appears once HowlAlert has watched a full week.")
+        }
+    }
+
+    /// Per-model recent usage.
+    @ViewBuilder private var modelsPanel: some View {
+        if data.models.isEmpty {
+            placeholder("No recent models", detail: "Model usage shows up here as you work.")
+        } else {
+            modelsSection
+        }
+    }
+
+    // MARK: - Shared pieces
+
+    @ViewBuilder private var critSection: some View {
+        CritBar(remaining: data.critRemaining, state: data.critState, label: data.critLabel)
+        ResetCountdown(data.resetText, state: data.resetState, lastMinute: data.resetLastMinute)
+    }
+
+    @ViewBuilder private var modelsSection: some View {
+        if !data.models.isEmpty {
+            VStack(alignment: .leading, spacing: HowlSpacing.s2) {
+                Text("Recent").font(HowlTypography.caption).foregroundStyle(HowlColor.ink500)
+                ForEach(data.models, id: \.name) { m in
+                    ModelRow(name: m.name, points: m.points, value: m.value, state: m.state)
+                }
+            }
+        }
+    }
+
+    private var actionRows: some View {
+        VStack(spacing: 0) {
+            MenuActionRow(systemImage: "iphone", label: "Open in iPhone",
+                          help: "Open HowlAlert on your paired iPhone")
+            MenuActionRow(systemImage: "qrcode", label: "Pair device",
+                          help: "Pair a new device")
+            MenuActionRow(systemImage: "arrow.clockwise", label: "Refresh", shortcut: "⌘R",
+                          help: "Recompute usage now") { onRefresh?() }
+                .keyboardShortcut("r", modifiers: .command)
+            if onToggleDemo != nil {
+                MenuActionRow(systemImage: "wand.and.stars", label: "Demo data",
+                              shortcut: demoEnabled ? "On" : "Off",
+                              help: "Show example data instead of your live usage") { onToggleDemo?() }
+            }
+            MenuActionRow(systemImage: "gearshape", label: "Settings", shortcut: "⌘,",
+                          help: "HowlAlert settings") { onSettings?() }
+                .keyboardShortcut(",", modifiers: .command)
+            MenuActionRow(systemImage: "power", label: "Quit", shortcut: "⌘Q", danger: true,
+                          help: "Quit HowlAlert") { onQuit?() }
+                .keyboardShortcut("q", modifiers: .command)
+        }
     }
 
     /// "Updated …" line. With a live `lastUpdated`, a `TimelineView` re-renders it
@@ -115,5 +172,15 @@ public struct DetailedPopover: View {
     private func usageRow(_ w: PopoverData.Window) -> some View {
         UsageRow(title: w.title, remaining: w.remaining, pace: w.pace, state: w.state,
                  trailingValue: w.trailingValue, metaLeading: w.metaLeading, deficit: w.deficit)
+    }
+
+    private func placeholder(_ title: String, detail: String) -> some View {
+        VStack(alignment: .leading, spacing: HowlSpacing.s1) {
+            Text(title).font(HowlTypography.callout).foregroundStyle(HowlColor.ink300)
+            Text(detail).font(HowlTypography.caption).foregroundStyle(HowlColor.ink500)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(HowlSpacing.s4)
+        .background(HowlColor.navy800, in: RoundedRectangle(cornerRadius: HowlRadius.md, style: .continuous))
     }
 }
