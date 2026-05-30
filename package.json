@@ -5,7 +5,7 @@
     "packages": [
       "apps/*",
       "packages/*",
-      "!apps/macos",
+      "!apps/desktop",
       "!apps/mobile",
       "!packages/HowlAlertUI"
     ],

@@ -20,7 +20,7 @@ Repo was **wiped from the old v3 plan and rebuilt as v2.1** (Hono on Bun + Postg
 - `apps/server` `@howlalert/server` Hono+tRPC (:3000) · `apps/web` `@howlalert/web` Next (:3001) · `apps/docs` `@howlalert/docs` fumadocs (:4000)
 - `packages/{api,auth,config,db,env,ui}` `@howlalert/*`
 - `packages/db/docker-compose.yml` = Postgres + Redis (NOT root). `bun run db:start` brings both up.
-- Swift (excluded from Bun workspaces): `apps/macos`, `apps/mobile`, `packages/HowlAlertUI`
+- Swift (excluded from Bun workspaces): `apps/desktop`, `apps/mobile`, `packages/HowlAlertUI`
 - Verified earlier: `bun install` clean · pg+redis healthy · `db:push` · all 3 dev servers 200 · `redis-cli ping` PONG.
 
 ## HowlAlertUI (HAA-118 — In Progress)
@@ -41,7 +41,7 @@ Old backlog HAA-1–112 all moved to **Done** (board cleared). Fresh v2.1 backlo
 
 ## Next steps
 
-- [ ] **HAA-119** — `apps/macos` Xcode shell that imports HowlAlertUI and renders `DetailedPopover`, so the design can be visually QA'd vs `section-b-macos.html`. (Fastest way to "see it.")
+- [x] **HAA-119** (Done) — `apps/desktop` Xcode shell imports HowlAlertUI and renders `DetailedPopover` (MenuBarExtra `.window`). `HOWL_QA_RENDER=<path>` dumps the popover to PNG headlessly. Build with `-scheme` (not `-target`). Bundle id `com.mrdemonwolf.howlalert` (`.dev` debug).
 - [ ] Finish HAA-118 visual QA → mark Done.
 - [ ] Then HAA-120+ (MenuBarExtra, FSEvents, Stop hook, 5h window math + P90).
 
