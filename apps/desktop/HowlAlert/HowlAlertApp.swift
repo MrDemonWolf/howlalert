@@ -19,9 +19,7 @@ struct HowlAlertApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            PopoverShell {
-                DetailedPopover()
-            }
+            PopoverContent()
         } label: {
             StatusItemLabel()
         }
@@ -66,9 +64,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 enum QARenderer {
     @MainActor
     static func render(to url: URL) {
+        // Render REAL popover data (refresh against ~/.claude first) so the QA
+        // PNG reflects the live binding, not the demo showcase.
+        UsageModel.shared.refresh()
         let content = ZStack {
             QAWallpaper()
-            DetailedPopover()
+            DetailedPopover(data: UsageModel.shared.popoverData)
                 .padding(40)
         }
         .frame(width: 420, height: 1180)
