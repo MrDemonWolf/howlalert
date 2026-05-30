@@ -59,6 +59,15 @@ Pure, testable usage engine. `swift-tools-version: 6.2`, `.v26`. **`swift test` 
 
 Local clone: `/Users/nathanialhenniges/Developer/tmp/CodexBar`. Key finding: CodexBar **does NOT compute the 5h window or plan limits from JSONL** — it scrapes those from Anthropic's OAuth API / `claude /usage` CLI. Its JSONL engine (`Sources/CodexBarCore/Vendored/CostUsage/CostUsageScanner+Claude.swift`) only does daily token aggregation + cost. So HowlAlert's window/P90 math is net-new; only the parsing/dedupe patterns were reusable prior art.
 
+## CI / Deploy (`.github/workflows/`)
+
+Mirrored from WolfWave (pinned action SHAs):
+- `docs.yml` — push to `main` → build `apps/docs` static export → deploy to **GitHub Pages**. **Docs are statically exported** now (`next.config.mjs` `output: "export"`, `basePath` default `/howlalert`, `trailingSlash`; search → fumadocs `staticGET` + `RootProvider search type:"static"`; `og`/`llms` routes are `force-static`). Local build verified → `apps/docs/out/`. **One-time:** enable repo Settings → Pages → Source = **GitHub Actions**.
+- `test.yml` — CI. `js` job (ubuntu): `bun install`, `check-types`, docs build. `swift` job (`macos-26`, paths-filtered): `swift test` HowlAlertCore, `swift build` HowlAlertUI, `xcodebuild build` desktop.
+- `license-year.yml` — annual LICENSE year bump. **Dormant: no LICENSE file yet** (repo license TBD — paid app, ask before choosing).
+- `update_sponsors.yml` — sponsorkit SVG. **Dormant: dispatch-only.** Needs `SPONSORKIT_TOKEN` secret + sponsor config + `apps/docs/public/` + GitHub Sponsors before re-adding a cron.
+- Local docs dev without basePath: `NEXT_PUBLIC_BASE_PATH="" bun run --filter @howlalert/docs dev`.
+
 ## Jira (project HAA, cloud `7566ead4-4eb1-467e-87cd-f187718109ab`)
 
 Old backlog HAA-1–112 → Done (board cleared). Fresh v2.1 backlog:
