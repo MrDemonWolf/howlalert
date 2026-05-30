@@ -50,9 +50,11 @@ coverage
 tmp
 temp
 
-# Swift / Xcode (apps/macos, apps/mobile, packages/HowlAlertUI)
+# Swift / Xcode (apps/desktop, apps/mobile, packages/HowlAlertUI, packages/HowlAlertCore)
 DerivedData/
 xcuserdata/
 *.xcuserstate
+.DS_Store
 .swiftpm/
 packages/HowlAlertUI/.build/
+packages/HowlAlertCore/.build/

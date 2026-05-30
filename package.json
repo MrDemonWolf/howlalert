@@ -7,7 +7,8 @@
       "packages/*",
       "!apps/desktop",
       "!apps/mobile",
-      "!packages/HowlAlertUI"
+      "!packages/HowlAlertUI",
+      "!packages/HowlAlertCore"
     ],
     "catalog": {
       "dotenv": "^17.2.2",
