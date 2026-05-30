@@ -49,7 +49,7 @@ Both grant the same RevenueCat entitlement `pro_features` — **never gate featu
 
 ## 5. Monorepo layout
 
-Bun + Turborepo. Workspaces glob `apps/*` + `packages/*` **excluding the Swift dirs** (`!apps/desktop`, `!apps/mobile`, `!packages/HowlAlertUI`).
+Bun + Turborepo. Workspaces glob `apps/*` + `packages/*` **excluding the Swift dirs** (`!apps/desktop`, `!apps/mobile`, `!packages/HowlAlertUI`, `!packages/HowlAlertCore`).
 
 ```
 apps/
@@ -65,7 +65,8 @@ packages/
   env/      @howlalert/env      — env validation (server reads from apps/server/.env)
   config/   @howlalert/config   — shared TS config
   ui/       @howlalert/ui       — shared React UI (web)
-  HowlAlertUI/  Swift design system (not a Bun workspace)
+  HowlAlertUI/    Swift design system (not a Bun workspace)
+  HowlAlertCore/  Swift usage engine — JSONL parse, 5h window, P90 limit (not a Bun workspace)
 ```
 
 Two Xcode projects only: `apps/desktop` = macOS desktop, `apps/mobile` = iOS + watchOS together. Never split watch into its own project.

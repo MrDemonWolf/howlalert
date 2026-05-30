@@ -44,8 +44,9 @@ Old backlog HAA-1–112 all moved to **Done** (board cleared). Fresh v2.1 backlo
 
 - [x] **HAA-119** (Done) — `apps/desktop` Xcode shell imports HowlAlertUI and renders `DetailedPopover` (MenuBarExtra `.window`). `HOWL_QA_RENDER=<path>` dumps the popover to PNG headlessly. Build with `-scheme` (not `-target`). Bundle id `com.mrdemonwolf.howlalert` (`.dev` debug).
 - [x] **HAA-120** (Done) — real `MenuBarExtra`: state-driven `MenuBarIcon` (WolfMark.mono tinted by HowlState, crit pulse) + `PopoverShell` Liquid Glass chrome. Glass can't be captured by `ImageRenderer` off-screen (blanks subtree) — view it live in the popover or the `#Preview`s; QA PNG renders content only. Scope line: 120 = chrome/glass/status-item, 124 = live data + Demo Mode.
+- [x] **HAA-123** (Done) — new `packages/HowlAlertCore` Swift package (usage engine): `UsageEvent`, `ClaudeTranscriptParser` (JSONL parse + dedupe, CodexBar patterns studied/reimplemented), `FiveHourWindow` (first-activity-anchored 5h blocks, gap-split), `PlanLimitEstimator`+`Percentile` (P90 type-7, remote `limits.json` override, no hard-coded limit), `UsageEngine.snapshot` → `UsageSnapshot`. **32 tests green via `swift test`.** Note: CodexBar derives the 5h window + limits from Anthropic's API/CLI, NOT JSONL — so that half was net-new.
 - [ ] Finish HAA-118 visual QA (pixel/type-scale vs HTML refs) → mark Done.
-- [ ] HAA-121 (FSEvents watcher), HAA-122 (Stop hook binary), HAA-123 (5h math + P90, tests), HAA-124 (live data + Demo Mode + refresh), HAA-125 (Sparkle + DMG + Homebrew).
+- [ ] HAA-121 (FSEvents watcher → feeds HowlAlertCore), HAA-122 (Stop hook binary), HAA-124 (bind HowlAlertCore snapshot to DetailedPopover + Demo Mode + refresh), HAA-125 (Sparkle + DMG + Homebrew).
 
 ## Test HowlAlertUI now
 
