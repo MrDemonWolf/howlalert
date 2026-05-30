@@ -14,6 +14,8 @@ Repo wiped from the old v3 plan, rebuilt as **v2.1** (Hono on Bun + Postgres + R
 
 ## Key commits (newest first)
 
+- `1b1d81e` native menu-bar rows (Button hover/.help/⌘shortcuts) + visible SF-Symbol status icon
+- `0c68d5e` bundle id → com.mrdemonwolf.howlalert.mac (iOS owns root)
 - `a86aaca` HAA-122 Stop-hook binary → instant refresh
 - `52843a6` HAA-124 bind live usage to popover + Demo Mode
 - `dbb3cc2` HAA-121 FSEvents watcher → live pipeline
@@ -54,6 +56,7 @@ Design source of truth: `apps/docs/design-bundle/` (`design-system.html` + `sect
 **Bundle-ID scheme (per-app unique; iOS owns the root):** iOS `com.mrdemonwolf.howlalert` · watch `com.mrdemonwolf.howlalert.watchkitapp` · macOS `com.mrdemonwolf.howlalert.mac`. Shared CloudKit container `iCloud.com.mrdemonwolf.howlalert` (desktop↔mobile pairing). Set iOS/watch ids when the mobile project is created. IAP SKUs (`com.howlalert.*`) are a separate namespace.
 - Pipeline: `TranscriptWatcher` (FSEvents, 1s debounce) + 60s timer + `HowlSignal` Stop-hook observer → `TranscriptReader` → `UsageEngine` → `UsageSnapshot`. `UsageModel` (`@Observable @MainActor`, 14-day retention), started synchronously in `applicationDidFinishLaunching`.
 - `UsageModel.popoverData` maps snapshot + recentModels → `PopoverData`. `PopoverContent` shows live data, or `.demo` when Demo Mode (`@AppStorage("demoMode")`); wires Refresh/Quit/Demo toggle. `StatusItemLabel` → menu-bar icon reflects live state.
+- **Native UI pass** (`1b1d81e`, via the `macos` skill): `MenuActionRow` is a real `Button` with animated hover highlight + `.help` tooltips + accessibility; `DetailedPopover` binds per-row actions + real keyboard shortcuts (⌘R refresh, ⌘Q quit). `MenuBarIcon` is an SF Symbol (`gauge…`) — the custom `WolfShape` didn't template-render in the menu bar (read as invisible); swap back to a wolf template later. Brand look kept; interactions are now idiomatic SwiftUI.
 - **Diagnostic env hooks** (file-based, since GUI stderr isn't capturable): `HOWL_QA_RENDER=/x.png` renders the popover to PNG; `HOWL_USAGE_DUMP=/x.txt` dumps the live snapshot; `HOWL_SIGNAL_PROBE=/x.txt` appends a line per refresh.
 
 ## Stop hook wiring (manual, optional)
@@ -97,7 +100,7 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 - [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap. **NEEDS YOU:** Apple Developer ID cert, notarization creds (App Store Connect API key / `.p8`), a Homebrew tap repo. Ask/walk through before starting. Don't `codesign --deep`; use `LinusU/node-appdmg` (not `create-dmg`).
 - [ ] **Weekly window** (not yet ticketed) — a 7-day window + limit so the popover Week row goes live (needs more history than the 14-day retention for a reliable P90; reconsider retention or weekly P90 source).
 - [ ] Decide whether **cache-read tokens** count toward the window (currently included; P90 keeps it self-relative).
-- [ ] Polish: "Updated just now" → live relative timer; Stop-hook binary auto-bundle + auto-register.
+- [ ] Polish: "Updated just now" → live relative timer; Stop-hook binary auto-bundle + auto-register; wolf template-image menu-bar icon (replace SF-Symbol placeholder); native `Settings` scene (⌘, → real Preferences window); wire the tab bar to real per-tab content.
 - [ ] Then P1 (`HAA-126–132`): server APNs relay, pairing (HMAC), push, etc.
 
 ## Gotchas
