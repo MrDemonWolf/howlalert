@@ -49,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         // Start the live usage pipeline: watch ~/.claude, parse, compute snapshot.
-        Task { @MainActor in UsageModel.shared.start() }
+        MainActor.assumeIsolated { UsageModel.shared.start() }
     }
 }
 
