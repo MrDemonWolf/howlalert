@@ -1,6 +1,6 @@
 # HowlAlert — End User License Agreement (EULA)
 
-**Last updated: [[EFFECTIVE_DATE — e.g. 2026-06-01]]**
+**Last updated: May 30, 2026**
 
 This End User License Agreement ("Agreement") is between you and **MrDemonWolf,
 Inc.** ("MrDemonWolf," "we," "us") and governs your use of the **HowlAlert**
@@ -92,9 +92,9 @@ breach. Your rights to the source code under the GPLv3 survive and are unaffecte
 
 ## 10. Governing law
 
-This Agreement is governed by the laws of [[GOVERNING_LAW_STATE/COUNTRY — e.g.
-State of [STATE], USA]], without regard to conflict-of-laws rules, except where
-your local consumer-protection law provides otherwise.
+This Agreement is governed by the laws of the State of Wisconsin, USA, without
+regard to conflict-of-laws rules, except where your local consumer-protection law
+provides otherwise.
 
 ## 11. Changes
 
@@ -103,7 +103,7 @@ updated" date.
 
 ## 12. Contact
 
-MrDemonWolf, Inc. — [[SUPPORT_CONTACT_EMAIL]] — [[LEGAL_ENTITY_MAILING_ADDRESS]]
+MrDemonWolf, Inc. — legal@mrdemonwolf.com — 645 3rd St, Beloit, WI 53511, USA
 
 ---
 
