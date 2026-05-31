@@ -1,0 +1,265 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Skip release creation
+        type: boolean
+        required: false
+        default: false
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+env:
+  SCHEME: HowlAlert
+  PROJECT: apps/desktop/HowlAlert.xcodeproj
+  CONFIGURATION: Release
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: latest-stable
+
+      - name: Test HowlAlertCore (usage engine)
+        run: swift test
+        working-directory: packages/HowlAlertCore
+
+      - name: Build desktop app (unsigned smoke)
+        working-directory: apps/desktop
+        run: |
+          xcodebuild -project HowlAlert.xcodeproj -scheme "$SCHEME" \
+            -configuration Debug -destination 'platform=macOS' \
+            ARCHS="arm64" build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+  build-and-release:
+    needs: test
+    runs-on: macos-26
+    # `release` environment requires Nathanial's manual approval before any
+    # step runs and scopes signing/notarization secrets to this job only.
+    # See repo Settings → Environments.
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: latest-stable
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION=$(xcodebuild -project "$PROJECT" -scheme "$SCHEME" \
+              -configuration "$CONFIGURATION" -showBuildSettings 2>/dev/null \
+              | awk -F'= ' '/MARKETING_VERSION/ {gsub(/^[ \t]+/,"",$2); print $2; exit}')
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "dmg_name=HowlAlert-${VERSION}.dmg" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+      - name: Import Developer ID certificate
+        env:
+          CERT_P12: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          CERT_PATH="$RUNNER_TEMP/certificate.p12"
+          echo "$CERT_P12" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: -k "" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          rm -f "$CERT_PATH"
+          echo "Developer ID certificate imported"
+
+      - name: Build Release
+        run: |
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" \
+            -destination 'generic/platform=macOS' \
+            ARCHS="arm64" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            -derivedDataPath build build -quiet
+
+      - name: Locate app bundle
+        id: app
+        run: |
+          APP_PATH=$(xcodebuild -project "$PROJECT" -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" -derivedDataPath build \
+            -showBuildSettings 2>/dev/null \
+            | awk -F'= ' '/CONFIGURATION_BUILD_DIR/ {dir=$2} /WRAPPER_NAME/ {name=$2} END {gsub(/^[ \t]+/,"",dir); gsub(/^[ \t]+/,"",name); print dir "/" name}')
+          if [ ! -d "$APP_PATH" ]; then
+            echo "App not found at $APP_PATH"; exit 1
+          fi
+          echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
+          echo "App: $APP_PATH"
+
+      - name: Code sign app bundle (inside-out)
+        env:
+          APP_PATH: ${{ steps.app.outputs.path }}
+        run: |
+          set -euo pipefail
+          IDENTITY="Developer ID Application"
+
+          # HowlAlert is NOT sandboxed (menu-bar app reading ~/.claude), so the
+          # outer app needs no entitlements file. We still sign inside-out and
+          # never --deep: --deep re-signs nested bundles but attaches no
+          # per-bundle entitlements, which would strip Sparkle's updater/XPC
+          # grants. Sign the deepest nested code first, then bundled helper
+          # executables, then the outer app, so each seal stays valid.
+
+          # 1. Nested bundles (frameworks, XPC services, helper apps, dylibs) —
+          #    this catches Sparkle.framework's Autoupdate.app / Updater.app /
+          #    Installer XPC. Deepest path first. Preserve each bundle's own
+          #    entitlements from the xcodebuild signature.
+          find "$APP_PATH/Contents" \
+            \( -name "*.framework" -o -name "*.xpc" -o -name "*.app" -o -name "*.dylib" \) \
+            -print0 \
+            | while IFS= read -r -d '' nested; do
+                printf '%s\t%s\0' "$(printf '%s' "$nested" | tr -cd '/' | wc -c)" "$nested"
+              done \
+            | sort -z -rn -k1,1 \
+            | while IFS=$'\t' read -r -d '' _depth nested; do
+                echo "Signing nested: $nested"
+                codesign --force --options runtime --timestamp \
+                  --preserve-metadata=entitlements,flags,runtime \
+                  --sign "$IDENTITY" "$nested"
+              done
+
+          # 2. Bundled bare helper executables in Contents/MacOS (e.g. the
+          #    Stop-hook binary `howlalert-hook`). The find above misses plain
+          #    Mach-O executables, but hardened runtime + notarization require
+          #    every executable to carry the runtime flag and a valid signature.
+          MAIN_EXEC="$(basename "$APP_PATH" .app)"
+          find "$APP_PATH/Contents/MacOS" -type f -perm -u+x \
+            ! -name "$MAIN_EXEC" -print0 \
+            | while IFS= read -r -d '' helper; do
+                echo "Signing helper executable: $helper"
+                codesign --force --options runtime --timestamp \
+                  --sign "$IDENTITY" "$helper"
+              done
+
+          # 3. Outer app bundle (no --deep, no entitlements file).
+          codesign --force --options runtime --timestamp \
+            --sign "$IDENTITY" "$APP_PATH"
+
+          # 4. Verify the whole tree, strictly.
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          echo "App signed inside-out"
+
+      - name: Create DMG
+        env:
+          DMG_NAME: ${{ steps.version.outputs.dmg_name }}
+          APP_PATH: ${{ steps.app.outputs.path }}
+        run: |
+          chmod +x apps/desktop/scripts/create-dmg.sh
+          apps/desktop/scripts/create-dmg.sh "$APP_PATH" "$DMG_NAME" builds
+
+      - name: Sign DMG
+        env:
+          DMG_NAME: ${{ steps.version.outputs.dmg_name }}
+        run: |
+          codesign --sign "Developer ID Application" --timestamp "builds/$DMG_NAME"
+          echo "DMG signed"
+
+      - name: Notarize DMG
+        env:
+          DMG_NAME: ${{ steps.version.outputs.dmg_name }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          xcrun notarytool submit "builds/$DMG_NAME" \
+            --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" --wait --timeout 30m
+          echo "Notarization complete"
+
+      - name: Staple notarization ticket
+        env:
+          DMG_NAME: ${{ steps.version.outputs.dmg_name }}
+        run: |
+          xcrun stapler staple "builds/$DMG_NAME"
+          echo "Notarization ticket stapled"
+
+      - name: Install Sparkle CLI tools
+        run: |
+          brew install --cask sparkle
+          SPARKLE_BIN=$(find /opt/homebrew/Caskroom/sparkle /usr/local/Caskroom/sparkle -name generate_appcast -type f 2>/dev/null | head -1 | xargs -I {} dirname {})
+          if [ -z "$SPARKLE_BIN" ]; then
+            echo "::error::Could not locate Sparkle CLI tools after Homebrew install"
+            exit 1
+          fi
+          echo "SPARKLE_BIN=$SPARKLE_BIN" >> "$GITHUB_ENV"
+          echo "Sparkle CLI tools at $SPARKLE_BIN"
+
+      - name: Generate Sparkle appcast
+        env:
+          DMG_NAME: ${{ steps.version.outputs.dmg_name }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          echo "$SPARKLE_PRIVATE_KEY" > "$RUNNER_TEMP/sparkle_key"
+          trap 'rm -f "$RUNNER_TEMP/sparkle_key"' EXIT
+          "$SPARKLE_BIN/generate_appcast" \
+            --ed-key-file "$RUNNER_TEMP/sparkle_key" \
+            --download-url-prefix "https://github.com/MrDemonWolf/howlalert/releases/download/v${VERSION}/" \
+            -o builds/appcast.xml builds/
+          xmllint --noout builds/appcast.xml
+          grep -q 'sparkle:edSignature=' builds/appcast.xml || { echo "::error::appcast.xml missing edSignature"; exit 1; }
+          echo "Appcast generated and validated"
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.version.outputs.dmg_name }}
+          path: builds/${{ steps.version.outputs.dmg_name }}
+
+      - name: Create draft GitHub Release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DMG_NAME: ${{ steps.version.outputs.dmg_name }}
+        run: |
+          gh release delete "v$VERSION" --yes 2>/dev/null || true
+          gh release create "v$VERSION" \
+            "builds/$DMG_NAME" "builds/appcast.xml" \
+            --title "HowlAlert v$VERSION" \
+            --generate-notes --draft
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/build.keychain-db" 2>/dev/null || true

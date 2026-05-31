@@ -117,7 +117,7 @@ Colors: navy `#091533`, cyan `#0FACED`, green `#3DDC97` / amber `#FFA533` / red 
 - ❌ Don't revert `ink-500` to `#6A7A99` (fails AA) — use `#9AA9C5`.
 - ❌ Don't commit secrets (`.p8`, App Store Connect keys, RevenueCat keys). Use `.env` (gitignored) + Dokploy env vars + Xcode `.xcconfig` (gitignored).
 - ❌ Don't `codesign --deep` the macOS app — breaks Sparkle's nested signatures.
-- ❌ Don't use `create-dmg` (npm) — use `LinusU/node-appdmg`.
+- ❌ Don't use `create-dmg` (npm) or node-appdmg — build the DMG with a bare-`hdiutil` script (mirrors `mrdemonwolf/wolfwave` `scripts/create-dmg.sh`: UDRW image → AppleScript Finder layout → UDZO convert).
 - ❌ Don't write tests after the fact — write alongside, especially the 5h-window math + JSONL parser.
 - ❌ Never force-push to `main`; never rewrite published history.
 - If something feels wrong or ambiguous, **stop and ask**.
