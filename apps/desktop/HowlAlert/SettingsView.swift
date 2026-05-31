@@ -168,6 +168,10 @@ private struct AboutSettingsTab: View {
                 Link("Docs", destination: URL(string: "https://mrdemonwolf.github.io/howlalert/")!)
             }
             .font(.callout)
+            Text("Not affiliated with or endorsed by Anthropic. Claude and Claude Code are trademarks of Anthropic, PBC.")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
             Text("Made with love by MrDemonWolf, Inc.")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
