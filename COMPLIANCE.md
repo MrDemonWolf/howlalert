@@ -64,6 +64,15 @@ because HowlAlert never touches the Services — but re-check them before adding
 any feature that talks to Anthropic (e.g. if you ever scrape limits from the API
 like CodexBar does; CLAUDE.md explicitly says we don't).
 
+**CodexBar precedent (researched 2026-05-30, v0.32.0).** CodexBar is **MIT**
+(© Peter Steinberger), names "Claude" only as one provider in a 40-provider list
+(not in its app name), ships **no** non-affiliation disclaimer, and — unlike
+HowlAlert — **connects to Anthropic's API/OAuth** (the very access Anthropic
+"clarified a ban on," The Register 2026-02-20). Takeaway: descriptive use of
+"Claude" is common and so far untested, but precedent ≠ permission; HowlAlert's
+local-only design is *more* conservative than CodexBar, and CodexBar's MIT license
+is not a model for our GPLv3 choice.
+
 **Trademark — required actions (not legal advice):**
 1. Add a prominent **"Not affiliated with or endorsed by Anthropic. Claude and
    Claude Code are trademarks of Anthropic, PBC."** disclaimer (About screen,
@@ -93,8 +102,8 @@ Gatekeeper/notarization rules and basic legal hygiene do.
 | Local notifications | ✅ runtime authorization requested | — |
 | Writes `~/.claude/settings.json` | ✅ opt-in toggle, backup + atomic write, refuses malformed | — |
 | **`PrivacyInfo.xcprivacy`** | ❌ none | Not required for notarized DMG, but add before any MAS build; `UserDefaults` is a "required-reason API" |
-| **LICENSE** | ❌ none (CLAUDE.md notes "TBD") | Choose + add (paid app → likely proprietary/all-rights-reserved, *decision needed*) |
-| **Privacy policy + EULA** | ❌ none in product/docs | Publish a privacy policy (reads transcripts locally; sends push; CloudKit). Link from app + site |
+| **LICENSE** | ✅ **GPLv3** (`LICENSE`) + Apple App-Store §7 additional permission + trademark reservation (README) | Done. Note: GPLv3 means anyone may fork/redistribute the code; brand is protected by trademark, not copyright |
+| **Privacy policy + EULA** | ✅ drafted (`legal/PRIVACY.md`, `legal/EULA.md`) — placeholders flagged | Fill placeholders (entity address, effective date, contact email, hosting/region), host at stable URLs, link from app + App Store Connect |
 | `LSUIElement`, version/copyright keys | verify in generated Info.plist | Confirm `LSUIElement=YES`, `CFBundleShortVersionString`, `NSHumanReadableCopyright` |
 
 ## 3. Apple — mobile app (`apps/mobile`, **not built yet** — bake in before submission)
@@ -129,10 +138,11 @@ App Store Review Guidelines that will apply to the paid iOS/watchOS app:
 ## 5. Prioritized actions
 
 **Do before launch (Blocker-ish):**
-- [ ] Non-affiliation + trademark disclaimer — About screen ✅ (shipped), website, App Store description.
-- [ ] Email Anthropic for written brand permission / sign-off on "for Claude Code" usage.
-- [ ] Choose + add a `LICENSE`. *(Decision: proprietary vs source-available.)*
-- [ ] Publish a privacy policy + EULA; link from app + site.
+- [ ] Non-affiliation + trademark disclaimer — About screen ✅ (shipped); add to website + App Store description.
+- [ ] Email marketing@anthropic.com for written brand permission / sign-off on "for Claude Code" usage.
+- [x] `LICENSE` = **GPLv3** + Apple App-Store §7 additional permission + trademark reservation (README).
+- [ ] Privacy policy + EULA drafted (`legal/`) — **fill placeholders + host at stable URLs**, link from app + site.
+- [ ] **GPLv3 implications to confirm:** copyleft lets others redistribute the app free (brand stays yours); verify all bundled deps are GPL-compatible (Sparkle MIT ✅, RevenueCat MIT ✅); keep the server's license decision separate (AGPL if you want network copyleft).
 
 **Before mobile App Store submission:**
 - [ ] Paywall IAP disclosures (3.1.2) + Terms/Privacy links.

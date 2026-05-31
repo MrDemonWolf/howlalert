@@ -118,7 +118,11 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 
 ## Compliance (Apple + Anthropic)
 
-Full audit: **`COMPLIANCE.md`** (repo root, 2026-05-30). Verdict: core mechanism is ToS-clean (local `~/.claude` reads + documented hooks; never touches Anthropic's Services, so anti-scraping/automation clauses don't attach). **One real risk: trademark use of "Claude"** — Consumer Terms forbid using Anthropic's name/marks without written consent; `CLAUDE` is registered (#7645254). Shipped a non-affiliation disclaimer in the desktop About tab; still TODO before launch: written brand permission from Anthropic, a `LICENSE`, a published privacy policy + EULA. Mobile App Store bake-in list (IAP 3.1.2 disclosures, account deletion 5.1.1(v), `PrivacyInfo.xcprivacy`, trademark-safe metadata) in the doc.
+Full audit: **`COMPLIANCE.md`** (repo root, 2026-05-30). Verdict: core mechanism is ToS-clean (local `~/.claude` reads + documented hooks; never touches Anthropic's Services, so anti-scraping/automation clauses don't attach). **One real risk: trademark use of "Claude"** — Consumer Terms §12 forbid using Anthropic's name/marks without written consent (email marketing@anthropic.com); `CLAUDE` is registered (#7645254). CodexBar (researched: MIT, hits the API, no disclaimer) is weak precedent, not permission.
+
+**Done:** non-affiliation disclaimer in the desktop About tab; **`LICENSE` = GPLv3** + Apple App-Store §7 additional permission + trademark reservation (README); **Privacy Policy + EULA drafted** (`legal/PRIVACY.md`, `legal/EULA.md`) — GDPR + CCPA + Apple EULA Schedule A, with `[[placeholders]]` to fill (entity address, effective date, contact email, hosting region).
+
+**TODO before launch:** fill the legal-doc placeholders + host at stable URLs; email Anthropic for brand permission; confirm GPLv3 dep-compatibility (Sparkle/RevenueCat both MIT ✅) and that copyleft (anyone may redistribute the code) is intended. Mobile App Store bake-in list (IAP 3.1.2 disclosures, account deletion 5.1.1(v), `PrivacyInfo.xcprivacy`, trademark-safe metadata) in the doc. **GPLv3 + App Store needs the §7 Apple exception (now in README) — without it GPL apps can't ship on the App Store.**
 
 ## Gotchas
 

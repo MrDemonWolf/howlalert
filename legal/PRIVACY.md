@@ -1,0 +1,154 @@
+# HowlAlert — Privacy Policy
+
+**Last updated: [[EFFECTIVE_DATE — e.g. 2026-06-01]]**
+
+This Privacy Policy explains how **MrDemonWolf, Inc.** ("we," "us," "MrDemonWolf")
+handles information in connection with **HowlAlert**, our usage-monitor app for the
+Apple ecosystem (macOS menu-bar app, and forthcoming iOS and watchOS apps) and the
+related push-notification relay service (together, the "Service").
+
+> **Plain-language summary.** HowlAlert watches *your own* local Claude Code usage
+> files on *your* device to show how much of your usage window is left. **The
+> contents of those files never leave your device.** Our server stores only what's
+> needed to deliver push notifications to your devices (a device token and a
+> pairing code). We don't sell your data and we don't run third-party ad or
+> analytics trackers.
+
+This is not legal advice. Have counsel review before publishing.
+
+---
+
+## 1. Who we are (data controller)
+
+MrDemonWolf, Inc.
+[[LEGAL_ENTITY_MAILING_ADDRESS]]
+Privacy contact: [[PRIVACY_CONTACT_EMAIL — e.g. privacy@mrdemonwolf.com]]
+[[EU/UK representative, if required — Art. 27 GDPR; otherwise state "not applicable"]]
+
+## 2. What HowlAlert reads on your device (and does **not** send anywhere)
+
+To show your usage, the desktop app reads files Claude Code has already written to
+your computer, under `~/.claude` (or the location set by `CLAUDE_CONFIG_DIR`):
+
+- **Claude Code transcript files (`.jsonl`)** — read locally to compute token
+  counts, your 5-hour usage window, pace, and reset time.
+- **Local app settings** — your HowlAlert preferences are stored on-device
+  (macOS `UserDefaults`).
+- **Optional Stop-hook setup** — if you turn it on, HowlAlert adds one entry to
+  `~/.claude/settings.json` so it can refresh the instant a Claude Code turn ends.
+  We back the file up first and only change that one entry; you can turn it off to
+  remove it.
+
+**This on-device data — including the contents of your transcripts — is processed
+only on your device and is never transmitted to us or to any third party by
+HowlAlert.** We never see your prompts, your code, or Claude's responses.
+
+## 3. Information the Service does process
+
+| Data | Why | Where it's stored | Retention |
+|---|---|---|---|
+| **APNs device token** | To deliver push notifications to your device | Our server (Postgres) | Until you unpair/uninstall or the token expires; deleted on request |
+| **Pairing record / pairing HMAC** | To securely link your Mac and your iPhone/Watch | Our server (Postgres) + your **iCloud (CloudKit)** | Until you unpair; deleted on request |
+| **Transient operational data** | Rate limiting, replay protection, push-token JWT cache | Our cache (Redis), short TTL | Minutes (auto-expires) |
+| **Purchase / subscription status** | To unlock paid features | Apple + RevenueCat (see §5) | Per Apple/RevenueCat |
+| **Update checks (desktop)** | Sparkle checks our appcast for new versions | Our update host receives your IP address + app version at check time (standard web request) | Standard server logs |
+
+We do **not** collect names, email addresses, precise location, contacts,
+photos, advertising identifiers, or analytics/behavioral tracking data through
+the app. We do **not** use third-party advertising or analytics SDKs.
+
+## 4. How we use information
+
+- Deliver the push notifications you enable.
+- Pair and authenticate your devices (HMAC-SHA256 over a CloudKit-shared secret;
+  replay protection).
+- Provide, maintain, and secure the Service.
+- Provide and verify paid features.
+- Comply with law.
+
+**GDPR legal bases:** performance of a contract (delivering the Service you
+request, incl. push and purchases); legitimate interests (securing the Service,
+preventing abuse); and consent where required (e.g. push permission, which you
+grant through the OS prompt and can revoke in Settings).
+
+## 5. Third parties / sub-processors
+
+We share the limited data above only with providers that help us run the Service:
+
+- **Apple** — APNs (push delivery), CloudKit (pairing), and the App Store (for
+  iOS/watchOS distribution and purchases). See Apple's Privacy Policy.
+- **RevenueCat** — manages in-app subscriptions; receives purchase events and an
+  app-assigned user identifier (not your name/email). See RevenueCat's Privacy
+  Policy.
+- **Hosting** — our server runs on [[HOSTING_PROVIDER — e.g. Dokploy on a VPS at PROVIDER/REGION]].
+- [[Cloudflare R2 — include only if used for blob storage; otherwise remove]]
+
+We do **not sell** your personal information, and we do **not share** it for
+cross-context behavioral advertising (as those terms are defined under the
+CCPA/CPRA). We disclose data only as described here or as required by law.
+
+## 6. Anthropic / Claude
+
+HowlAlert reads files created by Claude Code on your device. Your use of Claude
+Code is governed by **Anthropic's** terms and privacy policy, not ours. HowlAlert
+is **not affiliated with, endorsed by, or sponsored by Anthropic**; "Claude" and
+"Claude Code" are trademarks of Anthropic, PBC, used here only descriptively.
+
+## 7. Data retention
+
+We keep device tokens and pairing records only while your devices are paired, and
+delete them when you unpair, uninstall, or ask us to. Cache entries auto-expire
+within minutes. On-device data stays on your device under your control.
+
+## 8. Your rights
+
+Depending on where you live, you may have rights to **access, correct, delete,
+port, or restrict** processing of your personal data, and to **object** to
+certain processing. To exercise them, email [[PRIVACY_CONTACT_EMAIL]]. Because we
+hold very little data tied to you, you can also exercise most controls directly:
+unpair your devices and uninstall to remove the device token and pairing record.
+
+- **EU/UK (GDPR):** rights above, plus the right to lodge a complaint with your
+  supervisory authority.
+- **California (CCPA/CPRA):** rights to know, delete, correct, and to opt out of
+  sale/sharing — **we do not sell or share** personal information, and we do not
+  discriminate against you for exercising your rights.
+
+## 9. Children
+
+HowlAlert is not directed to children. You must be old enough to use Claude Code
+and to consent to this Service in your jurisdiction (and at least 18, consistent
+with Anthropic's terms). We do not knowingly collect data from children.
+
+## 10. Security
+
+Device→server requests are authenticated with HMAC-SHA256 and protected against
+replay. We store only minimal identifiers, use TLS in transit, and limit access.
+No method of transmission or storage is 100% secure.
+
+## 11. International transfers
+
+Our servers are located in [[SERVER_REGION]]. If you are in the EEA/UK, your
+limited data (device token, pairing record) may be processed in
+[[COUNTRY]] under appropriate safeguards (e.g. Standard Contractual Clauses)
+[[confirm mechanism with counsel]].
+
+## 12. Changes
+
+We may update this policy; we'll change the "Last updated" date and, for material
+changes, provide reasonable notice.
+
+## 13. Contact
+
+MrDemonWolf, Inc. — [[PRIVACY_CONTACT_EMAIL]] — [[LEGAL_ENTITY_MAILING_ADDRESS]]
+
+---
+
+### Apple Privacy "Nutrition Label" mapping (for App Store Connect)
+
+- **Data Not Collected** for the on-device features (transcripts, usage, settings).
+- **Identifiers → Device ID (APNs token)**: linked to you, used for **App
+  Functionality** (push). Not used for tracking.
+- **Purchases**: handled by Apple/RevenueCat for **App Functionality**.
+- No **Tracking** (no ATT prompt needed — we don't track across apps/sites).
+- Confirm and mirror this in App Store Connect → App Privacy before submission.
