@@ -1,0 +1,58 @@
+---
+title: How it works
+description: The 5-hour window, the P90 limit estimate, and how HowlAlert stays current.
+---
+
+HowlAlert turns the usage data Claude Code already keeps on your Mac into a
+single, trustworthy answer: how much of your current window is left.
+
+## Reading your usage
+
+Claude Code writes transcripts to `~/.claude`. HowlAlert parses those locally,
+deduplicates the events (one per message, last chunk wins), and sums the tokens
+per turn. Nothing is uploaded — the app never talks to Anthropic's servers.
+
+## The 5-hour window
+
+Usage limits reset on a rolling **5-hour window** anchored to your first
+activity. HowlAlert rebuilds that window the same way:
+
+- It groups events into 5-hour blocks, splitting on gaps longer than five hours.
+- The **current block** is what you're spending against right now.
+- Completed blocks are kept as history for estimating your limit.
+
+The result is shown as a percent used and a plain-language time-to-empty, like
+*"Runs out in 47m."*
+
+## Your real limit (P90)
+
+Anthropic doesn't publish a fixed number, and the limits change over time. So
+HowlAlert **does not hard-code any plan limit**. Instead it estimates your limit
+from your own history — the **90th percentile (P90)** of your completed-window
+totals. That self-calibrates to your plan and usage.
+
+When Anthropic changes limits, a small remote `limits.json` can override the
+estimate so everyone updates at once, without an app release.
+
+## Staying current
+
+HowlAlert refreshes from three sources, so the number is always fresh:
+
+1. **FSEvents** — it watches `~/.claude` and reacts to file changes (debounced).
+2. **A periodic timer** — a configurable safety-net refresh.
+3. **The Stop hook** — an opt-in Claude Code hook that pings HowlAlert the
+   instant a turn finishes, for a zero-delay update. Enable it in **Settings →
+   Integration**.
+
+## States
+
+| State | Meaning |
+| --- | --- |
+| Fresh | Plenty of window left |
+| OK | Comfortable |
+| Low | Getting close — first nudge |
+| Almost out | Crossing the line — final nudge |
+
+HowlAlert sends one notification when you rise into **Low** or **Almost out**,
+then re-arms only after you drop back down — so you get a heads-up, not a stream
+of noise.

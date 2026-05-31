@@ -1,15 +1,48 @@
 ---
-title: Hello World
-description: Your first document
+title: HowlAlert
+description: A tiny Mac menu bar app that watches your Claude Code usage and warns you before the 5-hour limit runs out.
 ---
 
-<img src="/howlalert-wolf-brand.svg" alt="HowlAlert" width="120" height="120" />
+<div className="docs-hero">
+  <span className="docs-eyebrow">For Claude Code · macOS 26+</span>
+  <h1 className="docs-hero-title">
+    Know when Claude Code <span className="accent">runs out.</span>
+  </h1>
+  <p className="docs-hero-sub">
+    HowlAlert reads your local Claude Code usage, learns your real limit, and
+    tells you how long the current 5-hour window has left — in plain words,
+    right in the menu bar.
+  </p>
+  <div className="docs-hero-pills">
+    <span className="ha-pill">5-hour window</span>
+    <span className="ha-pill">Auto-detected limit</span>
+    <span className="ha-pill">Local &amp; private</span>
+    <span className="ha-pill">Open source</span>
+  </div>
+</div>
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
-
-## What is Next?
+## Start here
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Install HowlAlert" href="/docs/installation" description="DMG or Homebrew. Under a minute on macOS 26+." />
+  <Card title="How it works" href="/docs/how-it-works" description="The 5-hour window, the P90 limit estimate, and the Stop hook." />
+  <Card title="Features" href="/docs/features" description="What the menu bar app does today, and what's coming to iPhone and Watch." />
+  <Card title="FAQ" href="/docs/faq" description="Privacy, pricing, supported Macs, and updates." />
 </Cards>
+
+## What it is
+
+HowlAlert is a small macOS menu bar app for people who live in Claude Code. It
+watches the usage files Claude Code already writes to `~/.claude`, rebuilds your
+rolling 5-hour usage window, and turns it into something you can act on:
+**"Runs out in 47m."**
+
+It never connects to Anthropic's services and never sees your prompts or code —
+it only reads the local usage totals already on your Mac.
+
+## What it is not
+
+HowlAlert is an independent, open-source project by MrDemonWolf, Inc. It is
+**not** affiliated with, endorsed by, or sponsored by Anthropic. "Claude" and
+"Claude Code" are trademarks of Anthropic, PBC. See the
+[disclaimer](/docs/legal/disclaimer) for details.
