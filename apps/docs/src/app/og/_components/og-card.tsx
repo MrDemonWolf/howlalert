@@ -42,7 +42,7 @@ function Wordmark(): ReactElement {
       <div
         style={{
           display: "flex",
-          fontFamily: "Fraunces",
+          fontFamily: "Bricolage Grotesque",
           fontSize: 36,
           fontWeight: 600,
           color: TXT_1,
@@ -65,7 +65,7 @@ function Frame({ tag, children }: { tag: string; children: ReactNode }): ReactEl
         flexDirection: "column",
         background: BG,
         position: "relative",
-        fontFamily: "Inter",
+        fontFamily: "Geist",
       }}
     >
       <div
@@ -116,7 +116,7 @@ function Frame({ tag, children }: { tag: string; children: ReactNode }): ReactEl
             display: "flex",
             alignItems: "center",
             gap: 10,
-            fontFamily: "JetBrains Mono",
+            fontFamily: "Geist Mono",
             fontSize: 16,
             color: TXT_2,
             letterSpacing: 0.4,
@@ -204,7 +204,7 @@ function GaugeTile(): ReactElement {
       </div>
 
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "flex-end", fontFamily: "Fraunces", color: TXT_1 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", fontFamily: "Bricolage Grotesque", color: TXT_1 }}>
           <span style={{ display: "flex", fontSize: 64, fontWeight: 600, lineHeight: 1 }}>84</span>
           <span style={{ display: "flex", fontSize: 30, color: TXT_2, marginBottom: 6 }}>%</span>
         </div>
@@ -219,7 +219,7 @@ function GaugeTile(): ReactElement {
       <div style={{ display: "flex", height: 1, background: HAIRLINE }} />
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: TXT_2 }}>
         <span style={{ display: "flex" }}>Limit auto-detected · P90</span>
-        <span style={{ display: "flex", fontFamily: "JetBrains Mono", color: TXT_1 }}>Sonnet · Opus</span>
+        <span style={{ display: "flex", fontFamily: "Geist Mono", color: TXT_1 }}>Sonnet · Opus</span>
       </div>
     </div>
   );
@@ -254,7 +254,7 @@ export function OgCard({ title, description, eyebrow, chips, accentWord }: OgCar
               display: "flex",
               flexWrap: "wrap",
               marginTop: eyebrow ? 24 : 0,
-              fontFamily: "Fraunces",
+              fontFamily: "Bricolage Grotesque",
               fontSize: 62,
               lineHeight: 1.05,
               color: TXT_1,
@@ -324,10 +324,10 @@ async function loadFont(
 }
 
 export async function loadOgFonts() {
-  const [fraunces, inter, mono] = await Promise.all([
-    loadFont("Fraunces", [600]),
-    loadFont("Inter", [400, 500]),
-    loadFont("JetBrains Mono", [400]),
+  const [display, body, mono] = await Promise.all([
+    loadFont("Bricolage Grotesque", [600]),
+    loadFont("Geist", [400, 500]),
+    loadFont("Geist Mono", [400]),
   ]);
-  return [...fraunces, ...inter, ...mono];
+  return [...display, ...body, ...mono];
 }

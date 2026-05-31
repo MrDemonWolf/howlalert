@@ -165,7 +165,7 @@ export default function HomePage() {
                   <Shield className="w-3 h-3" /> Signed &amp; notarized by Apple
                 </span>
                 <span className="ha-pill">
-                  <Lock className="w-3 h-3" /> Nothing leaves your Mac
+                  <Lock className="w-3 h-3" /> Your prompts never leave your Mac
                 </span>
               </div>
             </div>
@@ -495,9 +495,12 @@ export default function HomePage() {
           <p className="ha-text-2 text-lg mt-5 leading-relaxed">
             HowlAlert reads the usage files already on your Mac under{" "}
             <code className="ha-mono ha-text-1">~/.claude</code>. It never
-            connects to Anthropic&rsquo;s services, and nothing about your
-            prompts or code leaves your machine. When the iPhone and Watch apps
-            land, the server holds only device tokens — never your usage.
+            connects to Anthropic&rsquo;s services, and your prompts, code, and
+            usage history never leave your machine. The free Mac app is fully
+            local. When you add the iPhone and Apple Watch apps, the usage
+            summary — the percent left and reset time — passes through our relay
+            to reach your devices. We store only your device tokens, never your
+            prompts, code, or usage history.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
             {["Local-only reads", "No telemetry", "No account needed", "Open source"].map(
@@ -635,8 +638,10 @@ export default function HomePage() {
                 <>
                   No. It reads the usage files Claude Code already writes to{" "}
                   <code className="ha-mono ha-text-1">~/.claude</code> on your Mac.
-                  It never signs in to Anthropic, never sends your prompts
-                  anywhere, and works fully offline.
+                  It never signs in to Anthropic and never sends your prompts
+                  anywhere. The Mac app works fully offline; only the optional
+                  iPhone and Apple Watch push uses our relay, and only to forward
+                  the usage summary in the notification.
                 </>
               }
             />

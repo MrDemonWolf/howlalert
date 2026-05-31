@@ -121,18 +121,23 @@ html > body[data-scroll-locked] {
 }
 
 /* ── Typography ──────────────────────────────────────────── */
-.ha-font {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
-    "Segoe UI", system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv11";
+/* Body = Geist. Set globally so docs + nav inherit it too. */
+body {
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    system-ui, sans-serif;
 }
 
-/* Display = Fraunces (warm editorial serif) to evoke Claude's voice */
+.ha-font {
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    system-ui, sans-serif;
+}
+
+/* Display = Bricolage Grotesque (characterful, tight display grotesque) */
 .ha-display {
-  font-family: var(--font-display), Georgia, "Times New Roman", serif;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.08;
+  font-family: var(--font-display), "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
 }
 
 .ha-mono {
@@ -186,12 +191,12 @@ html > body[data-scroll-locked] {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 32%);
 }
 
-/* ── Hero headline (Fraunces, fluid) ─────────────────────── */
+/* ── Hero headline (Bricolage Grotesque, fluid) ──────────── */
 .ha-hero-headline {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-family: var(--font-display), "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
   font-size: clamp(2.4rem, 6vw, 4rem);
   margin: 0;
   text-wrap: balance;
@@ -477,10 +482,10 @@ article:has(.docs-hero) > p:first-of-type,
 .dark .docs-eyebrow { color: var(--brand-500); }
 
 .docs-hero-title {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-family: var(--font-display), "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
   font-size: clamp(2.5rem, 6vw, 4rem);
   color: var(--txt-1);
   margin: 0 0 1.25rem !important;

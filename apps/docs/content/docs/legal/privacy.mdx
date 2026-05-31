@@ -3,7 +3,7 @@ title: Privacy Policy
 description: How HowlAlert handles your data.
 ---
 
-_Last updated: May 30, 2026_
+_Last updated: May 31, 2026_
 
 This Privacy Policy explains how **MrDemonWolf, Inc.** ("we," "us," "MrDemonWolf")
 handles information in connection with **HowlAlert**, our usage-monitor app for the
@@ -12,10 +12,13 @@ related push-notification relay service (together, the "Service").
 
 > **Plain-language summary.** HowlAlert watches _your own_ local Claude Code usage
 > files on _your_ device to show how much of your usage window is left. **The
-> contents of those files never leave your device.** Our server stores only what's
-> needed to deliver push notifications to your devices (a device token and a
-> pairing code). We don't sell your data and we don't run third-party ad or
-> analytics trackers.
+> contents of those files — your prompts, your code, your transcripts — never leave
+> your device.** If you enable push on the iPhone or Apple Watch apps, the short
+> usage summary shown in the notification (such as the percent of your window left
+> and when it resets) is relayed through our server and Apple's push service to
+> reach your devices. Our server stores only what's needed to deliver those
+> notifications (a device token and a pairing code) — not your usage history. We
+> don't sell your data and we don't run third-party ad or analytics trackers.
 
 ## 1. Who we are (data controller)
 
@@ -40,13 +43,18 @@ your computer, under `~/.claude` (or the location set by `CLAUDE_CONFIG_DIR`):
 
 **This on-device data — including the contents of your transcripts — is processed
 only on your device and is never transmitted to us or to any third party by
-HowlAlert.** We never see your prompts, your code, or Claude's responses.
+HowlAlert.** The one exception is push: if you turn on notifications for the iPhone
+or Apple Watch apps, the brief usage summary that appears in the notification (for
+example, the percent of your window left and its reset time) is sent to our relay
+and Apple's APNs solely to deliver that notification to your devices. We never see
+your prompts, your code, your transcripts, or Claude's responses.
 
 ## 3. Information the Service does process
 
 | Data | Why | Where it's stored | Retention |
 |---|---|---|---|
 | **APNs device token** | To deliver push notifications to your device | Our server (Postgres) | Until you unpair/uninstall or the token expires; deleted on request |
+| **Push notification content (usage summary)** | To show your remaining window on your iPhone/Watch | Relayed through our server + Apple APNs; held only transiently in cache | Not stored after delivery (cache auto-expires in minutes) |
 | **Pairing record / pairing HMAC** | To securely link your Mac and your iPhone/Watch | Our server (Postgres) + your **iCloud (CloudKit)** | Until you unpair; deleted on request |
 | **Transient operational data** | Rate limiting, replay protection, push-token JWT cache | Our cache (Redis), short TTL | Minutes (auto-expires) |
 | **Purchase / subscription status** | To unlock paid features | Apple + RevenueCat (see §5) | Per Apple/RevenueCat |

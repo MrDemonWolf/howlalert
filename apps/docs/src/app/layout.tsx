@@ -1,24 +1,25 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 
 import "./global.css";
 import { asset, homepageSeo, repo, siteUrl } from "@/lib/site";
 
-// Warm editorial serif for display — evokes Claude's voice.
-const fraunces = Fraunces({
+// Display = Bricolage Grotesque. Characterful, tight display grotesque.
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  axes: ["opsz"],
 });
 
-const inter = Inter({
+// Body = Geist. Clean modern sans with a sharper personality than Inter.
+const geist = Geist({
   subsets: ["latin"],
+  variable: "--font-body",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
@@ -76,7 +77,7 @@ const jsonLd = {
     "Watches the Claude Code 5-hour usage window from the menu bar",
     "Auto-detects your limit from history (P90) — no hard-coded plan numbers",
     "Local and push notifications before you hit the limit",
-    "Reads ~/.claude locally; nothing sensitive leaves your Mac",
+    "Reads ~/.claude locally; your prompts and code never leave your Mac",
   ],
   license: "https://github.com/mrdemonwolf/howlalert/blob/main/LICENSE",
 };
@@ -85,7 +86,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${inter.className} ${jetbrainsMono.variable}`}
+      className={`${bricolage.variable} ${geist.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">
