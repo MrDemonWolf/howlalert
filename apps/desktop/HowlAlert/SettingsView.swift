@@ -14,6 +14,8 @@ struct SettingsView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             NotificationsSettingsTab()
                 .tabItem { Label("Notifications", systemImage: "bell") }
+            IntegrationSettingsTab()
+                .tabItem { Label("Integration", systemImage: "link") }
             AboutSettingsTab()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
@@ -99,6 +101,46 @@ private struct NotificationsSettingsTab: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+/// Claude Code Stop-hook registration — opt-in, writes ~/.claude/settings.json.
+private struct IntegrationSettingsTab: View {
+    @State private var enabled = HookInstaller.isEnabled()
+    @State private var errorText: String?
+    private let binaryPath = HookInstaller.hookBinaryPath()
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Instant refresh via Claude Code Stop hook", isOn: $enabled)
+                    .disabled(binaryPath == nil)
+                    .onChange(of: enabled) { _, on in apply(on) }
+            } footer: {
+                VStack(alignment: .leading, spacing: 4) {
+                    if let binaryPath {
+                        Text("Adds a Stop hook to ~/.claude/settings.json so HowlAlert refreshes the moment a Claude Code turn ends. Toggling off removes exactly that entry; your file is backed up first.")
+                        Text(binaryPath).font(.caption.monospaced()).foregroundStyle(.tertiary)
+                    } else {
+                        Text("The howlalert-hook binary isn't available yet — it ships bundled with the released app. For development, set HOWL_HOOK_PATH to the built binary and reopen Settings.")
+                    }
+                    if let errorText {
+                        Text(errorText).foregroundStyle(.red)
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func apply(_ on: Bool) {
+        do {
+            try HookInstaller.setEnabled(on)
+            errorText = nil
+        } catch {
+            errorText = error.localizedDescription
+            enabled = HookInstaller.isEnabled()   // resync to reality
+        }
     }
 }
 
