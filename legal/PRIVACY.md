@@ -1,6 +1,6 @@
 # HowlAlert — Privacy Policy
 
-**Last updated: [[EFFECTIVE_DATE — e.g. 2026-06-01]]**
+**Last updated: May 30, 2026**
 
 This Privacy Policy explains how **MrDemonWolf, Inc.** ("we," "us," "MrDemonWolf")
 handles information in connection with **HowlAlert**, our usage-monitor app for the
@@ -21,9 +21,9 @@ This is not legal advice. Have counsel review before publishing.
 ## 1. Who we are (data controller)
 
 MrDemonWolf, Inc.
-[[LEGAL_ENTITY_MAILING_ADDRESS]]
-Privacy contact: [[PRIVACY_CONTACT_EMAIL — e.g. privacy@mrdemonwolf.com]]
-[[EU/UK representative, if required — Art. 27 GDPR; otherwise state "not applicable"]]
+645 3rd St, Beloit, WI 53511, USA
+Privacy contact: legal@mrdemonwolf.com
+EU/UK representative: not applicable (no EU/UK establishment; if EU/UK user volume grows, a GDPR Art. 27 representative may be required — confirm with counsel).
 
 ## 2. What HowlAlert reads on your device (and does **not** send anywhere)
 
@@ -80,8 +80,7 @@ We share the limited data above only with providers that help us run the Service
 - **RevenueCat** — manages in-app subscriptions; receives purchase events and an
   app-assigned user identifier (not your name/email). See RevenueCat's Privacy
   Policy.
-- **Hosting** — our server runs on [[HOSTING_PROVIDER — e.g. Dokploy on a VPS at PROVIDER/REGION]].
-- [[Cloudflare R2 — include only if used for blob storage; otherwise remove]]
+- **Hosting** — our server runs on a Dokploy-managed VPS located in the United States.
 
 We do **not sell** your personal information, and we do **not share** it for
 cross-context behavioral advertising (as those terms are defined under the
@@ -104,9 +103,10 @@ within minutes. On-device data stays on your device under your control.
 
 Depending on where you live, you may have rights to **access, correct, delete,
 port, or restrict** processing of your personal data, and to **object** to
-certain processing. To exercise them, email [[PRIVACY_CONTACT_EMAIL]]. Because we
+certain processing. To exercise them, email legal@mrdemonwolf.com. Because we
 hold very little data tied to you, you can also exercise most controls directly:
 unpair your devices and uninstall to remove the device token and pairing record.
+Email: legal@mrdemonwolf.com.
 
 - **EU/UK (GDPR):** rights above, plus the right to lodge a complaint with your
   supervisory authority.
@@ -128,10 +128,10 @@ No method of transmission or storage is 100% secure.
 
 ## 11. International transfers
 
-Our servers are located in [[SERVER_REGION]]. If you are in the EEA/UK, your
-limited data (device token, pairing record) may be processed in
-[[COUNTRY]] under appropriate safeguards (e.g. Standard Contractual Clauses)
-[[confirm mechanism with counsel]].
+Our servers are located in the United States. If you are in the EEA/UK, your
+limited data (device token, pairing record) may be processed in the United States
+under appropriate safeguards such as the EU Standard Contractual Clauses (confirm
+the transfer mechanism with counsel).
 
 ## 12. Changes
 
@@ -140,7 +140,7 @@ changes, provide reasonable notice.
 
 ## 13. Contact
 
-MrDemonWolf, Inc. — [[PRIVACY_CONTACT_EMAIL]] — [[LEGAL_ENTITY_MAILING_ADDRESS]]
+MrDemonWolf, Inc. — legal@mrdemonwolf.com — 645 3rd St, Beloit, WI 53511, USA
 
 ---
 
