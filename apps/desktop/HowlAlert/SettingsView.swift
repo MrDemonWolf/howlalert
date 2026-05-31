@@ -168,6 +168,15 @@ private struct AboutSettingsTab: View {
                 Link("Docs", destination: URL(string: "https://mrdemonwolf.github.io/howlalert/")!)
             }
             .font(.callout)
+            HStack(spacing: HowlSpacing.s3) {
+                Link("Privacy", destination: URL(string: "https://mrdemonwolf.github.io/howlalert/docs/legal/privacy")!)
+                Text("·").foregroundStyle(.tertiary)
+                Link("Terms", destination: URL(string: "https://mrdemonwolf.github.io/howlalert/docs/legal/eula")!)
+                Text("·").foregroundStyle(.tertiary)
+                Link("Disclaimer", destination: URL(string: "https://mrdemonwolf.github.io/howlalert/docs/legal/disclaimer")!)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
             Text("Not affiliated with or endorsed by Anthropic. Claude and Claude Code are trademarks of Anthropic, PBC.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
