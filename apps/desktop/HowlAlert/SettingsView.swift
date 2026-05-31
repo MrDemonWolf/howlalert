@@ -163,6 +163,7 @@ private struct AboutSettingsTab: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            UpdateControl()
             HStack(spacing: HowlSpacing.s4) {
                 Link("Website", destination: URL(string: "https://mrdemonwolf.com")!)
                 Link("Docs", destination: URL(string: "https://mrdemonwolf.github.io/howlalert/")!)
@@ -187,6 +188,26 @@ private struct AboutSettingsTab: View {
         }
         .frame(maxWidth: .infinity)
         .padding(HowlSpacing.s5)
+    }
+}
+
+/// "Check for Updates" in About — a real Sparkle check, unless the app was
+/// installed via Homebrew (then `brew upgrade` owns updates and we say so).
+private struct UpdateControl: View {
+    private let isHomebrew = UpdaterService.shared.isHomebrewInstall
+
+    var body: some View {
+        if isHomebrew {
+            Text("Updates are managed by Homebrew — run `brew upgrade --cask howlalert`.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        } else {
+            Button("Check for Updates…") {
+                UpdaterService.shared.checkForUpdates()
+            }
+            .font(.callout)
+        }
     }
 }
 

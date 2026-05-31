@@ -54,7 +54,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         // Start the live usage pipeline: watch ~/.claude, parse, compute snapshot.
-        MainActor.assumeIsolated { UsageModel.shared.start() }
+        MainActor.assumeIsolated {
+            UsageModel.shared.start()
+            // Bring up Sparkle (begins scheduled checks in Release; no-op for
+            // Homebrew installs, where brew owns updates).
+            UpdaterService.shared.bootstrap()
+        }
     }
 }
 
