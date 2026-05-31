@@ -12,11 +12,14 @@
   on scraping / automated access / reverse-engineering / rate-limit circumvention
   **do not attach**. ✅
 - **One real Anthropic risk: trademark use of "Claude / Claude Code."** Consumer
-  Terms: *"You may not use our name, logos, or trademarks without our prior
-  written consent."* `CLAUDE` is a registered mark (USPTO Reg. #7645254). → add a
-  non-affiliation disclaimer, keep "Claude Code" strictly descriptive (never in
-  the app name/logo, never Anthropic logos), and consider requesting written
-  permission. ⚠️ **Action required.**
+  Terms §12 *"Use of our brand"* (verbatim): *"You may not, without our prior
+  written permission, use our name, logos, or other trademarks in connection with
+  products or services other than the Services, or in any other way that implies
+  our affiliation, endorsement, or sponsorship. To seek permission, please email
+  us at marketing@anthropic.com."* `CLAUDE` is a registered mark (USPTO Reg.
+  #7645254). → add a non-affiliation disclaimer, keep "Claude Code" strictly
+  descriptive (never in the app name/logo, never Anthropic logos), and **email
+  marketing@anthropic.com for written permission.** ⚠️ **Action required.**
 - **Apple — desktop (notarized DMG) has a few hygiene gaps**; the **mobile App
   Store app (not built yet) has a bake-in checklist** (IAP disclosures, privacy
   manifest, account deletion, metadata/trademark). No blockers in current code.
@@ -47,11 +50,19 @@ prior written consent."*
 | Using Claude outputs | Ownership | Reads token counts/metadata; transcript content never leaves the device, never redistributed | ✅ clear |
 | **Trademark "Claude"** | name/logo clause | Uses "Claude Code" in UI + marketing; `CLAUDE` is registered | ⚠️ **action** |
 
-**Why the restrictions don't attach:** (C)–(F) and the rate-limit clause all bind
-behavior against *"the Services"* (Anthropic's API/apps/site). HowlAlert performs
-zero network calls to Anthropic — it parses files already on the user's machine
-and registers an officially-supported hook. The user, not HowlAlert, is the party
-to those terms, and the user isn't breaching them by viewing their own usage.
+**Why the restrictions don't attach:** Consumer Terms §3 binds each "may not"
+against *"our Services"* (Claude.ai/Pro/apps). HowlAlert performs zero network
+calls to Anthropic — it parses files already on the user's machine and registers
+an officially-supported hook. The user, not HowlAlert, is the party to those
+terms, and isn't breaching them by viewing their own usage.
+
+**Watch item:** Anthropic publicly *clarified a ban on third-party tools
+accessing Claude* (The Register, 2026-02-20) and maintains
+[Software Directory Terms](https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms).
+Those target tools that **connect to / drive the Services** — still N/A here
+because HowlAlert never touches the Services — but re-check them before adding
+any feature that talks to Anthropic (e.g. if you ever scrape limits from the API
+like CodexBar does; CLAUDE.md explicitly says we don't).
 
 **Trademark — required actions (not legal advice):**
 1. Add a prominent **"Not affiliated with or endorsed by Anthropic. Claude and
