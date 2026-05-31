@@ -1,6 +1,6 @@
 # HANDOFF — HowlAlert v2.1
 
-> Continuation notes for a fresh Claude Code session. Read `CLAUDE.md` first, then this. Last updated 2026-05-30.
+> Continuation notes for a fresh Claude Code session. Read `CLAUDE.md` first, then this. Last updated 2026-05-30 (legal + Pages + repo-settings pass).
 
 ## TL;DR — start here
 
