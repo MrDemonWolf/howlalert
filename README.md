@@ -101,3 +101,27 @@ howlalert/
 - `bun run db:generate`: Generate database client/types
 - `bun run db:migrate`: Run database migrations
 - `bun run db:studio`: Open database studio UI
+
+## License
+
+HowlAlert is free software, licensed under the **GNU General Public License v3.0**
+(see [LICENSE](LICENSE)). Copyright © 2026 MrDemonWolf, Inc.
+
+**Apple App Store / Mac App Store additional permission (GPLv3 §7).** As an
+additional permission under section 7 of the GPLv3, MrDemonWolf, Inc. grants
+permission to convey the Program (or a work based on it) through the Apple App
+Store and/or Mac App Store, notwithstanding the additional terms imposed by
+Apple's Usage Rules / App Store terms that would otherwise be incompatible with
+the GPLv3. This permission applies to verbatim copies and to copies whose only
+modifications are those reasonably necessary for App Store distribution.
+
+**Trademarks are NOT licensed.** The names "HowlAlert" and "MrDemonWolf," the
+wolf mark, and associated logos are trademarks of MrDemonWolf, Inc. and are **not**
+licensed under the GPL. Forks and redistributions must use a different name and
+logo (you may state your build is "based on HowlAlert").
+
+**Not affiliated with Anthropic.** "Claude" and "Claude Code" are trademarks of
+Anthropic, PBC, used here only descriptively to state compatibility. HowlAlert is
+not affiliated with, endorsed by, or sponsored by Anthropic.
+
+**Legal:** [Privacy Policy](legal/PRIVACY.md) · [EULA](legal/EULA.md) · [Compliance audit](COMPLIANCE.md).
