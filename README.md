@@ -124,4 +124,4 @@ logo (you may state your build is "based on HowlAlert").
 Anthropic, PBC, used here only descriptively to state compatibility. HowlAlert is
 not affiliated with, endorsed by, or sponsored by Anthropic.
 
-**Legal:** [Privacy Policy](legal/PRIVACY.md) · [EULA](legal/EULA.md) · [Compliance audit](COMPLIANCE.md).
+**Legal:** [Privacy Policy](https://mrdemonwolf.github.io/howlalert/docs/legal/privacy) · [EULA](https://mrdemonwolf.github.io/howlalert/docs/legal/eula) · [Disclaimer](https://mrdemonwolf.github.io/howlalert/docs/legal/disclaimer). Internal compliance audit: [COMPLIANCE.md](COMPLIANCE.md).

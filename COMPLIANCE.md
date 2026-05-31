@@ -103,7 +103,7 @@ Gatekeeper/notarization rules and basic legal hygiene do.
 | Writes `~/.claude/settings.json` | ✅ opt-in toggle, backup + atomic write, refuses malformed | — |
 | **`PrivacyInfo.xcprivacy`** | ❌ none | Not required for notarized DMG, but add before any MAS build; `UserDefaults` is a "required-reason API" |
 | **LICENSE** | ✅ **GPLv3** (`LICENSE`) + Apple App-Store §7 additional permission + trademark reservation (README) | Done. Note: GPLv3 means anyone may fork/redistribute the code; brand is protected by trademark, not copyright |
-| **Privacy policy + EULA** | ✅ drafted (`legal/PRIVACY.md`, `legal/EULA.md`) — placeholders flagged | Fill placeholders (entity address, effective date, contact email, hosting/region), host at stable URLs, link from app + App Store Connect |
+| **Privacy policy + EULA + Disclaimer** | ✅ published as docs pages (`apps/docs/content/docs/legal/`), GitHub Pages → `https://mrdemonwolf.github.io/howlalert/docs/legal/{privacy,eula,disclaimer}` | Placeholders filled (MrDemonWolf, Inc., Beloit WI, WI law, legal@mrdemonwolf.com). Add the privacy URL to App Store Connect; confirm Beloit ZIP + SCC mechanism with counsel |
 | `LSUIElement`, version/copyright keys | verify in generated Info.plist | Confirm `LSUIElement=YES`, `CFBundleShortVersionString`, `NSHumanReadableCopyright` |
 
 ## 3. Apple — mobile app (`apps/mobile`, **not built yet** — bake in before submission)

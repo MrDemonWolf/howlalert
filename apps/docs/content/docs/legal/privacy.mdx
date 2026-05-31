@@ -1,29 +1,28 @@
-# HowlAlert — Privacy Policy
+---
+title: Privacy Policy
+description: How HowlAlert handles your data.
+---
 
-**Last updated: May 30, 2026**
+_Last updated: May 30, 2026_
 
 This Privacy Policy explains how **MrDemonWolf, Inc.** ("we," "us," "MrDemonWolf")
 handles information in connection with **HowlAlert**, our usage-monitor app for the
 Apple ecosystem (macOS menu-bar app, and forthcoming iOS and watchOS apps) and the
 related push-notification relay service (together, the "Service").
 
-> **Plain-language summary.** HowlAlert watches *your own* local Claude Code usage
-> files on *your* device to show how much of your usage window is left. **The
+> **Plain-language summary.** HowlAlert watches _your own_ local Claude Code usage
+> files on _your_ device to show how much of your usage window is left. **The
 > contents of those files never leave your device.** Our server stores only what's
 > needed to deliver push notifications to your devices (a device token and a
 > pairing code). We don't sell your data and we don't run third-party ad or
 > analytics trackers.
 
-This is not legal advice. Have counsel review before publishing.
-
----
-
 ## 1. Who we are (data controller)
 
-MrDemonWolf, Inc.
-645 3rd St, Beloit, WI 53511, USA
-Privacy contact: legal@mrdemonwolf.com
-EU/UK representative: not applicable (no EU/UK establishment; if EU/UK user volume grows, a GDPR Art. 27 representative may be required — confirm with counsel).
+MrDemonWolf, Inc. — 645 3rd St, Beloit, WI 53511, USA
+Privacy contact: [legal@mrdemonwolf.com](mailto:legal@mrdemonwolf.com)
+EU/UK representative: not applicable (no EU/UK establishment; if EU/UK user volume
+grows, a GDPR Art. 27 representative may be required).
 
 ## 2. What HowlAlert reads on your device (and does **not** send anywhere)
 
@@ -51,11 +50,11 @@ HowlAlert.** We never see your prompts, your code, or Claude's responses.
 | **Pairing record / pairing HMAC** | To securely link your Mac and your iPhone/Watch | Our server (Postgres) + your **iCloud (CloudKit)** | Until you unpair; deleted on request |
 | **Transient operational data** | Rate limiting, replay protection, push-token JWT cache | Our cache (Redis), short TTL | Minutes (auto-expires) |
 | **Purchase / subscription status** | To unlock paid features | Apple + RevenueCat (see §5) | Per Apple/RevenueCat |
-| **Update checks (desktop)** | Sparkle checks our appcast for new versions | Our update host receives your IP address + app version at check time (standard web request) | Standard server logs |
+| **Update checks (desktop)** | Sparkle checks our appcast for new versions | Our update host receives your IP address + app version at check time | Standard server logs |
 
-We do **not** collect names, email addresses, precise location, contacts,
-photos, advertising identifiers, or analytics/behavioral tracking data through
-the app. We do **not** use third-party advertising or analytics SDKs.
+We do **not** collect names, email addresses, precise location, contacts, photos,
+advertising identifiers, or analytics/behavioral tracking data through the app. We
+do **not** use third-party advertising or analytics SDKs.
 
 ## 4. How we use information
 
@@ -76,11 +75,11 @@ grant through the OS prompt and can revoke in Settings).
 We share the limited data above only with providers that help us run the Service:
 
 - **Apple** — APNs (push delivery), CloudKit (pairing), and the App Store (for
-  iOS/watchOS distribution and purchases). See Apple's Privacy Policy.
+  iOS/watchOS distribution and purchases).
 - **RevenueCat** — manages in-app subscriptions; receives purchase events and an
-  app-assigned user identifier (not your name/email). See RevenueCat's Privacy
-  Policy.
-- **Hosting** — our server runs on a Dokploy-managed VPS located in the United States.
+  app-assigned user identifier (not your name/email).
+- **Hosting** — our server runs on a Dokploy-managed VPS located in the United
+  States.
 
 We do **not sell** your personal information, and we do **not share** it for
 cross-context behavioral advertising (as those terms are defined under the
@@ -102,11 +101,11 @@ within minutes. On-device data stays on your device under your control.
 ## 8. Your rights
 
 Depending on where you live, you may have rights to **access, correct, delete,
-port, or restrict** processing of your personal data, and to **object** to
-certain processing. To exercise them, email legal@mrdemonwolf.com. Because we
-hold very little data tied to you, you can also exercise most controls directly:
-unpair your devices and uninstall to remove the device token and pairing record.
-Email: legal@mrdemonwolf.com.
+port, or restrict** processing of your personal data, and to **object** to certain
+processing. To exercise them, email [legal@mrdemonwolf.com](mailto:legal@mrdemonwolf.com).
+Because we hold very little data tied to you, you can also exercise most controls
+directly: unpair your devices and uninstall to remove the device token and pairing
+record.
 
 - **EU/UK (GDPR):** rights above, plus the right to lodge a complaint with your
   supervisory authority.
@@ -123,15 +122,14 @@ with Anthropic's terms). We do not knowingly collect data from children.
 ## 10. Security
 
 Device→server requests are authenticated with HMAC-SHA256 and protected against
-replay. We store only minimal identifiers, use TLS in transit, and limit access.
-No method of transmission or storage is 100% secure.
+replay. We store only minimal identifiers, use TLS in transit, and limit access. No
+method of transmission or storage is 100% secure.
 
 ## 11. International transfers
 
 Our servers are located in the United States. If you are in the EEA/UK, your
 limited data (device token, pairing record) may be processed in the United States
-under appropriate safeguards such as the EU Standard Contractual Clauses (confirm
-the transfer mechanism with counsel).
+under appropriate safeguards such as the EU Standard Contractual Clauses.
 
 ## 12. Changes
 
@@ -140,15 +138,9 @@ changes, provide reasonable notice.
 
 ## 13. Contact
 
-MrDemonWolf, Inc. — legal@mrdemonwolf.com — 645 3rd St, Beloit, WI 53511, USA
+MrDemonWolf, Inc. — [legal@mrdemonwolf.com](mailto:legal@mrdemonwolf.com) — 645 3rd
+St, Beloit, WI 53511, USA
 
 ---
 
-### Apple Privacy "Nutrition Label" mapping (for App Store Connect)
-
-- **Data Not Collected** for the on-device features (transcripts, usage, settings).
-- **Identifiers → Device ID (APNs token)**: linked to you, used for **App
-  Functionality** (push). Not used for tracking.
-- **Purchases**: handled by Apple/RevenueCat for **App Functionality**.
-- No **Tracking** (no ATT prompt needed — we don't track across apps/sites).
-- Confirm and mirror this in App Store Connect → App Privacy before submission.
+_This document is provided for transparency and is not legal advice._
