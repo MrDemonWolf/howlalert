@@ -213,12 +213,21 @@ jobs:
           xcrun stapler staple "builds/$DMG_NAME"
           echo "Notarization ticket stapled"
 
-      - name: Install Sparkle CLI tools
+      - name: Fetch Sparkle CLI tools (pinned tarball — the brew cask is deprecated 2026-09-01)
+        env:
+          SPARKLE_VERSION: 2.9.2
+          SPARKLE_SHA256: 1cb340cbbef04c6c0d162078610c25e2221031d794a3449d89f2f56f4df77c95
         run: |
-          brew install --cask sparkle
-          SPARKLE_BIN=$(find /opt/homebrew/Caskroom/sparkle /usr/local/Caskroom/sparkle -name generate_appcast -type f 2>/dev/null | head -1 | xargs -I {} dirname {})
-          if [ -z "$SPARKLE_BIN" ]; then
-            echo "::error::Could not locate Sparkle CLI tools after Homebrew install"
+          set -euo pipefail
+          TARBALL="Sparkle-${SPARKLE_VERSION}.tar.xz"
+          URL="https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/${TARBALL}"
+          curl -fsSL -o "$RUNNER_TEMP/$TARBALL" "$URL"
+          echo "${SPARKLE_SHA256}  $RUNNER_TEMP/$TARBALL" | shasum -a 256 -c -
+          mkdir -p "$RUNNER_TEMP/sparkle"
+          tar -xf "$RUNNER_TEMP/$TARBALL" -C "$RUNNER_TEMP/sparkle"
+          SPARKLE_BIN=$(dirname "$(find "$RUNNER_TEMP/sparkle" -name generate_appcast -type f | head -1)")
+          if [ -z "$SPARKLE_BIN" ] || [ ! -x "$SPARKLE_BIN/generate_appcast" ]; then
+            echo "::error::generate_appcast not found in Sparkle ${SPARKLE_VERSION} tarball"
             exit 1
           fi
           echo "SPARKLE_BIN=$SPARKLE_BIN" >> "$GITHUB_ENV"
