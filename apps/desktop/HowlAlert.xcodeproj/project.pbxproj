@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C0DE000000000000000000F1 /* HowlAlertUI in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000F0 /* HowlAlertUI */; };
 		C0DE000000000000000000F3 /* HowlAlertCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000F4 /* HowlAlertCore */; };
+		C0DE000000000000000000F6 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000F7 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 			files = (
 				C0DE000000000000000000F1 /* HowlAlertUI in Frameworks */,
 				C0DE000000000000000000F3 /* HowlAlertCore in Frameworks */,
+				C0DE000000000000000000F6 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +76,7 @@
 			packageProductDependencies = (
 				C0DE000000000000000000F0 /* HowlAlertUI */,
 				C0DE000000000000000000F4 /* HowlAlertCore */,
+				C0DE000000000000000000F7 /* Sparkle */,
 			);
 			productName = HowlAlert;
 			productReference = C0DE000000000000000000A1 /* HowlAlert.app */;
@@ -106,6 +109,7 @@
 			packageReferences = (
 				C0DE000000000000000000F2 /* XCLocalSwiftPackageReference "../../packages/HowlAlertUI" */,
 				C0DE000000000000000000F5 /* XCLocalSwiftPackageReference "../../packages/HowlAlertCore" */,
+				C0DE000000000000000000F8 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0DE000000000000000000D2 /* Products */;
@@ -325,6 +329,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		C0DE000000000000000000F8 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCLocalSwiftPackageReference section */
 		C0DE000000000000000000F2 /* XCLocalSwiftPackageReference "../../packages/HowlAlertUI" */ = {
 			isa = XCLocalSwiftPackageReference;
@@ -346,6 +361,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE000000000000000000F5 /* XCLocalSwiftPackageReference "../../packages/HowlAlertCore" */;
 			productName = HowlAlertCore;
+		};
+		C0DE000000000000000000F7 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE000000000000000000F8 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
