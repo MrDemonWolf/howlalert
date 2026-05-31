@@ -14,6 +14,12 @@ Repo wiped from the old v3 plan, rebuilt as **v2.1** (Hono on Bun + Postgres + R
 
 ## Key commits (newest first)
 
+- `209dc9c` HAA-125 bundle howlalert-hook into the app (Copy Files → Contents/MacOS; Stop-hook Phase B)
+- `427a1f8` HAA-125 Sparkle Info.plist keys (feed URL + EdDSA pubkey; merged base plist)
+- `8003fbb` HAA-125 UpdaterService + About "Check for Updates"
+- `9c29f05` HAA-125 add Sparkle 2.9.2 SPM dependency
+- `569e183` HAA-125 fetch Sparkle CLI from pinned tarball (brew cask deprecated)
+- `0d87fc2` HAA-125 release pipeline — DMG + notarize + Homebrew (mirror wolfwave)
 - `1b1d81e` native menu-bar rows (Button hover/.help/⌘shortcuts) + visible SF-Symbol status icon
 - `0c68d5e` bundle id → com.mrdemonwolf.howlalert.mac (iOS owns root)
 - `a86aaca` HAA-122 Stop-hook binary → instant refresh
@@ -105,7 +111,7 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 | HAA-122 | Stop hook binary | **Done** |
 | HAA-123 | 5h window + P90 (tests) | **Done** |
 | HAA-124 | Popover UI + Demo Mode + refresh | **Done** |
-| HAA-125 | Sparkle + DMG + Homebrew | To Do |
+| HAA-125 | Sparkle + DMG + Homebrew | In Progress — in-app + CI done; release-time signing pending |
 
 ## Next steps
 
@@ -114,7 +120,12 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
   - **No code drift requiring a fix** — every component font/spacing literal audited against `design-bundle/*.html` tracks the mock. (The meter is `UsageMeter`, a flat depleting bar h=8 — there is no ring component.) Stroke widths (1 / 1.5) and `SettingsRow` micro-spacing (2pt) are sub-token by design, kept.
   - `EmptyState` 32pt = decorative SF-Symbol glyph (no empty-state in any mock) — justified inline, not a type token.
   - **Visual eyeball remains Xcode-canvas only** (ImageRenderer blanks Liquid-Glass; headless GUI stderr uncapturable — see Gotchas). Token *values* already match HTML (verified prior). Recommended residual manual check: open the live `#Preview`s in Xcode 26 and compare against `section-*.html`.
-- [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap. **NEEDS YOU:** Apple Developer ID cert, notarization creds (App Store Connect API key / `.p8`), a Homebrew tap repo. Ask/walk through before starting. Don't `codesign --deep`; use `LinusU/node-appdmg` (not `create-dmg`).
+- [ ] **HAA-125** — Sparkle + notarized DMG + Homebrew tap. **In-app + CI scaffolding DONE; only release-time signing/notarization remains (needs Apple creds).**
+  - **In-app (done, build-verified Debug + Release):** Sparkle **2.9.2** via SPM (`Package.resolved` pinned); `UpdaterService` (`apps/desktop/HowlAlert/UpdaterService.swift`) wraps `SPUStandardUpdaterController` — Release auto-checks, DEBUG doesn't start, Homebrew install disables Sparkle, no system-profile telemetry; About tab "Check for Updates…" button (or "managed by Homebrew" notice); `Bundle+InstallMethod.swift` detection. **`howlalert-hook` is now bundled into `Contents/MacOS`** via a Copy Files phase (Stop-hook Phase B — Integration toggle works on a release build, no `HOWL_HOOK_PATH` needed).
+  - **Info.plist (synthesized + merged):** base `apps/desktop/HowlAlert/Info.plist` (`INFOPLIST_FILE`, keeps `GENERATE_INFOPLIST_FILE=YES`) carries `SUFeedURL` (→ GitHub Releases `releases/latest/download/appcast.xml`), `SUPublicEDKey`, `SUEnableAutomaticChecks`, `SUScheduledCheckInterval` with correct types. A `PBXFileSystemSynchronizedBuildFileExceptionSet` keeps it out of `Contents/Resources`.
+  - **EdDSA key:** HowlAlert has its OWN key (account `HowlAlert` in the login Keychain, separate from WolfWave). Public key (in Info.plist): `UcKqLAAQ7dYFCrLEZlI8cCjc7rhgy8YjmzbH1rkXaAs=`. **Export the private key for the CI secret** with `generate_keys --account HowlAlert -x howlalert_priv.key` (tool at `…/DerivedData/HowlAlert-*/SourcePackages/artifacts/sparkle/Sparkle/bin/`); that file's contents = the `SPARKLE_PRIVATE_KEY` GitHub secret.
+  - **CI (done):** `.github/workflows/build_release.yml` (tag `v*`/dispatch, `release` env gate) → test → Developer ID sign **inside-out, never `--deep`** (+ a step signing bare `Contents/MacOS` helpers like the hook) → DMG (`apps/desktop/scripts/create-dmg.sh`, bare hdiutil) → notarize → staple → Sparkle CLI from **pinned tarball** (not the deprecated brew cask) → `generate_appcast` → draft release. `update_homebrew.yml` (`homebrew-tap` env gate) PRs the cask to **`mrdemonwolf/homebrew-den`**.
+  - **NEEDS YOU at release:** (1) Developer ID Application cert + notary creds; (2) add 7 secrets `DEVELOPER_ID_CERT_P12`, `DEVELOPER_ID_CERT_PASSWORD`, `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_APP_PASSWORD`, `SPARKLE_PRIVATE_KEY`, `HOMEBREW_TAP_TOKEN`; (3) create `release` + `homebrew-tap` GitHub Environments (approval gates); (4) copy `apps/desktop/distribution/howlalert.rb` → `homebrew-den` `Casks/howlalert.rb` once; (5) tag the first release. Optional polish: a `dmg-background.png` in `apps/desktop/assets/` (the DMG script works without it).
 - [ ] **Weekly window** (not yet ticketed) — a 7-day window + limit so the popover Week row goes live (needs more history than the 14-day retention for a reliable P90; reconsider retention or weekly P90 source).
 - [ ] Decide whether **cache-read tokens** count toward the window (currently included; P90 keeps it self-relative).
 - [ ] Polish DONE (native pass 2): live relative timer ✓; native `Settings` scene ✓ (General / Notifications / About); local notifications on warn/crit ✓ (needs GUI eyeball — auth prompt + delivery can't be verified headlessly); popover tab bar wired to per-tab panels ✓ (only Overview verified via QA render; 5-Hour/Weekly/Models switch on click — GUI eyeball). REMAINING: Stop-hook binary auto-bundle + auto-register; wolf template-image menu-bar icon (replace SF-Symbol placeholder); weekly window data (then the Weekly tab goes live — needs >14d retention/P90 decision); **Stop-hook Phase B** = bundle the `howlalert-hook` binary into `HowlAlert.app` (Copy-Files build phase — do it with HAA-125 packaging; auto-register Phase A is done). [warn/crit transition logic extracted to Core + unit-tested ✓]
