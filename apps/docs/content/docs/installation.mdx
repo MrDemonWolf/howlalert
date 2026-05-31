@@ -1,0 +1,52 @@
+---
+title: Installation
+description: Install HowlAlert on macOS 26+ with the signed DMG or Homebrew.
+---
+
+HowlAlert runs on **macOS 26 (Tahoe) or newer**, on **Apple Silicon**. You also
+need Claude Code installed locally, since HowlAlert reads its usage files.
+
+## Option 1 — DMG (recommended)
+
+<Steps>
+<Step>
+Download the latest signed `.dmg` from the
+[releases page](https://github.com/mrdemonwolf/howlalert/releases/latest).
+</Step>
+<Step>
+Open the `.dmg` and drag **HowlAlert** into your Applications folder.
+</Step>
+<Step>
+Launch HowlAlert. A wolf icon appears in the menu bar — click it for the full
+popover.
+</Step>
+</Steps>
+
+The DMG is signed with a Developer ID and notarized by Apple, and updates itself
+through Sparkle.
+
+## Option 2 — Homebrew
+
+```bash
+brew tap mrdemonwolf/den
+brew install --cask howlalert
+```
+
+Homebrew installs keep themselves current with `brew upgrade --cask`.
+
+## First run
+
+HowlAlert starts watching immediately — no account, no sign-in. On first launch
+it asks permission to send notifications; allow it if you want a heads-up before
+your window runs out. You can change thresholds later in **Settings →
+Notifications**.
+
+To get an instant refresh the moment Claude Code finishes a turn, enable the
+Stop hook in **Settings → Integration**. See [how it works](/docs/how-it-works)
+for what the hook does.
+
+## Requirements
+
+- macOS 26 Tahoe or newer
+- Apple Silicon (M-series)
+- Claude Code installed (HowlAlert reads `~/.claude`)

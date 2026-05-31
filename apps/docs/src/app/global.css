@@ -1,12 +1,584 @@
 @import "tailwindcss";
-@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/ocean.css";
 @import "fumadocs-ui/css/preset.css";
 
-html {
-  scrollbar-gutter: stable;
-}
+/* ──────────────────────────────────────────────────────────
+   HowlAlert docs + marketing.
+   Claude-warm palette (cream #FAF9F5 + coral #D97757), scoped to
+   the web surface only. The desktop app keeps its navy/cyan brand.
+   Utility prefix: `ha-`.
+   ────────────────────────────────────────────────────────── */
 
+html { scrollbar-gutter: stable; }
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+@theme {
+  --color-fd-primary: hsl(15 60% 60%);
+  --color-fd-primary-foreground: hsl(0 0% 100%);
+  --color-fd-background: hsl(45 33% 97%);
+  --color-fd-foreground: hsl(30 5% 12%);
+  --color-fd-muted: hsl(43 25% 93%);
+  --color-fd-muted-foreground: hsl(40 5% 40%);
+  --color-fd-secondary: hsl(43 25% 90%);
+  --color-fd-secondary-foreground: hsl(30 5% 12%);
+  --color-fd-accent: hsl(20 55% 94%);
+  --color-fd-accent-foreground: hsl(15 55% 38%);
+  --color-fd-card: hsl(0 0% 100%);
+  --color-fd-card-foreground: hsl(30 5% 12%);
+  --color-fd-popover: hsl(45 33% 97%);
+  --color-fd-popover-foreground: hsl(30 5% 12%);
+  --color-fd-border: hsl(40 20% 86%);
+  --color-fd-ring: hsl(15 60% 58%);
+  --color-fd-overlay: hsla(30 10% 6% / 0.3);
+}
+
+.dark {
+  --color-fd-primary: hsl(16 65% 66%);
+  --color-fd-primary-foreground: hsl(30 10% 8%);
+  --color-fd-background: hsl(40 8% 9%);
+  --color-fd-foreground: hsl(43 28% 92%);
+  --color-fd-muted: hsl(36 6% 16%);
+  --color-fd-muted-foreground: hsl(40 6% 64%);
+  --color-fd-secondary: hsl(36 6% 18%);
+  --color-fd-secondary-foreground: hsl(43 28% 92%);
+  --color-fd-accent: hsl(16 35% 22%);
+  --color-fd-accent-foreground: hsl(16 70% 78%);
+  --color-fd-card: hsl(36 7% 12%);
+  --color-fd-card-foreground: hsl(43 28% 92%);
+  --color-fd-popover: hsl(36 7% 12%);
+  --color-fd-popover-foreground: hsl(43 28% 92%);
+  --color-fd-border: hsl(36 6% 22%);
+  --color-fd-ring: hsl(16 65% 60%);
+  --color-fd-overlay: hsla(30 10% 2% / 0.6);
+
+  --shiki-dark: #e8e3d8;
+  --shiki-dark-bg: #15140f;
+}
+
+:root {
+  --shiki-light: #1f1e1d;
+  --shiki-light-bg: #f0eee6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) { color-scheme: dark; }
+}
+
+/* ── Brand tokens ────────────────────────────────────────── */
+:root {
+  --brand-500: #D97757; /* Claude coral / clay */
+  --brand-600: #C15F3C; /* darker — AA text on cream + hover */
+  --brand-50:  #F7EDE7;
+
+  --bg-base:    #FAF9F5; /* warm paper */
+  --bg-surface: #F0EEE6; /* ivory */
+  --bg-elev:    #FFFFFF;
+  --txt-1:      #1F1E1D;
+  --txt-2:      #6B6862;
+  --hairline:   #E4DFD4;
+
+  /* Usage-state accents (semantic; harmonize with coral/cream) */
+  --state-fresh: #3DDC97;
+  --state-warn:  #E0922F;
+  --state-crit:  #E0533D;
+}
+
+.dark {
+  --brand-500: #E08A6B;
+  --brand-600: #D97757;
+  --brand-50:  rgba(217, 119, 87, 0.14);
+
+  --bg-base:    #1A1917;
+  --bg-surface: #242220;
+  --bg-elev:    #1F1E1B;
+  --txt-1:      #F0EEE6;
+  --txt-2:      #A8A39A;
+  --hairline:   #34312C;
+
+  --state-fresh: #3DDC97;
+  --state-warn:  #FFA533;
+  --state-crit:  #FF6A53;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --brand-500: #E08A6B;
+    --brand-600: #D97757;
+    --brand-50:  rgba(217, 119, 87, 0.14);
+    --bg-base:    #1A1917;
+    --bg-surface: #242220;
+    --bg-elev:    #1F1E1B;
+    --txt-1:      #F0EEE6;
+    --txt-2:      #A8A39A;
+    --hairline:   #34312C;
+    --state-fresh: #3DDC97;
+    --state-warn:  #FFA533;
+    --state-crit:  #FF6A53;
+  }
+}
+
+/* ── Typography ──────────────────────────────────────────── */
+.ha-font {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "Segoe UI", system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Display = Fraunces (warm editorial serif) to evoke Claude's voice */
+.ha-display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+}
+
+.ha-mono {
+  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ── Surfaces ────────────────────────────────────────────── */
+.ha-bg-base    { background-color: var(--bg-base); }
+.ha-bg-surface { background-color: var(--bg-surface); }
+.ha-bg-elev    { background-color: var(--bg-elev); }
+
+.ha-text-1     { color: var(--txt-1); }
+.ha-text-2     { color: var(--txt-2); }
+.ha-text-brand { color: var(--brand-600); }
+.dark .ha-text-brand { color: var(--brand-500); }
+
+.ha-hairline { border-color: var(--hairline); }
+
+/* ── Liquid Glass. macOS 26 chrome ──────────────────────── */
+.ha-glass {
+  background-color: color-mix(in srgb, var(--bg-elev) 70%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(28px);
+  backdrop-filter: saturate(160%) blur(28px);
+  border: 1px solid color-mix(in srgb, var(--hairline) 80%, transparent);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, #ffffff 70%, transparent) inset,
+    0 24px 60px -28px rgba(60, 40, 20, 0.22);
+  position: relative;
+}
+.dark .ha-glass {
+  background-color: color-mix(in srgb, var(--bg-elev) 60%, transparent);
+  border-color: color-mix(in srgb, var(--hairline) 70%, transparent);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 24px 60px -20px rgba(0, 0, 0, 0.6);
+}
+.ha-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #ffffff 10%, transparent) 0%,
+    transparent 32%
+  );
+  pointer-events: none;
+}
+.dark .ha-glass::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 32%);
+}
+
+/* ── Hero headline (Fraunces, fluid) ─────────────────────── */
+.ha-hero-headline {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  margin: 0;
+  text-wrap: balance;
+}
+@media (min-width: 1024px) {
+  .ha-hero-headline { line-height: 1.02; letter-spacing: -0.025em; }
+}
+
+/* ── Hero product card. Soft seated glow + idle float ────── */
+.ha-hero-card-glow {
+  position: absolute;
+  inset: 8% -6%;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    rgba(217, 119, 87, 0.20) 0%,
+    transparent 70%
+  );
+  filter: blur(10px);
+  pointer-events: none;
+}
+.ha-hero-card-float {
+  z-index: 1;
+  will-change: transform;
+  animation: ha-card-float 7s ease-in-out infinite;
+}
+@keyframes ha-card-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ha-hero-card-float { animation: none; }
+}
+
+/* ── Hero radial wash ────────────────────────────────────── */
+.ha-hero-glow {
+  position: absolute;
+  inset: -10% -10% auto -10%;
+  height: 70%;
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 28%,
+    rgba(217, 119, 87, 0.12) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.dark .ha-hero-glow {
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 28%,
+    rgba(217, 119, 87, 0.20) 0%,
+    transparent 65%
+  );
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.ha-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.4rem;
+  border-radius: 980px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.ha-btn:active { transform: scale(0.98); }
+
+.ha-btn-primary { background-color: var(--brand-500); color: #fff; }
+.ha-btn-primary:hover { background-color: var(--brand-600); }
+
+.ha-btn-secondary { background-color: transparent; color: var(--brand-600); }
+.dark .ha-btn-secondary { color: var(--brand-500); }
+.ha-btn-secondary:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.ha-btn-ghost {
+  background-color: var(--bg-surface);
+  color: var(--txt-1);
+  border: 1px solid var(--hairline);
+}
+.ha-btn-ghost:hover {
+  background-color: color-mix(in srgb, var(--bg-surface) 78%, var(--brand-500));
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.ha-card {
+  background-color: var(--bg-surface);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  transition: transform 0.25s ease, border-color 0.2s ease;
+}
+.ha-card-hover:hover { transform: translateY(-2px); }
+
+/* ── Pill ────────────────────────────────────────────────── */
+.ha-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 980px;
+  background-color: var(--bg-surface);
+  color: var(--txt-2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--hairline);
+}
+
+/* ── Reveal on load ──────────────────────────────────────── */
+.ha-reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: ha-rise 0.5s ease forwards;
+}
+.ha-reveal-1 { animation-delay: 0.05s; }
+.ha-reveal-2 { animation-delay: 0.15s; }
+.ha-reveal-3 { animation-delay: 0.25s; }
+@keyframes ha-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Usage gauge pulse (the one piece of product motion) ─── */
+.ha-pulse-ring { animation: ha-pulse 3.6s ease-in-out infinite; }
+@keyframes ha-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 87, 0); }
+  50%      { box-shadow: 0 0 0 8px rgba(217, 119, 87, 0.12); }
+}
+
+/* ── Dev code block ──────────────────────────────────────── */
+.ha-code {
+  background-color: var(--bg-elev);
+  color: var(--txt-1);
+  border: 1px solid var(--hairline);
+  border-radius: 0.9rem;
+  padding: 1.25rem 1.4rem;
+  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+}
+.dark .ha-code { background-color: #15140f; }
+
+/* ── Navbar ──────────────────────────────────────────────── */
+#nd-nav {
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+  background-color: color-mix(in srgb, var(--bg-base) 74%, transparent);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+#nd-nav:not([data-transparent="true"]) {
+  border-bottom-color: var(--hairline);
+}
+#nd-nav a[href]:not([aria-label]) {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--txt-2);
+  padding: 0.4rem 0.85rem;
+  border-radius: 980px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+#nd-nav a[href]:not([aria-label]):hover {
+  background-color: var(--bg-surface);
+  color: var(--txt-1);
+}
+#nd-nav a[aria-label] { border-radius: 980px; transition: background-color 0.15s ease; }
+#nd-nav a[aria-label]:hover { background-color: var(--bg-surface); }
+#nd-nav [data-theme-toggle] {
+  border-color: var(--hairline);
+  background-color: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+}
+#nd-nav [data-theme-toggle] .bg-fd-accent {
+  background-color: var(--brand-50);
+  color: var(--brand-500);
+}
+#nd-nav button[data-search-full],
+#nd-nav [data-search-full] {
+  background-color: var(--bg-surface);
+  border-color: var(--hairline);
+  border-radius: 980px;
+}
+[data-nav-sheet] { border-color: var(--hairline) !important; }
+
+/* ── Skip to content ─────────────────────────────────────── */
+.skip-nav {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--brand-600);
+  color: #fff;
+  border-radius: 980px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: top 0.15s ease;
+}
+.skip-nav:focus { top: 1rem; outline: 2px solid var(--brand-500); outline-offset: 2px; }
+
+/* ── Focus visible ───────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.dark :focus-visible { outline-color: var(--brand-500); }
+
+/* ── Docs prose readability ──────────────────────────────── */
+.fd-prose,
+[class*="prose"] { line-height: 1.75; }
+.fd-prose p,
+[class*="prose"] p { margin-bottom: 1.25rem; }
+.fd-prose h2,
+[class*="prose"] h2 { margin-top: 2.5rem; margin-bottom: 1rem; }
+.fd-prose h3,
+[class*="prose"] h3 { margin-top: 2rem; margin-bottom: 0.75rem; }
+.fd-prose :not(pre) > code,
+[class*="prose"] :not(pre) > code {
+  color: var(--brand-600);
+  background-color: var(--bg-surface);
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+.dark .fd-prose :not(pre) > code,
+.dark [class*="prose"] :not(pre) > code { color: var(--brand-500); }
+
+/* ── Reduced motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ha-pulse-ring,
+  .ha-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Docs page polish. Extends the marketing aesthetic into MDX
+   ────────────────────────────────────────────────────────── */
+article:has(.docs-hero) > h1:first-of-type,
+article:has(.docs-hero) > p:first-of-type,
+[data-page]:has(.docs-hero) > h1:first-of-type,
+[data-page]:has(.docs-hero) > p:first-of-type { display: none; }
+
+.docs-hero {
+  position: relative;
+  padding: 2rem 0 3rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.docs-hero::before {
+  content: "";
+  position: absolute;
+  inset: -2rem -10% auto -10%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse 50% 60% at 50% 20%,
+    rgba(217, 119, 87, 0.10) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.docs-hero > * { position: relative; z-index: 1; }
+
+.docs-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-600);
+  margin-bottom: 1rem;
+}
+.dark .docs-eyebrow { color: var(--brand-500); }
+
+.docs-hero-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  color: var(--txt-1);
+  margin: 0 0 1.25rem !important;
+}
+.docs-hero-title .accent { color: var(--brand-600); }
+.dark .docs-hero-title .accent { color: var(--brand-500); }
+
+.docs-hero-sub {
+  color: var(--txt-2);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  max-width: 42rem;
+  margin: 0 0 1.5rem !important;
+}
+
+.docs-hero-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+
+.fd-prose > h1:first-child,
+[class*="prose"] > h1:first-child { margin-top: 0; }
+
+/* Refined Fumadocs Card */
+.fd-card,
+a[data-card],
+div[data-card] {
+  border: 1px solid var(--hairline) !important;
+  border-radius: 1rem !important;
+  background-color: var(--bg-elev) !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.fd-card:hover,
+a[data-card]:hover,
+div[data-card]:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--brand-500) 35%, var(--hairline));
+  box-shadow: 0 12px 32px -16px rgba(217, 119, 87, 0.22);
+}
+
+/* Steps. Brand-tinted index circles */
+.fd-steps [data-step],
+.fd-steps li::before {
+  background-color: var(--brand-50) !important;
+  color: var(--brand-600) !important;
+  border-color: color-mix(in srgb, var(--brand-500) 30%, transparent) !important;
+  font-weight: 600;
+}
+
+/* Tabs. Pill segmented control */
+[role="tablist"] {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--hairline) !important;
+  border-radius: 980px !important;
+  padding: 4px !important;
+  gap: 2px;
+}
+[role="tab"] {
+  border-radius: 980px !important;
+  padding: 0.4rem 1rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 500;
+  color: var(--txt-2) !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+[role="tab"][data-state="active"],
+[role="tab"][aria-selected="true"] {
+  background-color: var(--brand-50) !important;
+  color: var(--brand-600) !important;
+}
+
+/* Accordion. Match marketing FaqRow */
+div[data-orientation="vertical"][data-state] {
+  border: 1px solid var(--hairline) !important;
+  border-radius: 1rem !important;
+  background-color: var(--bg-elev) !important;
+  margin-bottom: 0.6rem !important;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+div[data-orientation="vertical"][data-state="open"] {
+  border-color: color-mix(in srgb, var(--brand-500) 30%, var(--hairline)) !important;
+  box-shadow: 0 8px 24px -16px rgba(217, 119, 87, 0.20);
+}
+div[data-orientation="vertical"][data-state] > h3 { margin: 0 !important; }
+div[data-orientation="vertical"][data-state] > h3 > button {
+  width: 100%;
+  padding: 1rem 1.25rem !important;
+  font-weight: 600 !important;
+  color: var(--txt-1) !important;
+  font-size: 1rem !important;
+}
+div[data-orientation="vertical"][data-state] > h3 > button:hover {
+  background-color: color-mix(in srgb, var(--brand-50) 60%, transparent) !important;
+}
+div[data-orientation="vertical"][data-state] > h3 > button > svg {
+  color: var(--brand-500) !important;
+  transition: transform 0.2s ease;
+}
+div[data-orientation="vertical"][data-state="open"] > h3 > button > svg { transform: rotate(90deg); }
+div[data-orientation="vertical"][data-state] > div[role="region"] {
+  padding: 0 1.25rem 1rem !important;
+  color: var(--txt-2);
 }

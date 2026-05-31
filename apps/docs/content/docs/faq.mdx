@@ -1,0 +1,45 @@
+---
+title: FAQ
+description: Privacy, pricing, supported Macs, and updates for HowlAlert.
+---
+
+## Does HowlAlert connect to my Claude account?
+
+No. It reads the usage files Claude Code already writes to `~/.claude` on your
+Mac. It never signs in to Anthropic, never sends your prompts anywhere, and
+works fully offline.
+
+## How does it know my limit if Anthropic doesn't show one?
+
+It estimates from your own history — the P90 of your completed 5-hour windows —
+and can pull a remote override when limits change. There are no hard-coded plan
+numbers to go stale. See [how it works](/docs/how-it-works).
+
+## Is it really free?
+
+The Mac menu bar app is free and open source. Paid **Pro** and **Max** tiers
+will unlock the iPhone and Apple Watch apps when they ship, each with a 7-day
+free trial.
+
+## Which Macs are supported?
+
+macOS 26 (Tahoe) or newer on Apple Silicon. HowlAlert uses Liquid Glass and
+modern APIs with no pre-26 fallback.
+
+## Is this an official Anthropic app?
+
+No. HowlAlert is an independent, open-source project by MrDemonWolf, Inc. and is
+not affiliated with or endorsed by Anthropic. "Claude" and "Claude Code" are
+trademarks of Anthropic, PBC. See the [disclaimer](/docs/legal/disclaimer).
+
+## How do updates work?
+
+The Mac app updates through Sparkle with signed appcasts, or via
+`brew upgrade --cask` if you installed through Homebrew.
+
+## What does the Stop hook do?
+
+It's an opt-in Claude Code hook that pings HowlAlert the instant a turn finishes,
+so the window updates with no delay. Enable it in **Settings → Integration** — no
+manual JSON editing. HowlAlert backs up your settings file first and refuses to
+touch malformed JSON.

@@ -1,3 +1,11 @@
 {
-  "pages": ["index", "---Legal---", "legal"]
+  "pages": [
+    "index",
+    "installation",
+    "how-it-works",
+    "features",
+    "faq",
+    "---Legal---",
+    "legal"
+  ]
 }
