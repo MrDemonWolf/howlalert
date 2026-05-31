@@ -15,7 +15,7 @@ public struct EmptyState: View {
     public var body: some View {
         VStack(spacing: HowlSpacing.s3) {
             Image(systemName: systemImage)
-                .font(.system(size: 32, weight: .regular))
+                .font(.system(size: 32, weight: .regular))   // decorative SF Symbol glyph (no mock); not a type-scale token
                 .foregroundStyle(HowlColor.ink500)
             Text(title)
                 .font(HowlTypography.headline)

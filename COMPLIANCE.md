@@ -141,7 +141,7 @@ App Store Review Guidelines that will apply to the paid iOS/watchOS app:
 - [ ] Non-affiliation + trademark disclaimer — About screen ✅ (shipped); add to website + App Store description.
 - [ ] Email marketing@anthropic.com for written brand permission / sign-off on "for Claude Code" usage.
 - [x] `LICENSE` = **GPLv3** + Apple App-Store §7 additional permission + trademark reservation (README).
-- [ ] Privacy policy + EULA drafted (`legal/`) — **fill placeholders + host at stable URLs**, link from app + site.
+- [x] Privacy policy + EULA published (`legal/`) + **linked from the desktop About tab** (Privacy / Terms / Disclaimer → GitHub Pages). Still TODO: link from website + App Store description.
 - [ ] **GPLv3 implications to confirm:** copyleft lets others redistribute the app free (brand stays yours); verify all bundled deps are GPL-compatible (Sparkle MIT ✅, RevenueCat MIT ✅); keep the server's license decision separate (AGPL if you want network copyleft).
 
 **Before mobile App Store submission:**

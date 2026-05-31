@@ -4,7 +4,7 @@
 
 ## TL;DR — start here
 
-Phase 0 desktop is **functional end-to-end**: the menu-bar app watches `~/.claude`, computes the 5-hour usage window with a P90-auto-detected limit, and shows it live in the popover. **6 of 8 P0 tickets done** (HAA-118 pixel-QA + HAA-125 packaging remain). Docs auto-deploy to GitHub Pages. CI green on every push.
+Phase 0 desktop is **functional end-to-end**: the menu-bar app watches `~/.claude`, computes the 5-hour usage window with a P90-auto-detected limit, and shows it live in the popover. **7 of 8 P0 tickets done** (only HAA-125 packaging remains). Docs auto-deploy to GitHub Pages. CI green on every push.
 
 To see it: open `apps/desktop/HowlAlert.xcodeproj` in Xcode 26 → **⌘R** → click the wolf icon in the menu bar. Or `swift test` in `packages/HowlAlertCore` (66 tests).
 
@@ -98,7 +98,7 @@ Build the binary: `cd packages/HowlAlertCore && swift build` → `.build/debug/h
 Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 | Key | What | Status |
 |---|---|---|
-| HAA-118 | HowlAlertUI tokens + 20 components | In Progress (pixel/type-scale QA left) |
+| HAA-118 | HowlAlertUI tokens + 20 components | **Done** (type/pixel QA pass — see closeout below) |
 | HAA-119 | apps/desktop Xcode shell | **Done** |
 | HAA-120 | MenuBarExtra + Liquid Glass shell | **Done** |
 | HAA-121 | FSEvents watcher | **Done** |
@@ -109,7 +109,11 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 
 ## Next steps
 
-- [ ] **HAA-118** — close out: pixel/type-scale QA of components vs `section-*.html`, then mark Done. (Smallest remaining P0.)
+- [x] **HAA-118** — **Done.** Type/pixel QA pass vs `design-bundle/*.html`. Closeout:
+  - The HTML source-of-truth uses a **dense native-macOS pixel ramp** (13px dominant ×94, plus 9/10/11/12/14/15/16/17/18/22/28/34/40), **not** the clean 7-step `HowlTypography` enum {10,12,14,16,20,28,34}. The enum is for big semantic text; dense data rows correctly use explicit `numeric(size:)`/`.system(size:)` matching the mock pixels. So `numeric(size: 12/13/18/22/40)` + `MenuActionRow .system(size: 13)` are **faithful to the mock, not drift** — left as-is.
+  - **No code drift requiring a fix** — every component font/spacing literal audited against `design-bundle/*.html` tracks the mock. (The meter is `UsageMeter`, a flat depleting bar h=8 — there is no ring component.) Stroke widths (1 / 1.5) and `SettingsRow` micro-spacing (2pt) are sub-token by design, kept.
+  - `EmptyState` 32pt = decorative SF-Symbol glyph (no empty-state in any mock) — justified inline, not a type token.
+  - **Visual eyeball remains Xcode-canvas only** (ImageRenderer blanks Liquid-Glass; headless GUI stderr uncapturable — see Gotchas). Token *values* already match HTML (verified prior). Recommended residual manual check: open the live `#Preview`s in Xcode 26 and compare against `section-*.html`.
 - [ ] **HAA-125** — Sparkle 2.x + notarized DMG + Homebrew tap. **NEEDS YOU:** Apple Developer ID cert, notarization creds (App Store Connect API key / `.p8`), a Homebrew tap repo. Ask/walk through before starting. Don't `codesign --deep`; use `LinusU/node-appdmg` (not `create-dmg`).
 - [ ] **Weekly window** (not yet ticketed) — a 7-day window + limit so the popover Week row goes live (needs more history than the 14-day retention for a reliable P90; reconsider retention or weekly P90 source).
 - [ ] Decide whether **cache-read tokens** count toward the window (currently included; P90 keeps it self-relative).
