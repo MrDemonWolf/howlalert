@@ -116,6 +116,10 @@ Epics `HAA-113`(P0)…`HAA-117`(P4). **P0 status:**
 - [ ] Polish DONE (native pass 2): live relative timer ✓; native `Settings` scene ✓ (General / Notifications / About); local notifications on warn/crit ✓ (needs GUI eyeball — auth prompt + delivery can't be verified headlessly); popover tab bar wired to per-tab panels ✓ (only Overview verified via QA render; 5-Hour/Weekly/Models switch on click — GUI eyeball). REMAINING: Stop-hook binary auto-bundle + auto-register; wolf template-image menu-bar icon (replace SF-Symbol placeholder); weekly window data (then the Weekly tab goes live — needs >14d retention/P90 decision); **Stop-hook Phase B** = bundle the `howlalert-hook` binary into `HowlAlert.app` (Copy-Files build phase — do it with HAA-125 packaging; auto-register Phase A is done). [warn/crit transition logic extracted to Core + unit-tested ✓]
 - [ ] Then P1 (`HAA-126–132`): server APNs relay, pairing (HMAC), push, etc.
 
+## Compliance (Apple + Anthropic)
+
+Full audit: **`COMPLIANCE.md`** (repo root, 2026-05-30). Verdict: core mechanism is ToS-clean (local `~/.claude` reads + documented hooks; never touches Anthropic's Services, so anti-scraping/automation clauses don't attach). **One real risk: trademark use of "Claude"** — Consumer Terms forbid using Anthropic's name/marks without written consent; `CLAUDE` is registered (#7645254). Shipped a non-affiliation disclaimer in the desktop About tab; still TODO before launch: written brand permission from Anthropic, a `LICENSE`, a published privacy policy + EULA. Mobile App Store bake-in list (IAP 3.1.2 disclosures, account deletion 5.1.1(v), `PrivacyInfo.xcprivacy`, trademark-safe metadata) in the doc.
+
 ## Gotchas
 
 - **xcodebuild:** desktop app builds with `-scheme HowlAlert`, never `-target` (won't resolve local SPM packages).
