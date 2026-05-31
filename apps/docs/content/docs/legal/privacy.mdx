@@ -54,7 +54,7 @@ your prompts, your code, your transcripts, or Claude's responses.
 | Data | Why | Where it's stored | Retention |
 |---|---|---|---|
 | **APNs device token** | To deliver push notifications to your device | Our server (Postgres) | Until you unpair/uninstall or the token expires; deleted on request |
-| **Push notification content (usage summary)** | To show your remaining window on your iPhone/Watch | Relayed through our server + Apple APNs; held only transiently in cache | Not stored after delivery (cache auto-expires in minutes) |
+| **Push notification content (usage summary)** | To show your remaining window on your iPhone/Watch | Relayed through our server + Apple APNs; held only transiently in cache | Held only long enough to deliver the notification, then discarded; never written to our database |
 | **Pairing record / pairing HMAC** | To securely link your Mac and your iPhone/Watch | Our server (Postgres) + your **iCloud (CloudKit)** | Until you unpair; deleted on request |
 | **Transient operational data** | Rate limiting, replay protection, push-token JWT cache | Our cache (Redis), short TTL | Minutes (auto-expires) |
 | **Purchase / subscription status** | To unlock paid features | Apple + RevenueCat (see §5) | Per Apple/RevenueCat |
@@ -103,8 +103,10 @@ is **not affiliated with, endorsed by, or sponsored by Anthropic**; "Claude" and
 ## 7. Data retention
 
 We keep device tokens and pairing records only while your devices are paired, and
-delete them when you unpair, uninstall, or ask us to. Cache entries auto-expire
-within minutes. On-device data stays on your device under your control.
+delete them when you unpair, uninstall, or ask us to. Cache entries — including any
+usage summary in transit for a push — auto-expire under short time-to-live windows
+and are never written to our database. On-device data stays on your device under
+your control.
 
 ## 8. Your rights
 
