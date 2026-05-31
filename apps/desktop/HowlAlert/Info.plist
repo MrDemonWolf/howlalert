@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Base Info.plist for the Sparkle keys only. GENERATE_INFOPLIST_FILE stays
+	  YES, so Xcode overlays the synthesized keys (CFBundle*, LSUIElement, the
+	  INFOPLIST_KEY_* build settings) on top of this file at build time.
+	  SUEnableAutomaticChecks (Bool) and SUScheduledCheckInterval (Integer) need
+	  real plist types, which the INFOPLIST_KEY_ mechanism can't express — hence
+	  this file. SUPublicEDKey is HowlAlert's own EdDSA key (account "HowlAlert",
+	  distinct from other MrDemonWolf apps).
+	-->
+	<key>SUFeedURL</key>
+	<string>https://github.com/MrDemonWolf/howlalert/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>UcKqLAAQ7dYFCrLEZlI8cCjc7rhgy8YjmzbH1rkXaAs=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+</dict>
+</plist>
