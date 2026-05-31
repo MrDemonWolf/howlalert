@@ -132,8 +132,9 @@ export default function HomePage() {
               </h1>
               <p className="ha-reveal ha-reveal-2 ha-text-2 text-lg sm:text-xl mt-6 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 HowlAlert is a tiny Mac menu bar app that watches your Claude
-                Code usage. It learns your real limit, shows the time left at a
-                glance, and warns you before the 5-hour window runs out.
+                Code usage. It learns your real limit, shows how much you&rsquo;ve
+                used and how much is left in reserve, and warns you before you run
+                out — on your Mac now, your iPhone and Apple Watch next.
               </p>
               <div className="ha-reveal ha-reveal-3 mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
                 <Link href="/download" className="ha-btn ha-btn-primary">
@@ -257,7 +258,9 @@ export default function HomePage() {
               <span className="ha-text-1 font-medium">
                 &ldquo;Runs out in 47m.&rdquo;
               </span>{" "}
-              No raw token counts to decode, no dashboard to refresh.
+              You see both numbers at a glance — what you&rsquo;ve used and what&rsquo;s
+              left in reserve. No raw token counts to decode, no dashboard to
+              refresh.
             </p>
             <Link
               href="/docs/how-it-works"

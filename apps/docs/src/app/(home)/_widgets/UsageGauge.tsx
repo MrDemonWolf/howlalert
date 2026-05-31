@@ -79,9 +79,35 @@ export function UsageGauge() {
         />
       </div>
 
+      {/* Used vs reserve — what you've spent and what's left */}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <div
+          style={{
+            borderRadius: "10px",
+            padding: "0.5rem 0.7rem",
+            backgroundColor: "var(--bg-surface)",
+          }}
+        >
+          <p className="text-[0.65rem] uppercase tracking-wide ha-text-2">Used</p>
+          <p className="text-sm font-semibold ha-text-1">84% · 4h 13m</p>
+        </div>
+        <div
+          style={{
+            borderRadius: "10px",
+            padding: "0.5rem 0.7rem",
+            backgroundColor: "var(--brand-50)",
+          }}
+        >
+          <p className="text-[0.65rem] uppercase tracking-wide ha-text-2">Reserve</p>
+          <p className="text-sm font-semibold" style={{ color: "var(--brand-600)" }}>
+            16% · 47m
+          </p>
+        </div>
+      </div>
+
       {/* Per-model footnote */}
       <div
-        className="mt-4 pt-3 flex items-center justify-between text-xs"
+        className="mt-3 pt-3 flex items-center justify-between text-xs"
         style={{ borderTop: "1px solid var(--hairline)" }}
       >
         <span className="ha-text-2">Limit auto-detected · P90</span>
